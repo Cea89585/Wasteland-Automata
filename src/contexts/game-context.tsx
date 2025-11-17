@@ -2,11 +2,12 @@
 'use client';
 
 import React, { createContext, useReducer, useEffect, type ReactNode } from 'react';
-import type { GameState, GameAction, LogMessage } from '@/lib/game-types';
+import type { GameState, GameAction, LogMessage, Resource } from '@/lib/game-types';
 import { initialState } from '@/lib/game-data/initial-state';
 import { recipes } from '@/lib/game-data/recipes';
 
 const SAVE_KEY = 'wastelandAutomata_save';
+const INVENTORY_CAP = 200;
 
 let logIdCounter = 0;
 
@@ -14,6 +15,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
   const generateUniqueLogId = () => {
     // Combine timestamp with a counter to ensure uniqueness
     return Date.now() + logIdCounter++;
+  };
+
+  const addResource = (inventory: GameState['inventory'], resource: Resource, amount: number) => {
+    const newInventory = { ...inventory };
+    newInventory[resource] = Math.min(INVENTORY_CAP, newInventory[resource] + amount);
+    return newInventory;
   };
 
   switch (action.type) {
@@ -32,9 +39,17 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'GAME_TICK': {
       let newStats = { ...state.playerStats };
+      let newInventory = { ...state.inventory };
+      const logMessages: LogMessage[] = [];
       
       if (state.isResting || newStats.health <= 0) return state;
       
+      // Passive systems
+      if(state.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP) {
+        newInventory.water = Math.min(INVENTORY_CAP, newInventory.water + 1);
+        // We don't log this every tick to avoid spam
+      }
+
       // Passive energy regeneration
       if(newStats.energy < 100) {
         newStats.energy = Math.min(100, newStats.energy + 1);
@@ -54,7 +69,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         }
       }
 
-      const logMessages: LogMessage[] = [];
       if (state.playerStats.health > 0 && newStats.health <= 0) {
         logMessages.push({
           id: generateUniqueLogId(),
@@ -67,6 +81,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       return {
         ...state,
         playerStats: newStats,
+        inventory: newInventory,
         gameTick: state.gameTick + 1,
         log: [...state.log, ...logMessages],
       };
@@ -80,9 +95,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'GATHER': {
       const { resource, amount } = action.payload;
-      const newInventory = { ...state.inventory };
-      newInventory[resource] += amount;
-      return { ...state, inventory: newInventory };
+      return { ...state, inventory: addResource(state.inventory, resource, amount) };
     }
 
     case 'BUILD_STRUCTURE': {
@@ -117,13 +130,17 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           newUnlockedRecipes.push(r.id);
         }
       });
+      
+      const logMessageText = recipe.id === 'recipe_waterPurifier' 
+        ? `You built a Water Purifier. It will passively generate water.`
+        : `You built a ${recipe.name}.`;
 
       return {
         ...state,
         inventory: newInventory,
         builtStructures: newBuiltStructures,
         unlockedRecipes: newUnlockedRecipes,
-        log: [...state.log, { id: generateUniqueLogId(), text: `You built a ${recipe.name}.`, type: 'craft', timestamp: Date.now() }],
+        log: [...state.log, { id: generateUniqueLogId(), text: logMessageText, type: 'craft', timestamp: Date.now() }],
       };
     }
 
@@ -147,12 +164,19 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           log: [...state.log, { id: generateUniqueLogId(), text: "Not enough resources to craft this.", type: 'danger', timestamp: Date.now() }],
         };
       }
+
+      if(newInventory[recipe.creates] >= INVENTORY_CAP) {
+        return {
+          ...state,
+          log: [...state.log, { id: generateUniqueLogId(), text: `You can't carry any more ${recipe.name}.`, type: 'danger', timestamp: Date.now() }],
+        };
+      }
       
       for (const [resource, requiredAmount] of Object.entries(recipe.requirements)) {
         newInventory[resource as keyof typeof newInventory] -= requiredAmount;
       }
       
-      newInventory[recipe.creates] += 1;
+      newInventory[recipe.creates] = Math.min(INVENTORY_CAP, newInventory[recipe.creates] + 1);
       
       const newUnlockedRecipes = [...state.unlockedRecipes];
       recipes.forEach(r => {

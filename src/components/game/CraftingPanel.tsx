@@ -14,8 +14,12 @@ export default function CraftingPanel() {
   const { gameState, dispatch } = useGame();
   const { inventory, unlockedRecipes } = gameState;
 
-  // Filter out the workbench since it's now built in the Base panel
-  const availableRecipes = recipes.filter(r => unlockedRecipes.includes(r.id) && r.id !== 'recipe_workbench');
+  // Filter out items that are now built in the Base panel
+  const availableRecipes = recipes.filter(r => 
+    unlockedRecipes.includes(r.id) && 
+    r.id !== 'recipe_workbench' &&
+    r.id !== 'recipe_waterPurifier'
+  );
 
   const canCraft = (recipeId: string) => {
     const recipe = recipes.find(r => r.id === recipeId);
