@@ -9,8 +9,6 @@ export const Resources = {
   components: 'Components',
   uranium: 'Uranium',
   lemon: 'Lemon',
-  banana: 'Banana',
-  peach: 'Peach',
 } as const;
 export type Resource = keyof typeof Resources;
 

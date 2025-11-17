@@ -10,7 +10,5 @@ import {
 export async function getFactionEncounter(
   input: FactionEncounterInput
 ): Promise<FactionEncounterOutput> {
-  // The error handling is now done within the flow itself
-  // to provide a more robust fallback.
   return await generateFactionEncounter(input);
 }
