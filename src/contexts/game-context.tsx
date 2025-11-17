@@ -13,13 +13,22 @@ let logIdCounter = 0;
 const reducer = (state: GameState, action: GameAction): GameState => {
   const generateUniqueLogId = () => {
     // A simple counter combined with timestamp should be unique enough for this app's purposes.
-    return Date.now() + logIdCounter++;
+    const newId = Date.now() + logIdCounter;
+    logIdCounter++;
+    return newId;
   };
 
   switch (action.type) {
     case 'INITIALIZE': {
       const loadedState = action.payload;
-      logIdCounter = loadedState.log.length > 0 ? Math.max(...loadedState.log.map(l => l.id)) + 1 : 1;
+      // Initialize the counter based on the last known log ID to prevent collisions across sessions
+      if (loadedState.log && loadedState.log.length > 0) {
+        const maxId = Math.max(...loadedState.log.map(l => l.id));
+        // Set counter to be one higher than the max, just in case. The timestamp will handle most of the uniqueness.
+        logIdCounter = (maxId > Date.now()) ? (maxId - Date.now() + 1) : 1;
+      } else {
+        logIdCounter = 1;
+      }
       return { ...loadedState, isInitialized: true };
     }
 
@@ -181,11 +190,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      // Forcing a reset to the initial state as requested.
-      localStorage.removeItem(SAVE_KEY);
-      dispatch({ type: 'INITIALIZE', payload: initialState });
+      const savedGame = localStorage.getItem(SAVE_KEY);
+      if (savedGame) {
+        dispatch({ type: 'INITIALIZE', payload: JSON.parse(savedGame) });
+      } else {
+        dispatch({ type: 'INITIALIZE', payload: initialState });
+      }
     } catch (error) {
-      console.error("Failed to clear game from localStorage", error);
+      console.error("Failed to load game from localStorage", error);
       dispatch({ type: 'INITIALIZE', payload: initialState });
     }
   }, []);
