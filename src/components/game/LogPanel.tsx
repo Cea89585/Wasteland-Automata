@@ -54,7 +54,7 @@ export default function LogPanel() {
     if (scrollAreaRef.current) {
         const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
         if (viewport) {
-            viewport.scrollTop = viewport.scrollHeight;
+            viewport.scrollTop = 0; // Scroll to the top
         }
     }
   }, [log]);
@@ -86,8 +86,8 @@ export default function LogPanel() {
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden h-[300px]">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
-          <div className="flex flex-col-reverse gap-3 pr-4">
-            {log.slice(-15).map((message) => (
+          <div className="flex flex-col gap-3 pr-4">
+            {log.slice(-15).reverse().map((message) => (
               <LogEntry key={message.id} message={message} />
             ))}
           </div>
