@@ -16,7 +16,7 @@ export default function InventoryPanel() {
   const consumableSortOrder = ['apple', 'water', 'cookedApple'];
 
   const ownedItems = Object.entries(inventory)
-    .filter(([, quantity]) => quantity > 0)
+    .filter(([id, quantity]) => quantity > 0 && id !== 'silver')
     .map(([id]) => id)
     .sort((a, b) => {
       const aIndex = consumableSortOrder.indexOf(a);
