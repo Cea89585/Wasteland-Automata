@@ -6,26 +6,27 @@ import { itemData } from '@/lib/game-data/items';
 import { allIcons } from './GameIcons';
 import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
-import { Apple, GlassWater } from 'lucide-react';
+import { Apple, GlassWater, Zap } from 'lucide-react';
 
 export default function InventoryPanel() {
   const { gameState, dispatch } = useGame();
   const { inventory } = gameState;
 
+  const consumableSortOrder = ['food', 'water', 'cookedApple'];
+
   const ownedItems = Object.entries(inventory)
     .filter(([, quantity]) => quantity > 0)
     .map(([id]) => id)
     .sort((a, b) => {
-      if (a === 'food' || a === 'water') {
-        if (b === 'food' || b === 'water') {
-          return a.localeCompare(b); // sort food and water alphabetically
-        }
-        return -1; // a is food/water, b is not, so a comes first
+      const aIndex = consumableSortOrder.indexOf(a);
+      const bIndex = consumableSortOrder.indexOf(b);
+
+      if (aIndex !== -1 && bIndex !== -1) {
+        return aIndex - bIndex;
       }
-      if (b === 'food' || b === 'water') {
-        return 1; // b is food/water, a is not, so b comes first
-      }
-      return a.localeCompare(b); // neither are food/water, sort alphabetically
+      if (aIndex !== -1) return -1;
+      if (bIndex !== -1) return 1;
+      return a.localeCompare(b);
     });
 
   const isDead = gameState.playerStats.health <= 0;
@@ -42,6 +43,12 @@ export default function InventoryPanel() {
     }
   };
 
+  const handleEatCookedApple = () => {
+    if (inventory.cookedApple > 0) {
+        dispatch({ type: 'EAT_COOKED_APPLE' });
+    }
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -57,6 +64,7 @@ export default function InventoryPanel() {
                   const data = itemData[itemId as keyof typeof itemData];
                   const isFood = itemId === 'food';
                   const isWater = itemId === 'water';
+                  const isCookedApple = itemId === 'cookedApple';
 
                   return (
                     <div key={itemId} className="flex items-center justify-between p-3 rounded-md bg-muted/50">
@@ -76,6 +84,11 @@ export default function InventoryPanel() {
                         {isWater && (
                             <Button size="icon" variant="outline" onClick={handleDrink} disabled={isDead || inventory.water === 0} aria-label="Drink water">
                                 <GlassWater className="h-4 w-4" />
+                            </Button>
+                        )}
+                        {isCookedApple && (
+                            <Button size="icon" variant="outline" onClick={handleEatCookedApple} disabled={isDead || inventory.cookedApple === 0} aria-label="Eat Cooked Apple">
+                                <Zap className="h-4 w-4" />
                             </Button>
                         )}
                       </div>

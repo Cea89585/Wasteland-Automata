@@ -21,10 +21,13 @@ export default function StatsPanel() {
         {stats.map(({ name, label }) => (
           <Tooltip key={name}>
             <TooltipTrigger asChild>
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center text-xs text-muted-foreground">
-                  {statIcons[name]}
-                  <span className="font-medium">{label}</span>
+              <div className="flex flex-col gap-1 w-24">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <div className="flex items-center">
+                        {statIcons[name]}
+                        <span className="font-medium">{label}</span>
+                    </div>
+                    <span className="font-mono text-primary">{Math.round(playerStats[name])}%</span>
                 </div>
                 <Progress value={playerStats[name]} className="h-2" indicatorClassName={
                   playerStats[name] < 20 ? 'bg-destructive' : 'bg-primary'

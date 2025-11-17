@@ -17,6 +17,7 @@ const emptyInventory = {
   generator: 0,
   droneBay: 0,
   miningRig: 0,
+  cookedApple: 0,
 };
 
 export const initialState: GameState = {

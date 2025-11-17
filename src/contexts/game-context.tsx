@@ -133,6 +133,22 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       };
     }
 
+    case 'EAT_COOKED_APPLE': {
+        if (state.inventory.cookedApple <= 0) return state;
+  
+        const newInventory = { ...state.inventory, cookedApple: state.inventory.cookedApple - 1 };
+        const newStats = { ...state.playerStats };
+        newStats.energy = Math.min(100, newStats.energy + 50);
+        newStats.hunger = Math.min(100, newStats.hunger + 10);
+  
+        return {
+          ...state,
+          inventory: newInventory,
+          playerStats: newStats,
+          log: [...state.log, { id: Date.now(), text: "You eat the cooked apple. You feel a surge of energy.", type: 'success', timestamp: Date.now() }],
+        };
+      }
+
     default:
       return state;
   }

@@ -20,4 +20,5 @@ export const itemData: Record<Resource | Item, { name: string; description: stri
   generator: { name: Items.generator, description: 'Provides power to your automated systems.' },
   droneBay: { name: Items.droneBay, description: 'Launches scavenger drones to automatically find resources.' },
   miningRig: { name: Items.miningRig, description: 'An automated rig that extracts resources from the earth.' },
+  cookedApple: { name: Items.cookedApple, description: 'A cooked apple that restores some energy.' },
 };

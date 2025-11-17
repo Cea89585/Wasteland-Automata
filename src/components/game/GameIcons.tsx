@@ -19,6 +19,7 @@ import {
   CupSoda,
   Battery,
   Search,
+  Zap,
   type LucideProps,
 } from 'lucide-react';
 import type { Resource, Item } from '@/lib/game-types';
@@ -48,6 +49,7 @@ export const itemIcons: Record<Item, React.ReactElement<LucideProps>> = {
   generator: <Power {...iconProps} />,
   droneBay: <Bot {...iconProps} />,
   miningRig: <Drill {...iconProps} />,
+  cookedApple: <Zap {...iconProps} />,
 };
 
 export const statIcons = {

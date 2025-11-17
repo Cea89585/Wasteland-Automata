@@ -20,6 +20,7 @@ export const Items = {
   generator: 'Power Generator',
   droneBay: 'Drone Bay',
   miningRig: 'Mining Rig',
+  cookedApple: 'Cooked Apple',
 } as const;
 export type Item = keyof typeof Items;
 
@@ -69,4 +70,5 @@ export type GameAction =
   | { type: 'CRAFT'; payload: { recipeId: string } }
   | { type: 'CONSUME'; payload: { stat: keyof PlayerStats; amount: number } }
   | { type: 'EAT' }
-  | { type: 'DRINK' };
+  | { type: 'DRINK' }
+  | { type: 'EAT_COOKED_APPLE' };
