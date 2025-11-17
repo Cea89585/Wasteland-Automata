@@ -1,0 +1,23 @@
+// src/lib/game-data/items.ts
+import { type Resource, Resources, type Item, Items } from '@/lib/game-types';
+
+export const itemData: Record<Resource | Item, { name: string; description: string }> = {
+  // Resources
+  wood: { name: Resources.wood, description: 'A sturdy piece of wood. Useful for building and fuel.' },
+  stone: { name: Resources.stone, description: 'A chunk of rock. Good for basic tools and structures.' },
+  scrap: { name: Resources.scrap, description: 'Twisted metal from the old world. Can be smelted and repurposed.' },
+  food: { name: Resources.food, description: 'Canned goods or preserved rations. Keeps hunger at bay.' },
+  water: { name: Resources.water, description: 'Purified water, safe to drink.' },
+  components: { name: Resources.components, description: 'Advanced electronic parts. Key to automation.' },
+  uranium: { name: Resources.uranium, description: 'A rare, radioactive element needed for high-tier power.' },
+
+  // Crafted Items
+  stoneAxe: { name: Items.stoneAxe, description: 'A simple axe for chopping wood more efficiently.' },
+  workbench: { name: Items.workbench, description: 'Unlocks more complex crafting recipes.' },
+  waterPurifier: { name: Items.waterPurifier, description: 'A device to turn contaminated water into a drinkable resource.' },
+  furnace: { name: Items.furnace, description: 'Used to smelt ores and scrap metal into ingots.' },
+  radio: { name: Items.radio, description: 'Can pick up strange signals and story fragments.' },
+  generator: { name: Items.generator, description: 'Provides power to your automated systems.' },
+  droneBay: { name: Items.droneBay, description: 'Launches scavenger drones to automatically find resources.' },
+  miningRig: { name: Items.miningRig, description: 'An automated rig that extracts resources from the earth.' },
+};
