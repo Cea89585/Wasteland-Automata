@@ -6,11 +6,12 @@ import { itemData } from '@/lib/game-data/items';
 import { allIcons } from './GameIcons';
 import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
-import { Apple, GlassWater, Zap } from 'lucide-react';
+import { Apple, GlassWater, Zap, Shirt } from 'lucide-react';
+import type { Item } from '@/lib/game-types';
 
 export default function InventoryPanel() {
   const { gameState, dispatch } = useGame();
-  const { inventory } = gameState;
+  const { inventory, equipment } = gameState;
 
   const consumableSortOrder = ['food', 'water', 'cookedApple'];
 
@@ -50,6 +51,10 @@ export default function InventoryPanel() {
     }
   }
 
+  const handleEquip = (itemId: Item) => {
+    dispatch({ type: 'EQUIP', payload: { item: itemId, slot: 'hand' } });
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -66,6 +71,9 @@ export default function InventoryPanel() {
                   const isFood = itemId === 'food';
                   const isWater = itemId === 'water';
                   const isCookedApple = itemId === 'cookedApple';
+                  const isEquippable = data.equipSlot === 'hand';
+                  const isEquipped = equipment.hand === itemId;
+
 
                   return (
                     <div key={itemId} className="flex items-center justify-between p-3 rounded-md bg-muted/50">
@@ -90,6 +98,11 @@ export default function InventoryPanel() {
                         {isCookedApple && (
                             <Button size="icon" variant="outline" onClick={handleEatCookedApple} disabled={isDead || inventory.cookedApple === 0 || isBusy} aria-label="Eat Cooked Apple">
                                 <Zap className="h-4 w-4" />
+                            </Button>
+                        )}
+                        {isEquippable && !isEquipped &&(
+                             <Button size="icon" variant="outline" onClick={() => handleEquip(itemId as Item)} disabled={isDead || isBusy} aria-label={`Equip ${data.name}`}>
+                                <Shirt className="h-4 w-4" />
                             </Button>
                         )}
                       </div>

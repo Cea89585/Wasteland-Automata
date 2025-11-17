@@ -50,9 +50,13 @@ export type LocationId =
 
 export type TechId = 'basicTools' | 'shelter' | 'power' | 'automation';
 
+export type EquipmentSlot = 'hand' | 'body';
+export type Equipment = Partial<Record<EquipmentSlot, Item | null>>;
+
 export interface GameState {
   playerStats: PlayerStats;
   inventory: Inventory;
+  equipment: Equipment;
   log: LogMessage[];
   currentLocation: LocationId;
   unlockedRecipes: string[];
@@ -75,4 +79,6 @@ export type GameAction =
   | { type: 'DRINK' }
   | { type: 'EAT_COOKED_APPLE' }
   | { type: 'START_RESTING' }
-  | { type: 'FINISH_RESTING' };
+  | { type: 'FINISH_RESTING' }
+  | { type: 'EQUIP'; payload: { item: Item, slot: EquipmentSlot } }
+  | { type: 'UNEQUIP'; payload: { slot: EquipmentSlot } };

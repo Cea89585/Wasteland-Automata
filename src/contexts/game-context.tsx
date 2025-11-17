@@ -29,7 +29,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'GAME_TICK': {
-      const newStats = { ...state.playerStats };
+      let newStats = { ...state.playerStats };
       let hasChanged = false;
 
       if (state.isResting) return state;
@@ -45,7 +45,15 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
       if (newStats.thirst === 0 || newStats.hunger === 0) {
         newStats.health = Math.max(0, newStats.health - 2);
+      } else if (newStats.thirst < 20 || newStats.hunger < 20) {
+        // No health regen if starving or dehydrated
+      } else {
+        // Slow health regeneration if well-fed and hydrated
+        if (newStats.health < 100) {
+            newStats.health = Math.min(100, newStats.health + 0.5);
+        }
       }
+
 
       const logMessages: LogMessage[] = [];
       if (state.playerStats.health > 0 && newStats.health <= 0) {
@@ -181,6 +189,50 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         };
     }
 
+    case 'EQUIP': {
+        const { item, slot } = action.payload;
+        if (state.inventory[item] < 1) return state; // Can't equip something you don't have
+
+        const newInventory = { ...state.inventory };
+        const newEquipment = { ...state.equipment };
+
+        // Unequip current item in slot, if any
+        const currentItem = newEquipment[slot];
+        if (currentItem) {
+            newInventory[currentItem] += 1;
+        }
+
+        // Equip new item
+        newEquipment[slot] = item;
+        newInventory[item] -= 1;
+
+        return {
+            ...state,
+            inventory: newInventory,
+            equipment: newEquipment,
+            log: [...state.log, { id: generateUniqueLogId(), text: `Equipped ${item}.`, type: 'info', timestamp: Date.now() }],
+        };
+    }
+
+    case 'UNEQUIP': {
+        const { slot } = action.payload;
+        const itemToUnequip = state.equipment[slot];
+        if (!itemToUnequip) return state;
+
+        const newInventory = { ...state.inventory };
+        const newEquipment = { ...state.equipment };
+
+        newInventory[itemToUnequip] += 1;
+        newEquipment[slot] = null;
+
+        return {
+            ...state,
+            inventory: newInventory,
+            equipment: newEquipment,
+            log: [...state.log, { id: generateUniqueLogId(), text: `Unequipped ${itemToUnequip}.`, type: 'info', timestamp: Date.now() }],
+        };
+    }
+
     case 'START_RESTING':
         return { ...state, isResting: true };
 
@@ -204,7 +256,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
     try {
       const savedGame = localStorage.getItem(SAVE_KEY);
       if (savedGame) {
-        dispatch({ type: 'INITIALIZE', payload: JSON.parse(savedGame) });
+        const loadedState = JSON.parse(savedGame);
+        // Ensure new properties exist on old save files
+        const migratedState = { ...initialState, ...loadedState };
+        migratedState.isResting = false; // Never load into a resting state
+        dispatch({ type: 'INITIALIZE', payload: migratedState });
       } else {
         dispatch({ type: 'INITIALIZE', payload: initialState });
       }

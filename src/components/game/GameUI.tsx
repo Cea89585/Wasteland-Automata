@@ -10,8 +10,9 @@ import InventoryPanel from './InventoryPanel';
 import CraftingPanel from './CraftingPanel';
 import BasePanel from './BasePanel';
 import TechPanel from './TechPanel';
+import CharacterPanel from './CharacterPanel'; // New Import
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Backpack, Compass, Hammer, Home, BookOpen } from 'lucide-react';
+import { Backpack, Compass, Hammer, Home, BookOpen, User } from 'lucide-react'; // New: User icon
 import {
   AlertDialog,
   AlertDialogAction,
@@ -47,16 +48,18 @@ export default function GameUI() {
         </div>
         <div className="lg:col-span-3">
           <Tabs defaultValue="explore" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="explore" disabled={isBusy}><Compass className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Explore</span></TabsTrigger>
               <TabsTrigger value="inventory" disabled={isBusy}><Backpack className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Inventory</span></TabsTrigger>
               <TabsTrigger value="craft" disabled={isBusy}><Hammer className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Craft</span></TabsTrigger>
+              <TabsTrigger value="character" disabled={isBusy}><User className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Character</span></TabsTrigger>
               <TabsTrigger value="base" disabled={isBusy}><Home className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Base</span></TabsTrigger>
               <TabsTrigger value="tech" disabled={isBusy}><BookOpen className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Tech</span></TabsTrigger>
             </TabsList>
             <TabsContent value="explore" className="mt-4"><ExplorationPanel /></TabsContent>
             <TabsContent value="inventory" className="mt-4"><InventoryPanel /></TabsContent>
             <TabsContent value="craft" className="mt-4"><CraftingPanel /></TabsContent>
+            <TabsContent value="character" className="mt-4"><CharacterPanel /></TabsContent>
             <TabsContent value="base" className="mt-4"><BasePanel /></TabsContent>
             <TabsContent value="tech" className="mt-4"><TechPanel /></TabsContent>
           </Tabs>

@@ -32,6 +32,10 @@ export const initialState: GameState = {
     food: 5,
     water: 5,
   },
+  equipment: {
+    hand: null,
+    body: null,
+  },
   log: [
     {
       id: 1,

@@ -1,7 +1,7 @@
 // src/lib/game-data/items.ts
-import { type Resource, Resources, type Item, Items } from '@/lib/game-types';
+import { type Resource, Resources, type Item, Items, type EquipmentSlot } from '@/lib/game-types';
 
-export const itemData: Record<Resource | Item, { name: string; description: string }> = {
+export const itemData: Record<Resource | Item, { name: string; description: string, equipSlot?: EquipmentSlot }> = {
   // Resources
   wood: { name: Resources.wood, description: 'A sturdy piece of wood. Useful for building and fuel.' },
   stone: { name: Resources.stone, description: 'A chunk of rock. Good for basic tools and structures.' },
@@ -12,7 +12,7 @@ export const itemData: Record<Resource | Item, { name: string; description: stri
   uranium: { name: Resources.uranium, description: 'A rare, radioactive element needed for high-tier power.' },
 
   // Crafted Items
-  stoneAxe: { name: Items.stoneAxe, description: 'A simple axe for chopping wood more efficiently.' },
+  stoneAxe: { name: Items.stoneAxe, description: 'A simple axe for chopping wood more efficiently.', equipSlot: 'hand' },
   workbench: { name: Items.workbench, description: 'Unlocks more complex crafting recipes.' },
   waterPurifier: { name: Items.waterPurifier, description: 'A device to turn contaminated water into a drinkable resource.' },
   furnace: { name: Items.furnace, description: 'Used to smelt ores and scrap metal into ingots.' },
