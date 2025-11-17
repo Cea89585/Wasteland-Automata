@@ -13,7 +13,7 @@ import TechPanel from './TechPanel';
 import CharacterPanel from './CharacterPanel';
 import FurnacePanel from './FurnacePanel'; // New Import
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Backpack, Compass, Hammer, Home, BookOpen, User, RotateCcw, Power } from 'lucide-react';
+import { Backpack, Compass, Hammer, Home, BookOpen, User, RotateCcw, Power, AlertTriangle } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +25,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 
@@ -69,7 +70,16 @@ export default function GameUI() {
               </AlertDialogContent>
             </AlertDialog>
         </div>
-        <StatsPanel />
+        <div className="flex flex-col gap-4 w-full sm:w-auto">
+            <Alert variant="destructive" className="border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle className="font-semibold">High Stakes</AlertTitle>
+                <AlertDescription>
+                    If your health reaches 0%, you will die and your progress will be reset.
+                </AlertDescription>
+            </Alert>
+            <StatsPanel />
+        </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
