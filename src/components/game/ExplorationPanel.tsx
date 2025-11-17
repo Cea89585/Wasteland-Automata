@@ -69,7 +69,7 @@ export default function ExplorationPanel() {
           
           // Apply bonuses from equipped items
           if (res.resource === 'wood' && equipment.hand === 'stoneAxe') {
-            amount = Math.ceil(amount * 1.10); // 10% bonus
+            amount = Math.ceil(amount * 1.50); // 50% bonus
           }
           if (res.resource === 'scrap' && equipment.hand === 'metalDetector') {
             amount = Math.ceil(amount * 1.20); // 20% bonus
