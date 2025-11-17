@@ -107,8 +107,11 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           logText += ` You lost ${amount} health.`;
         } else {
           const currentAmount = newInventory[type] || 0;
-          newInventory[type] = Math.max(0, currentAmount - amount);
-          logText += ` You lost ${Math.min(currentAmount, amount)} ${itemData[type].name}.`;
+          const amountLost = Math.min(currentAmount, amount);
+          if (amountLost > 0) {
+            newInventory[type] = currentAmount - amountLost;
+            logText += ` You lost ${amountLost} ${itemData[type].name}.`;
+          }
         }
       }
     
