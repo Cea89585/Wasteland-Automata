@@ -192,8 +192,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         }
       });
       
-      const itemName = itemData[recipe.creates].name;
-      const logMessageText = `You built a ${itemName}.`;
+      const itemDetails = itemData[recipe.creates];
+      const logMessageText = `You built a ${itemDetails.name}.\n${itemDetails.description}`;
 
       return {
         ...state,
@@ -244,12 +244,15 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           newUnlockedRecipes.push(r.id);
         }
       });
+
+      const itemDetails = itemData[recipe.creates];
+      const logMessageText = `Crafted ${itemDetails.name}.\n${itemDetails.description}`;
       
       return {
         ...state,
         inventory: newInventory,
         unlockedRecipes: newUnlockedRecipes,
-        log: [{ id: generateUniqueLogId(), text: `Crafted ${itemData[recipe.creates].name}.`, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
+        log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
       };
     }
 
@@ -487,9 +490,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
         const newSmeltingQueue = state.smeltingQueue - 1;
         
-        let logMessage = "The furnace cools. You retrieve 1 Component.";
+        let logMessage = `The furnace cools. You retrieve 1 Component.\n${itemData['components'].description}`;
         if (newSmeltingQueue === 0) {
-          logMessage += " The queue is empty.";
+          logMessage += "\nThe queue is empty.";
         }
 
         return {

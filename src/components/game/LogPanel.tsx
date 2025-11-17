@@ -58,7 +58,7 @@ const LogEntry = ({ message }: { message: ReturnType<typeof useGame>['gameState'
   <div className="flex items-start gap-3 text-sm animate-in fade-in-0 duration-500">
     <div className="pt-0.5">{icon}</div>
     <div className="flex-1">
-      <p className={cn(logTypeColors[message.type])}>{message.text}</p>
+      <p className={cn(logTypeColors[message.type], 'whitespace-pre-wrap')}>{message.text}</p>
       <div className="text-xs text-muted-foreground/50 flex items-center pt-1">
         <Clock className="h-3 w-3 mr-1" />
         {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
