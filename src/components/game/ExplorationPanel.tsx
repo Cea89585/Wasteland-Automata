@@ -3,13 +3,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useGame } from '@/hooks/use-game';
-import { getFactionEncounter } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { locations } from '@/lib/game-data/locations';
 import { Loader2, Compass, Search, Bed } from 'lucide-react';
 import { itemData } from '@/lib/game-data/items';
-import { Skeleton } from '../ui/skeleton';
 import { Progress } from '../ui/progress';
 
 export default function ExplorationPanel() {
@@ -17,7 +15,6 @@ export default function ExplorationPanel() {
   const [isExploring, setIsExploring] = useState(false);
   const [isScavenging, setIsScavenging] = useState(false);
   const [restingProgress, setRestingProgress] = useState(0);
-  const [lastEncounter, setLastEncounter] = useState<{title: string, text: string} | null>(null);
 
   const currentLocation = locations[gameState.currentLocation];
   const { equipment } = gameState;
@@ -54,14 +51,13 @@ export default function ExplorationPanel() {
     }
 
     setIsExploring(true);
-    setLastEncounter(null);
     dispatch({ type: 'CONSUME', payload: { stat: 'energy', amount: 10 } });
 
     // Resource finding
     let foundSomething = false;
     let foundText = 'You explore the area...';
     
-    setTimeout(async () => {
+    setTimeout(() => {
       currentLocation.resources.forEach((res) => {
         if (Math.random() < res.chance) {
           let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
@@ -87,23 +83,6 @@ export default function ExplorationPanel() {
       
       dispatch({ type: 'ADD_LOG', payload: { text: foundText, type: 'info' } });
   
-      // Faction encounter
-      if (Math.random() < 0.25) {
-        try {
-          const result = await getFactionEncounter({
-            location: currentLocation.name,
-            environment: 'Gloomy and irradiated',
-            factions: ['Scavengers', 'Mutants', 'Enclave Remnants'],
-          });
-
-          const encounterLogText = `Encounter: ${result.description}`;
-          dispatch({ type: 'ADD_LOG', payload: { text: encounterLogText, type: 'event' } });
-          setLastEncounter({ title: `Encounter with ${result.faction}`, text: result.description });
-        } catch (error) {
-          console.error('Failed to generate faction encounter', error);
-        }
-      }
-  
       setIsExploring(false);
     }, 1000); // Simulate exploration time
   };
@@ -115,7 +94,6 @@ export default function ExplorationPanel() {
     }
 
     setIsScavenging(true);
-    setLastEncounter(null);
     dispatch({ type: 'CONSUME', payload: { stat: 'energy', amount: 5 } });
 
     setTimeout(() => {
@@ -197,29 +175,6 @@ export default function ExplorationPanel() {
             <p className="text-sm text-muted-foreground text-center">Recovering energy...</p>
             <Progress value={restingProgress} className="w-full" />
           </div>
-        )}
-        
-        {isExploring && (
-            <Card className="bg-muted/50">
-                <CardHeader>
-                    <Skeleton className="h-5 w-3/5" />
-                </CardHeader>
-                <CardContent className="space-y-2">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-4/5" />
-                </CardContent>
-            </Card>
-        )}
-
-        {lastEncounter && !isExploring && !gameState.isResting &&(
-            <Card className="animate-in fade-in-0 duration-500 border-accent">
-                <CardHeader>
-                    <CardTitle className="text-accent">{lastEncounter.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-accent-foreground/80">{lastEncounter.text}</p>
-                </CardContent>
-            </Card>
         )}
       </CardContent>
     </Card>
