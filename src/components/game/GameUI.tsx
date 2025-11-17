@@ -2,6 +2,7 @@
 'use client';
 
 import { useGame } from '@/hooks/use-game';
+import { useBreakpoint } from '@/hooks/use-breakpoint';
 import LoadingScreen from './LoadingScreen';
 import StatsPanel from './StatsPanel';
 import LogPanel from './LogPanel';
@@ -13,7 +14,7 @@ import BasePanel from './BasePanel';
 import TechPanel from './TechPanel';
 import CharacterPanel from './CharacterPanel';
 import FurnacePanel from './FurnacePanel';
-import MarketPanel from './MarketPanel'; // New Import
+import MarketPanel from './MarketPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Backpack, Compass, Hammer, Home, BookOpen, User, RotateCcw, Power, AlertTriangle, Coins } from 'lucide-react';
 import {
@@ -27,12 +28,19 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '../ui/button';
-import { cn } from '@/lib/utils';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 
 export default function GameUI() {
-  const { gameState } = useGame();
+  const { gameState, dispatch } = useGame();
+  const isMobile = useBreakpoint('sm');
 
   if (!gameState.isInitialized) {
     return <LoadingScreen />;
@@ -42,14 +50,18 @@ export default function GameUI() {
   const isBusy = gameState.isResting || gameState.isSmelting;
 
   const showFurnace = gameState.builtStructures.includes('furnace');
-  const showMarket = gameState.builtStructures.includes('workbench'); // Show market after workbench is built
+  const showMarket = gameState.builtStructures.includes('workbench');
 
-  const tabGridCols = () => {
-    let count = 6;
-    if (showFurnace) count++;
-    if (showMarket) count++;
-    return `grid-cols-${count}`;
-  }
+  const tabs = [
+    { value: "explore", label: "Explore", icon: <Compass className="h-4 w-4" /> },
+    { value: "inventory", label: "Inventory", icon: <Backpack className="h-4 w-4" /> },
+    { value: "craft", label: "Craft", icon: <Hammer className="h-4 w-4" /> },
+    { value: "character", label: "Character", icon: <User className="h-4 w-4" /> },
+    { value: "base", label: "Base", icon: <Home className="h-4 w-4" /> },
+    { value: "furnace", label: "Furnace", icon: <Power className="h-4 w-4" />, condition: showFurnace },
+    { value: "market", label: "Market", icon: <Coins className="h-4 w-4" />, condition: showMarket },
+    { value: "tech", label: "Tech", icon: <BookOpen className="h-4 w-4" /> },
+  ].filter(tab => tab.condition !== false);
 
   return (
     <div className="flex flex-col gap-4">
@@ -98,23 +110,54 @@ export default function GameUI() {
         </div>
         <div className="lg:col-span-3">
           <Tabs defaultValue="explore" className="w-full">
-            <TabsList className={cn("grid w-full", `grid-cols-${6 + (showFurnace ? 1 : 0) + (showMarket ? 1 : 0)}`)}>
-              <TabsTrigger value="explore" disabled={isBusy}><Compass className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Explore</span></TabsTrigger>
-              <TabsTrigger value="inventory" disabled={isBusy}><Backpack className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Inventory</span></TabsTrigger>
-              <TabsTrigger value="craft" disabled={isBusy}><Hammer className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Craft</span></TabsTrigger>
-              <TabsTrigger value="character" disabled={isBusy}><User className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Character</span></TabsTrigger>
-              <TabsTrigger value="base" disabled={isBusy}><Home className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Base</span></TabsTrigger>
-              {showFurnace && <TabsTrigger value="furnace" disabled={isBusy}><Power className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Furnace</span></TabsTrigger>}
-              {showMarket && <TabsTrigger value="market" disabled={isBusy}><Coins className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Market</span></TabsTrigger>}
-              <TabsTrigger value="tech" disabled={isBusy}><BookOpen className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Tech</span></TabsTrigger>
+             {isMobile ? (
+              <Select defaultValue="explore" onValueChange={(value) => {
+                const trigger = document.querySelector(`button[value="${value}"]`) as HTMLElement | null;
+                trigger?.click();
+              }} disabled={isBusy}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a tab" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tabs.map((tab) => (
+                    <SelectItem key={tab.value} value={tab.value}>
+                       <div className="flex items-center gap-2">
+                         {tab.icon} {tab.label}
+                       </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+                <TabsList className="grid w-full grid-cols-8">
+                {tabs.map((tab) => (
+                  <TabsTrigger key={tab.value} value={tab.value} disabled={isBusy} className="sm:flex sm:items-center sm:gap-2">
+                    {tab.icon}
+                    <span className="hidden sm:inline">{tab.label}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+            )}
+
+            {/* Hidden TabsList for functionality on mobile */}
+            <TabsList className={isMobile ? 'hidden' : 'grid w-full'} style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
+              {tabs.map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value} disabled={isBusy}>
+                  <div className="flex items-center gap-2">
+                    {tab.icon}
+                    {!isMobile && <span className="hidden sm:inline">{tab.label}</span>}
+                  </div>
+                </TabsTrigger>
+              ))}
             </TabsList>
+
             <TabsContent value="explore" className="mt-4"><ExplorationPanel /></TabsContent>
             <TabsContent value="inventory" className="mt-4"><InventoryPanel /></TabsContent>
             <TabsContent value="craft" className="mt-4"><CraftingPanel /></TabsContent>
             <TabsContent value="character" className="mt-4"><CharacterPanel /></TabsContent>
             <TabsContent value="base" className="mt-4"><BasePanel /></TabsContent>
-            {showFurnace && <TabsContent value="furnace" className="mt-4"><FurnacePanel /></TabsContent>}
-            {showMarket && <TabsContent value="market" className="mt-4"><MarketPanel /></TabsContent>}
+            <TabsContent value="furnace" className="mt-4"><FurnacePanel /></TabsContent>
+            <TabsContent value="market" className="mt-4"><MarketPanel /></TabsContent>
             <TabsContent value="tech" className="mt-4"><TechPanel /></TabsContent>
           </Tabs>
         </div>
