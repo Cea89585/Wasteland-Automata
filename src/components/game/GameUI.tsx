@@ -12,16 +12,19 @@ import BasePanel from './BasePanel';
 import TechPanel from './TechPanel';
 import CharacterPanel from './CharacterPanel'; // New Import
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Backpack, Compass, Hammer, Home, BookOpen, User } from 'lucide-react'; // New: User icon
+import { Backpack, Compass, Hammer, Home, BookOpen, User, RotateCcw } from 'lucide-react'; // New: User icon, RotateCcw
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { Button } from '../ui/button';
 
 export default function GameUI() {
   const { gameState } = useGame();
@@ -36,9 +39,32 @@ export default function GameUI() {
   return (
     <div className="flex flex-col gap-4">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 rounded-lg border bg-card text-card-foreground p-4 shadow-sm">
-        <h1 className="text-xl sm:text-2xl font-bold font-headline text-primary">
-          Wasteland Automata
-        </h1>
+        <div className="flex flex-col gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold font-headline text-primary">
+            Wasteland Automata
+            </h1>
+             <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" className="w-fit">
+                    <RotateCcw className="mr-2 h-4 w-4" /> Reset Game
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will permanently delete all your game progress. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => { localStorage.clear(); window.location.reload(); }}>
+                    Yes, delete my save
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+        </div>
         <StatsPanel />
       </header>
 
