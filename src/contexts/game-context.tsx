@@ -92,6 +92,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const encounter = action.payload;
       let newInventory = { ...state.inventory };
       let newStats = { ...state.playerStats };
+      let newEquipment = { ...state.equipment };
       let logText = encounter.message;
     
       if (encounter.type === 'positive' && encounter.reward) {
@@ -101,16 +102,30 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
     
       if (encounter.type === 'negative' && encounter.penalty) {
-        const { type, amount } = encounter.penalty;
-        if (type === 'health') {
+        const { type: penaltyType, amount } = encounter.penalty;
+        if (penaltyType === 'health') {
           newStats.health = Math.max(0, newStats.health - amount);
           logText += ` You lost ${amount} health.`;
-        } else {
-          const currentAmount = newInventory[type] || 0;
+        } else if (penaltyType === 'stoneAxe') {
+          // Special case for breaking the equipped item
+          let axeLost = false;
+          if (newEquipment.hand === 'stoneAxe') {
+            newEquipment.hand = null;
+            axeLost = true;
+          } else if (newInventory.stoneAxe > 0) {
+            newInventory.stoneAxe -= 1;
+            axeLost = true;
+          }
+          if (axeLost) {
+             // The log message from encounters.ts is already descriptive
+          }
+        }
+        else { // For all other resource/item penalties
+          const currentAmount = newInventory[penaltyType] || 0;
           const amountLost = Math.min(currentAmount, amount);
           if (amountLost > 0) {
-            newInventory[type] = currentAmount - amountLost;
-            logText += ` You lost ${amountLost} ${itemData[type].name}.`;
+            newInventory[penaltyType] = currentAmount - amountLost;
+            logText += ` You lost ${amountLost} ${itemData[penaltyType].name}.`;
           }
         }
       }
@@ -119,6 +134,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         ...state,
         inventory: newInventory,
         playerStats: newStats,
+        equipment: newEquipment,
         log: [...state.log, { id: generateUniqueLogId(), text: logText, type: encounter.type === 'positive' ? 'success' : 'danger', timestamp: Date.now() }],
       };
     }
@@ -329,7 +345,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             ...state,
             inventory: newInventory,
             equipment: newEquipment,
-            log: [...state.log, { id: generateUniqueLogId(), text: `Equipped ${item}.`, type: 'info', timestamp: Date.now() }],
+            log: [...state.log, { id: generateUniqueLogId(), text: `Equipped ${itemData[item].name}.`, type: 'info', timestamp: Date.now() }],
         };
     }
 
@@ -348,7 +364,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             ...state,
             inventory: newInventory,
             equipment: newEquipment,
-            log: [...state.log, { id: generateUniqueLogId(), text: `Unequipped ${itemToUnequip}.`, type: 'info', timestamp: Date.now() }],
+            log: [...state.log, { id: generateUniqueLogId(), text: `Unequipped ${itemData[itemToUnequip].name}.`, type: 'info', timestamp: Date.now() }],
         };
     }
 

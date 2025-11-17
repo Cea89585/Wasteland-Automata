@@ -10,6 +10,8 @@ const emptyInventory = {
   components: 0,
   uranium: 0,
   lemon: 0,
+  banana: 0,
+  peach: 0,
   stoneAxe: 0,
   metalDetector: 0,
   workbench: 0,

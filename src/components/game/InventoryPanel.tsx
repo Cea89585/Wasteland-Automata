@@ -71,8 +71,9 @@ export default function InventoryPanel() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {ownedItems.map((itemId) => {
                   const data = itemData[itemId as keyof typeof itemData];
-                  const isEquippable = data && data.equipSlot === 'hand';
-                  const isEquipped = equipment.hand === itemId;
+                  const isEquippable = data && data.equipSlot; // Check if it has any equip slot
+                  const equippedItemInSlot = data.equipSlot ? equipment[data.equipSlot] : null;
+                  const isEquipped = equippedItemInSlot === itemId;
 
                   return (
                     <div key={itemId} className="flex items-center justify-between p-3 rounded-md bg-muted/50">

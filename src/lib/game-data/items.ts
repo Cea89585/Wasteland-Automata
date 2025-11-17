@@ -11,6 +11,9 @@ export const itemData: Record<Resource | Item, { name: string; description: stri
   components: { name: Resources.components, description: 'Advanced electronic parts. Key to automation.' },
   uranium: { name: Resources.uranium, description: 'A rare, radioactive element needed for high-tier power.' },
   lemon: { name: Resources.lemon, description: 'A sour, yellow fruit.' },
+  banana: { name: Resources.banana, description: 'A yellow fruit.' },
+  peach: { name: Resources.peach, description: 'A fuzzy fruit.' },
+
 
   // Crafted Items
   stoneAxe: { name: Items.stoneAxe, description: 'A simple axe. Increases wood gathering by 50%.', equipSlot: 'hand' },
