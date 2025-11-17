@@ -1,7 +1,7 @@
 // src/components/game/ExplorationPanel.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useGame } from '@/hooks/use-game';
 import { getFactionEncounter } from '@/app/actions';
 import { Button } from '@/components/ui/button';
@@ -22,25 +22,31 @@ export default function ExplorationPanel() {
   const [lastEncounter, setLastEncounter] = useState<{title: string, text: string} | null>(null);
 
   const currentLocation = locations[gameState.currentLocation];
+
+  const finishResting = useCallback(() => {
+    setIsResting(false);
+    dispatch({ type: 'REGEN_ENERGY', payload: { amount: 10 } });
+    dispatch({ type: 'ADD_LOG', payload: { text: "You feel rested and ready for action.", type: 'success' } });
+    setRestingProgress(0);
+  }, [dispatch]);
   
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: NodeJS.Timeout | undefined;
     if (isResting) {
       interval = setInterval(() => {
-        setRestingProgress(prev => {
-          if (prev >= 100) {
-            clearInterval(interval);
-            setIsResting(false);
-            dispatch({ type: 'REGEN_ENERGY', payload: { amount: 10 }});
-            dispatch({ type: 'ADD_LOG', payload: { text: "You feel rested and ready for action.", type: 'success' } });
-            return 0;
-          }
-          return prev + (100 / 30);
-        });
+        setRestingProgress(prev => prev + (100 / 30));
       }, 1000);
     }
-    return () => clearInterval(interval);
-  }, [isResting, dispatch]);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isResting]);
+
+  useEffect(() => {
+    if (restingProgress >= 100) {
+      finishResting();
+    }
+  }, [restingProgress, finishResting]);
 
   const handleExplore = async () => {
     if (gameState.playerStats.energy < 10) {
