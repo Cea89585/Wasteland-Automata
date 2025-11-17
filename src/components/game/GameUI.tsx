@@ -30,6 +30,7 @@ export default function GameUI() {
   }
 
   const isGameOver = gameState.playerStats.health <= 0;
+  const isBusy = gameState.isResting;
 
   return (
     <div className="flex flex-col gap-4">
@@ -47,11 +48,11 @@ export default function GameUI() {
         <div className="lg:col-span-3">
           <Tabs defaultValue="explore" className="w-full">
             <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="explore"><Compass className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Explore</span></TabsTrigger>
-              <TabsTrigger value="inventory"><Backpack className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Inventory</span></TabsTrigger>
-              <TabsTrigger value="craft"><Hammer className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Craft</span></TabsTrigger>
-              <TabsTrigger value="base"><Home className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Base</span></TabsTrigger>
-              <TabsTrigger value="tech"><BookOpen className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Tech</span></TabsTrigger>
+              <TabsTrigger value="explore" disabled={isBusy}><Compass className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Explore</span></TabsTrigger>
+              <TabsTrigger value="inventory" disabled={isBusy}><Backpack className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Inventory</span></TabsTrigger>
+              <TabsTrigger value="craft" disabled={isBusy}><Hammer className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Craft</span></TabsTrigger>
+              <TabsTrigger value="base" disabled={isBusy}><Home className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Base</span></TabsTrigger>
+              <TabsTrigger value="tech" disabled={isBusy}><BookOpen className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Tech</span></TabsTrigger>
             </TabsList>
             <TabsContent value="explore" className="mt-4"><ExplorationPanel /></TabsContent>
             <TabsContent value="inventory" className="mt-4"><InventoryPanel /></TabsContent>
