@@ -45,7 +45,7 @@ export default function LogPanel() {
       <CardContent className="flex-grow overflow-hidden">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
           <div className="flex flex-col gap-3 pr-4">
-            {log.slice().reverse().map((message) => (
+            {log.slice(-5).reverse().map((message) => (
               <div key={message.id} className="flex items-start gap-3 text-sm animate-in fade-in-0 duration-500">
                 <div className="pt-0.5">{logTypeIcons[message.type]}</div>
                 <div className="flex-1">
