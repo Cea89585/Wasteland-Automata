@@ -12,7 +12,8 @@ export const Resources = {
   uranium: 'Uranium',
   lemon: 'Lemon',
   banana: 'Banana',
-  peach: 'Peach'
+  peach: 'Peach',
+  silver: 'Silver'
 } as const;
 export type Resource = keyof typeof Resources;
 
@@ -82,6 +83,7 @@ export type GameAction =
   | { type: 'GATHER'; payload: { resource: Resource; amount: number } }
   | { type: 'CRAFT'; payload: { recipeId: string } }
   | { type: 'BUILD_STRUCTURE'; payload: { recipeId: string } }
+  | { type: 'SELL_ITEM'; payload: { item: Resource, amount: number, price: number } }
   | { type: 'CONSUME'; payload: { stat: keyof PlayerStats, resource?: Resource, amount: number } }
   | { type: 'PENALTY'; payload: { stat: keyof PlayerStats; percentage: number } }
   | { type: 'REGEN_ENERGY'; payload: { amount: number } }

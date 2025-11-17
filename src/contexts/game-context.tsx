@@ -244,6 +244,27 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         log: [...state.log, { id: generateUniqueLogId(), text: `Crafted ${recipe.name}.`, type: 'craft', timestamp: Date.now() }],
       };
     }
+
+    case 'SELL_ITEM': {
+      const { item, amount, price } = action.payload;
+      const newInventory = { ...state.inventory };
+
+      if (newInventory[item] < amount) {
+        return {
+          ...state,
+          log: [...state.log, { id: generateUniqueLogId(), text: `Not enough ${itemData[item].name} to sell.`, type: 'danger', timestamp: Date.now() }],
+        }
+      }
+
+      newInventory[item] -= amount;
+      newInventory.silver += amount * price;
+
+      return {
+        ...state,
+        inventory: newInventory,
+        log: [...state.log, { id: generateUniqueLogId(), text: `Sold ${amount} ${itemData[item].name} for ${amount * price} silver.`, type: 'success', timestamp: Date.now() }],
+      }
+    }
     
     case 'CONSUME': {
         const { stat, amount, resource } = action.payload;

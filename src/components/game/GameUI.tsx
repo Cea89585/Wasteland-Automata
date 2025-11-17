@@ -5,15 +5,17 @@ import { useGame } from '@/hooks/use-game';
 import LoadingScreen from './LoadingScreen';
 import StatsPanel from './StatsPanel';
 import LogPanel from './LogPanel';
+import SilverCounter from './SilverCounter';
 import ExplorationPanel from './ExplorationPanel';
 import InventoryPanel from './InventoryPanel';
 import CraftingPanel from './CraftingPanel';
 import BasePanel from './BasePanel';
 import TechPanel from './TechPanel';
 import CharacterPanel from './CharacterPanel';
-import FurnacePanel from './FurnacePanel'; // New Import
+import FurnacePanel from './FurnacePanel';
+import MarketPanel from './MarketPanel'; // New Import
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Backpack, Compass, Hammer, Home, BookOpen, User, RotateCcw, Power, AlertTriangle } from 'lucide-react';
+import { Backpack, Compass, Hammer, Home, BookOpen, User, RotateCcw, Power, AlertTriangle, Coins } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,6 +42,14 @@ export default function GameUI() {
   const isBusy = gameState.isResting || gameState.isSmelting;
 
   const showFurnace = gameState.builtStructures.includes('furnace');
+  const showMarket = gameState.builtStructures.includes('workbench'); // Show market after workbench is built
+
+  const tabGridCols = () => {
+    let count = 6;
+    if (showFurnace) count++;
+    if (showMarket) count++;
+    return `grid-cols-${count}`;
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -82,18 +92,20 @@ export default function GameUI() {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 flex flex-col gap-4">
           <LogPanel />
+          <SilverCounter />
         </div>
         <div className="lg:col-span-3">
           <Tabs defaultValue="explore" className="w-full">
-            <TabsList className={cn("grid w-full", showFurnace ? "grid-cols-7" : "grid-cols-6")}>
+            <TabsList className={cn("grid w-full", `grid-cols-${6 + (showFurnace ? 1 : 0) + (showMarket ? 1 : 0)}`)}>
               <TabsTrigger value="explore" disabled={isBusy}><Compass className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Explore</span></TabsTrigger>
               <TabsTrigger value="inventory" disabled={isBusy}><Backpack className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Inventory</span></TabsTrigger>
               <TabsTrigger value="craft" disabled={isBusy}><Hammer className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Craft</span></TabsTrigger>
               <TabsTrigger value="character" disabled={isBusy}><User className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Character</span></TabsTrigger>
               <TabsTrigger value="base" disabled={isBusy}><Home className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Base</span></TabsTrigger>
               {showFurnace && <TabsTrigger value="furnace" disabled={isBusy}><Power className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Furnace</span></TabsTrigger>}
+              {showMarket && <TabsTrigger value="market" disabled={isBusy}><Coins className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Market</span></TabsTrigger>}
               <TabsTrigger value="tech" disabled={isBusy}><BookOpen className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Tech</span></TabsTrigger>
             </TabsList>
             <TabsContent value="explore" className="mt-4"><ExplorationPanel /></TabsContent>
@@ -102,6 +114,7 @@ export default function GameUI() {
             <TabsContent value="character" className="mt-4"><CharacterPanel /></TabsContent>
             <TabsContent value="base" className="mt-4"><BasePanel /></TabsContent>
             {showFurnace && <TabsContent value="furnace" className="mt-4"><FurnacePanel /></TabsContent>}
+            {showMarket && <TabsContent value="market" className="mt-4"><MarketPanel /></TabsContent>}
             <TabsContent value="tech" className="mt-4"><TechPanel /></TabsContent>
           </Tabs>
         </div>

@@ -12,6 +12,7 @@ const emptyInventory = {
   lemon: 0,
   banana: 0,
   peach: 0,
+  silver: 0,
   stoneAxe: 0,
   metalDetector: 0,
   workbench: 0,
@@ -35,6 +36,7 @@ export const initialState: GameState = {
     ...emptyInventory,
     apple: 5,
     water: 5,
+    silver: 20,
   },
   equipment: {
     hand: null,

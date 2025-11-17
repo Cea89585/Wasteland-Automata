@@ -60,7 +60,7 @@ export default function LogPanel() {
   }, [log]);
 
   return (
-    <Card className="h-[400px] lg:h-full flex flex-col">
+    <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Event Log</CardTitle>
         <Dialog>
@@ -84,10 +84,10 @@ export default function LogPanel() {
           </DialogContent>
         </Dialog>
       </CardHeader>
-      <CardContent className="flex-grow overflow-hidden">
+      <CardContent className="flex-grow overflow-hidden h-[300px]">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
-          <div className="flex flex-col gap-3 pr-4">
-            {log.slice(-5).reverse().map((message) => (
+          <div className="flex flex-col-reverse gap-3 pr-4">
+            {log.slice(-15).map((message) => (
               <LogEntry key={message.id} message={message} />
             ))}
           </div>
