@@ -12,7 +12,6 @@ let logIdCounter = 0;
 
 const reducer = (state: GameState, action: GameAction): GameState => {
   const generateUniqueLogId = () => {
-    // A simple counter combined with timestamp should be unique enough for this app's purposes.
     const newId = Date.now() + logIdCounter;
     logIdCounter++;
     return newId;
@@ -21,11 +20,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
     case 'INITIALIZE': {
       const loadedState = action.payload;
-      // Initialize the counter based on the last known log ID to prevent collisions across sessions
       if (loadedState.log && loadedState.log.length > 0) {
-        const maxId = Math.max(...loadedState.log.map(l => l.id));
-        // Set counter to be one higher than the max, just in case. The timestamp will handle most of the uniqueness.
-        logIdCounter = (maxId > Date.now()) ? (maxId - Date.now() + 1) : 1;
+        logIdCounter = loadedState.log.reduce((max, l) => Math.max(max, l.id), 0) + 1;
       } else {
         logIdCounter = 1;
       }
@@ -33,9 +29,17 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'GAME_TICK': {
-      if (state.isResting) return state;
-
       const newStats = { ...state.playerStats };
+      let hasChanged = false;
+
+      if (state.isResting) return state;
+      
+      // Passive energy regeneration
+      if(newStats.energy < 100) {
+        newStats.energy = Math.min(100, newStats.energy + 1);
+        hasChanged = true;
+      }
+
       newStats.thirst = Math.max(0, newStats.thirst - 1);
       newStats.hunger = Math.max(0, newStats.hunger - 0.5);
 
