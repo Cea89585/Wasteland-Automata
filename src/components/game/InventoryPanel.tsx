@@ -71,7 +71,7 @@ export default function InventoryPanel() {
                   const isApple = itemId === 'apple';
                   const isWater = itemId === 'water';
                   const isCookedApple = itemId === 'cookedApple';
-                  const isEquippable = data.equipSlot === 'hand';
+                  const isEquippable = data && data.equipSlot === 'hand';
                   const isEquipped = equipment.hand === itemId;
 
 
@@ -80,7 +80,7 @@ export default function InventoryPanel() {
                       <div className="flex items-center">
                         {allIcons[itemId]}
                         <div className="flex flex-col">
-                            <span className="font-medium">{data.name}</span>
+                            <span className="font-medium">{data?.name}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
