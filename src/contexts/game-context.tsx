@@ -33,7 +33,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'GAME_TICK': {
       let newStats = { ...state.playerStats };
       
-      if (state.isResting) return state;
+      if (state.isResting || newStats.health <= 0) return state;
       
       // Passive energy regeneration
       if(newStats.energy < 100) {
