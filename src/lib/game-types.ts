@@ -1,5 +1,7 @@
 // src/lib/game-types.ts
 
+import type { FixedEncounter } from "./game-data/encounters";
+
 export const Resources = {
   wood: 'Wood',
   stone: 'Stone',
@@ -74,6 +76,7 @@ export type GameAction =
   | { type: 'INITIALIZE'; payload: GameState }
   | { type: 'GAME_TICK' }
   | { type: 'ADD_LOG'; payload: { text: string; type: LogMessage['type'] } }
+  | { type: 'TRIGGER_ENCOUNTER'; payload: FixedEncounter }
   | { type: 'GATHER'; payload: { resource: Resource; amount: number } }
   | { type: 'CRAFT'; payload: { recipeId: string } }
   | { type: 'BUILD_STRUCTURE'; payload: { recipeId: string } }

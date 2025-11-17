@@ -5,6 +5,7 @@ import React, { createContext, useReducer, useEffect, type ReactNode } from 'rea
 import type { GameState, GameAction, LogMessage, Resource } from '@/lib/game-types';
 import { initialState } from '@/lib/game-data/initial-state';
 import { recipes } from '@/lib/game-data/recipes';
+import { itemData } from '@/lib/game-data/items';
 
 const SAVE_KEY = 'wastelandAutomata_save';
 const INVENTORY_CAP = 200;
@@ -84,6 +85,38 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         inventory: newInventory,
         gameTick: state.gameTick + 1,
         log: [...state.log, ...logMessages],
+      };
+    }
+
+    case 'TRIGGER_ENCOUNTER': {
+      const encounter = action.payload;
+      let newInventory = { ...state.inventory };
+      let newStats = { ...state.playerStats };
+      let logText = encounter.message;
+    
+      if (encounter.type === 'positive' && encounter.reward) {
+        const { item, amount } = encounter.reward;
+        newInventory[item] = Math.min(INVENTORY_CAP, (newInventory[item] || 0) + amount);
+        logText += ` You found ${amount} ${itemData[item].name}.`;
+      }
+    
+      if (encounter.type === 'negative' && encounter.penalty) {
+        const { type, amount } = encounter.penalty;
+        if (type === 'health') {
+          newStats.health = Math.max(0, newStats.health - amount);
+          logText += ` You lost ${amount} health.`;
+        } else {
+          const currentAmount = newInventory[type] || 0;
+          newInventory[type] = Math.max(0, currentAmount - amount);
+          logText += ` You lost ${Math.min(currentAmount, amount)} ${itemData[type].name}.`;
+        }
+      }
+    
+      return {
+        ...state,
+        inventory: newInventory,
+        playerStats: newStats,
+        log: [...state.log, { id: generateUniqueLogId(), text: logText, type: encounter.type === 'positive' ? 'success' : 'danger', timestamp: Date.now() }],
       };
     }
 

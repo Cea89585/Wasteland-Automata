@@ -9,6 +9,8 @@ import { locations } from '@/lib/game-data/locations';
 import { Loader2, Compass, Search, Bed } from 'lucide-react';
 import { itemData } from '@/lib/game-data/items';
 import { Progress } from '../ui/progress';
+import { positiveEncounters, negativeEncounters } from '@/lib/game-data/encounters';
+import type { FixedEncounter } from '@/lib/game-data/encounters';
 
 export default function ExplorationPanel() {
   const { gameState, dispatch } = useGame();
@@ -44,6 +46,17 @@ export default function ExplorationPanel() {
     }
   }, [restingProgress, finishResting]);
 
+  const handleFixedEncounter = () => {
+    let encounter: FixedEncounter;
+    if (Math.random() < 0.5) { // 50% chance for a positive encounter
+      encounter = positiveEncounters[Math.floor(Math.random() * positiveEncounters.length)];
+    } else {
+      encounter = negativeEncounters[Math.floor(Math.random() * negativeEncounters.length)];
+    }
+    dispatch({ type: 'TRIGGER_ENCOUNTER', payload: encounter });
+  };
+
+
   const handleExplore = async () => {
     if (gameState.playerStats.energy < 10) {
         dispatch({ type: 'ADD_LOG', payload: { text: "You are too tired to explore.", type: 'danger' } });
@@ -53,37 +66,42 @@ export default function ExplorationPanel() {
     setIsExploring(true);
     dispatch({ type: 'CONSUME', payload: { stat: 'energy', amount: 10 } });
 
-    // Resource finding
-    let foundSomething = false;
-    let foundText = 'You explore the area...';
-    
     setTimeout(() => {
-      currentLocation.resources.forEach((res) => {
-        if (Math.random() < res.chance) {
-          let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
-          
-          // Apply bonuses from equipped items
-          if (res.resource === 'wood' && equipment.hand === 'stoneAxe') {
-            amount = Math.ceil(amount * 1.50); // 50% bonus
-          }
-          if (res.resource === 'scrap' && equipment.hand === 'metalDetector') {
-            amount = Math.ceil(amount * 1.20); // 20% bonus
-          }
+        // Resource finding
+        let foundSomething = false;
+        let foundText = 'You explore the area...';
 
-          dispatch({ type: 'GATHER', payload: { resource: res.resource, amount } });
-          foundText += ` You found ${amount} ${itemData[res.resource].name}.`;
-          foundSomething = true;
+        currentLocation.resources.forEach((res) => {
+            if (Math.random() < res.chance) {
+            let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
+            
+            // Apply bonuses from equipped items
+            if (res.resource === 'wood' && equipment.hand === 'stoneAxe') {
+                amount = Math.ceil(amount * 1.50); // 50% bonus
+            }
+            if (res.resource === 'scrap' && equipment.hand === 'metalDetector') {
+                amount = Math.ceil(amount * 1.20); // 20% bonus
+            }
+
+            dispatch({ type: 'GATHER', payload: { resource: res.resource, amount } });
+            foundText += ` You found ${amount} ${itemData[res.resource].name}.`;
+            foundSomething = true;
+            }
+        });
+    
+        if (!foundSomething) {
+            const flavor = currentLocation.flavorText[Math.floor(Math.random() * currentLocation.flavorText.length)];
+            foundText += ` ${flavor}`;
         }
-      });
-  
-      if (!foundSomething) {
-        const flavor = currentLocation.flavorText[Math.floor(Math.random() * currentLocation.flavorText.length)];
-        foundText += ` ${flavor}`;
-      }
-      
-      dispatch({ type: 'ADD_LOG', payload: { text: foundText, type: 'info' } });
-  
-      setIsExploring(false);
+
+        dispatch({ type: 'ADD_LOG', payload: { text: foundText, type: 'info' } });
+
+        // Fixed Encounter
+        if (Math.random() < 0.25) { // 25% chance of a fixed encounter
+            handleFixedEncounter();
+        }
+
+        setIsExploring(false);
     }, 1000); // Simulate exploration time
   };
 
