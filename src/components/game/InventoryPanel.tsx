@@ -68,12 +68,8 @@ export default function InventoryPanel() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {ownedItems.map((itemId) => {
                   const data = itemData[itemId as keyof typeof itemData];
-                  const isApple = itemId === 'apple';
-                  const isWater = itemId === 'water';
-                  const isCookedApple = itemId === 'cookedApple';
                   const isEquippable = data && data.equipSlot === 'hand';
                   const isEquipped = equipment.hand === itemId;
-
 
                   return (
                     <div key={itemId} className="flex items-center justify-between p-3 rounded-md bg-muted/50">
@@ -85,17 +81,17 @@ export default function InventoryPanel() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-lg font-semibold text-primary">{inventory[itemId as keyof typeof inventory]}</span>
-                        {isApple && (
+                        {itemId === 'apple' && (
                             <Button size="icon" variant="outline" onClick={handleEat} disabled={isDead || inventory.apple === 0 || isBusy} aria-label="Eat apple">
                                 <Apple className="h-4 w-4" />
                             </Button>
                         )}
-                        {isWater && (
+                        {itemId === 'water' && (
                             <Button size="icon" variant="outline" onClick={handleDrink} disabled={isDead || inventory.water === 0 || isBusy} aria-label="Drink water">
                                 <GlassWater className="h-4 w-4" />
                             </Button>
                         )}
-                        {isCookedApple && (
+                        {itemId === 'cookedApple' && (
                             <Button size="icon" variant="outline" onClick={handleEatCookedApple} disabled={isDead || inventory.cookedApple === 0 || isBusy} aria-label="Eat Cooked Apple">
                                 <Zap className="h-4 w-4" />
                             </Button>
