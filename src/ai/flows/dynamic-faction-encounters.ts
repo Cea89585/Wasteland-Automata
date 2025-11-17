@@ -28,11 +28,11 @@ const FactionEncounterOutputSchema = z.object({
     reward: z.object({
         item: z.enum(['components', 'banana', 'peach', 'water']).describe("The item rewarded to the player, if any."),
         quantity: z.number().describe("The quantity of the item rewarded."),
-      }).optional().describe("The reward for a positive outcome."),
+      }).optional().describe("The reward for a positive outcome. Should be included only if the outcome type is 'positive'."),
     penalty: z.object({
         stat: z.enum(['health', 'hunger', 'thirst']).describe("The player stat that is penalized, if any."),
         amount: z.number().describe("The percentage to reduce the stat by (e.g., 15 for 15%)."),
-      }).optional().describe("The penalty for a negative outcome."),
+      }).optional().describe("The penalty for a negative outcome. Should be included only if the outcome type is 'negative'."),
   }).describe("The result of the encounter for the player."),
 });
 export type FactionEncounterOutput = z.infer<typeof FactionEncounterOutputSchema>;
@@ -53,13 +53,15 @@ const factionEncounterPrompt = ai.definePrompt({
 
   Generate a short description of an encounter with one of these factions. Include which faction was encountered.
   
-  The encounter should have a 50/50 chance of being 'positive' or 'negative' for the player.
-  - If the outcome is 'positive', the player should receive a small reward. Choose one of the following rewards: 1-3 components, 1-3 bananas, or 1-3 peaches. The description should reflect how the player obtained this reward (e.g., a grateful scavenger shared their food, you found a hidden stash). Set the 'outcome.type' to 'positive' and fill in the 'outcome.reward' object.
-  - If the outcome is 'negative', the player should suffer a penalty. Choose one of the following stats to penalize: health, hunger, or thirst. The penalty should be a 15% reduction. The description should reflect why this penalty occurred (e.g., a brief scuffle, a chase that left you exhausted and thirsty). Set the 'outcome.type' to 'negative' and fill in the 'outcome.penalty' object.
-  - If for some reason neither fits, make it 'neutral'.
+  The encounter should have a roughly 50/50 chance of being 'positive' or 'negative' for the player.
+  - If the outcome is 'positive', the player should receive a small reward. Choose one of the following rewards: 1-3 components, 1-3 bananas, or 1-3 peaches. The description should reflect how the player obtained this reward. Set the 'outcome.type' to 'positive' and fill in the 'outcome.reward' object.
+  - If the outcome is 'negative', the player should suffer a penalty. Choose one of the following stats to penalize: health, hunger, or thirst. The penalty should be a 15% reduction. The description should reflect why this penalty occurred. Set the 'outcome.type' to 'negative' and fill in the 'outcome.penalty' object.
+  - If for some reason neither fits, make it 'neutral'. In this case, do not include 'reward' or 'penalty' objects.
   
   The description must narrate the scene, the faction's demeanor, the action that leads to the outcome, and the immediate result for the player.
   Do not offer choices to the player or suggest any follow-up actions. Just describe the scene and its direct result.
+  
+  Always return a valid JSON object adhering to the output schema. The 'outcome' field must always be an object containing a 'type'.
 `,
 });
 
@@ -70,7 +72,22 @@ const factionEncounterFlow = ai.defineFlow(
     outputSchema: FactionEncounterOutputSchema,
   },
   async input => {
-    const {output} = await factionEncounterPrompt(input);
-    return output!;
+    try {
+      const {output} = await factionEncounterPrompt(input);
+      if (output) {
+        return output;
+      }
+      throw new Error('AI failed to generate a valid encounter.');
+    } catch(e) {
+       console.error("Error in factionEncounterFlow", e);
+       // Return a fallback neutral encounter on error
+       return {
+          faction: 'Unknown',
+          description: 'A chill runs down your spine as you scan the horizon, but you see nothing out of the ordinary. The feeling of being watched lingers.',
+          outcome: {
+            type: 'neutral'
+          }
+        };
+    }
   }
 );

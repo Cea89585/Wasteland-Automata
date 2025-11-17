@@ -10,18 +10,7 @@ import {
 export async function getFactionEncounter(
   input: FactionEncounterInput
 ): Promise<FactionEncounterOutput> {
-  try {
-    const encounter = await generateFactionEncounter(input);
-    return encounter;
-  } catch (error) {
-    console.error('Error in getFactionEncounter action:', error);
-    // Return a fallback encounter on error
-    return {
-      faction: 'Unknown',
-      description: 'A chill runs down your spine as you scan the horizon, but you see nothing out of the ordinary. The feeling of being watched lingers.',
-      outcome: {
-        type: 'neutral'
-      }
-    };
-  }
+  // The error handling is now done within the flow itself
+  // to provide a more robust fallback.
+  return await generateFactionEncounter(input);
 }
