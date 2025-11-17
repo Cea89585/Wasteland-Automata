@@ -8,6 +8,10 @@ import { recipes } from '@/lib/game-data/recipes';
 
 const SAVE_KEY = 'wastelandAutomata_save';
 
+const generateUniqueLogId = () => {
+  return Date.now() + Math.random();
+};
+
 const reducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
     case 'INITIALIZE':
@@ -23,9 +27,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
 
       const logMessages: LogMessage[] = [];
-      if (state.playerStats.health > 0 && newStats.health === 0) {
+      if (state.playerStats.health > 0 && newStats.health <= 0) {
         logMessages.push({
-          id: Date.now(),
+          id: generateUniqueLogId(),
           text: 'Your vision fades to black. The wasteland has claimed another soul.',
           timestamp: Date.now(),
           type: 'danger',
@@ -43,7 +47,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'ADD_LOG':
       return {
         ...state,
-        log: [...state.log, { ...action.payload, id: Date.now(), timestamp: Date.now() }],
+        log: [...state.log, { ...action.payload, id: generateUniqueLogId(), timestamp: Date.now() }],
       };
 
     case 'GATHER': {
@@ -70,7 +74,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (!canCraft) {
         return {
           ...state,
-          log: [...state.log, { id: Date.now(), text: "Not enough resources to craft this.", type: 'danger', timestamp: Date.now() }],
+          log: [...state.log, { id: generateUniqueLogId(), text: "Not enough resources to craft this.", type: 'danger', timestamp: Date.now() }],
         };
       }
       
@@ -91,7 +95,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         ...state,
         inventory: newInventory,
         unlockedRecipes: newUnlockedRecipes,
-        log: [...state.log, { id: Date.now(), text: `Crafted ${recipe.name}.`, type: 'craft', timestamp: Date.now() }],
+        log: [...state.log, { id: generateUniqueLogId(), text: `Crafted ${recipe.name}.`, type: 'craft', timestamp: Date.now() }],
       };
     }
     
@@ -121,7 +125,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         ...state,
         inventory: newInventory,
         playerStats: newStats,
-        log: [...state.log, { id: Date.now(), text: "You eat some food, restoring some health and hunger.", type: 'success', timestamp: Date.now() }],
+        log: [...state.log, { id: generateUniqueLogId(), text: "You eat some food, restoring some health and hunger.", type: 'success', timestamp: Date.now() }],
       };
     }
 
@@ -136,7 +140,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         ...state,
         inventory: newInventory,
         playerStats: newStats,
-        log: [...state.log, { id: Date.now(), text: "You drink some water, quenching your thirst.", type: 'success', timestamp: Date.now() }],
+        log: [...state.log, { id: generateUniqueLogId(), text: "You drink some water, quenching your thirst.", type: 'success', timestamp: Date.now() }],
       };
     }
 
@@ -152,7 +156,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           ...state,
           inventory: newInventory,
           playerStats: newStats,
-          log: [...state.log, { id: Date.now(), text: "You eat the cooked apple. You feel a surge of energy.", type: 'success', timestamp: Date.now() }],
+          log: [...state.log, { id: generateUniqueLogId(), text: "You eat the cooked apple. You feel a surge of energy.", type: 'success', timestamp: Date.now() }],
         };
       }
 
