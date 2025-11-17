@@ -84,7 +84,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         playerStats: newStats,
         inventory: newInventory,
         gameTick: state.gameTick + 1,
-        log: [...state.log, ...logMessages],
+        log: [...logMessages, ...state.log],
       };
     }
 
@@ -135,7 +135,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         inventory: newInventory,
         playerStats: newStats,
         equipment: newEquipment,
-        log: [...state.log, { id: generateUniqueLogId(), text: logText, type: encounter.type === 'positive' ? 'success' : 'danger', timestamp: Date.now() }],
+        log: [{ id: generateUniqueLogId(), text: logText, type: encounter.type === 'positive' ? 'success' : 'danger', timestamp: Date.now() }, ...state.log],
       };
     }
 
@@ -143,8 +143,15 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const { item, ...rest } = action.payload;
       return {
         ...state,
-        log: [...state.log, { ...rest, item, id: generateUniqueLogId(), timestamp: Date.now() }],
+        log: [{ ...rest, item, id: generateUniqueLogId(), timestamp: Date.now() }, ...state.log],
       };
+    }
+
+    case 'CLEAR_LOG': {
+      return {
+        ...state,
+        log: initialState.log,
+      }
     }
 
     case 'GATHER': {
@@ -168,7 +175,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (!canBuild) {
         return {
           ...state,
-          log: [...state.log, { id: generateUniqueLogId(), text: "Not enough resources to build this.", type: 'danger', timestamp: Date.now() }],
+          log: [{ id: generateUniqueLogId(), text: "Not enough resources to build this.", type: 'danger', timestamp: Date.now() }, ...state.log],
         };
       }
       
@@ -195,7 +202,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         inventory: newInventory,
         builtStructures: newBuiltStructures,
         unlockedRecipes: newUnlockedRecipes,
-        log: [...state.log, { id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }],
+        log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
       };
     }
 
@@ -216,14 +223,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (!canCraft) {
         return {
           ...state,
-          log: [...state.log, { id: generateUniqueLogId(), text: "Not enough resources to craft this.", type: 'danger', timestamp: Date.now() }],
+          log: [{ id: generateUniqueLogId(), text: "Not enough resources to craft this.", type: 'danger', timestamp: Date.now() }, ...state.log],
         };
       }
 
       if(newInventory[recipe.creates] >= INVENTORY_CAP) {
         return {
           ...state,
-          log: [...state.log, { id: generateUniqueLogId(), text: `You can't carry any more ${itemData[recipe.creates].name}.`, type: 'danger', timestamp: Date.now() }],
+          log: [{ id: generateUniqueLogId(), text: `You can't carry any more ${itemData[recipe.creates].name}.`, type: 'danger', timestamp: Date.now() }, ...state.log],
         };
       }
       
@@ -244,7 +251,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         ...state,
         inventory: newInventory,
         unlockedRecipes: newUnlockedRecipes,
-        log: [...state.log, { id: generateUniqueLogId(), text: `Crafted ${itemData[recipe.creates].name}.`, type: 'craft', item: recipe.creates, timestamp: Date.now() }],
+        log: [{ id: generateUniqueLogId(), text: `Crafted ${itemData[recipe.creates].name}.`, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
       };
     }
 
@@ -255,14 +262,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (state.lockedItems.includes(item)) {
         return {
           ...state,
-          log: [...state.log, { id: generateUniqueLogId(), text: `${itemData[item].name} is locked and cannot be sold.`, type: 'danger', timestamp: Date.now() }],
+          log: [{ id: generateUniqueLogId(), text: `${itemData[item].name} is locked and cannot be sold.`, type: 'danger', timestamp: Date.now() }, ...state.log],
         }
       }
 
       if (newInventory[item] < amount) {
         return {
           ...state,
-          log: [...state.log, { id: generateUniqueLogId(), text: `Not enough ${itemData[item].name} to sell.`, type: 'danger', timestamp: Date.now() }],
+          log: [{ id: generateUniqueLogId(), text: `Not enough ${itemData[item].name} to sell.`, type: 'danger', timestamp: Date.now() }, ...state.log],
         }
       }
 
@@ -272,7 +279,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       return {
         ...state,
         inventory: newInventory,
-        log: [...state.log, { id: generateUniqueLogId(), text: `Sold ${amount} ${itemData[item].name} for ${amount * price} silver.`, type: 'success', timestamp: Date.now() }],
+        log: [{ id: generateUniqueLogId(), text: `Sold ${amount} ${itemData[item].name} for ${amount * price} silver.`, type: 'success', timestamp: Date.now() }, ...state.log],
       }
     }
 
@@ -295,7 +302,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (itemsSold === 0) {
         return {
             ...state,
-            log: [...state.log, { id: generateUniqueLogId(), text: `No unlocked items to sell.`, type: 'info', timestamp: Date.now() }],
+            log: [{ id: generateUniqueLogId(), text: `No unlocked items to sell.`, type: 'info', timestamp: Date.now() }, ...state.log],
         }
       }
 
@@ -304,7 +311,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       return {
         ...state,
         inventory: newInventory,
-        log: [...state.log, { id: generateUniqueLogId(), text: `Sold all unlocked goods for ${totalSilverGained} silver.`, type: 'success', timestamp: Date.now() }],
+        log: [{ id: generateUniqueLogId(), text: `Sold all unlocked goods for ${totalSilverGained} silver.`, type: 'success', timestamp: Date.now() }, ...state.log],
       };
     }
     
@@ -365,7 +372,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         ...state,
         inventory: newInventory,
         playerStats: newStats,
-        log: [...state.log, { id: generateUniqueLogId(), text: "You eat an apple, restoring some health and hunger.", type: 'success', timestamp: Date.now() }],
+        log: [{ id: generateUniqueLogId(), text: "You eat an apple, restoring some health and hunger.", type: 'success', timestamp: Date.now() }, ...state.log],
       };
     }
 
@@ -380,7 +387,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         ...state,
         inventory: newInventory,
         playerStats: newStats,
-        log: [...state.log, { id: generateUniqueLogId(), text: "You drink some water, quenching your thirst.", type: 'success', timestamp: Date.now() }],
+        log: [{ id: generateUniqueLogId(), text: "You drink some water, quenching your thirst.", type: 'success', timestamp: Date.now() }, ...state.log],
       };
     }
 
@@ -396,7 +403,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           ...state,
           inventory: newInventory,
           playerStats: newStats,
-          log: [...state.log, { id: generateUniqueLogId(), text: "You eat the cooked apple. You feel a surge of energy.", type: 'success', timestamp: Date.now() }],
+          log: [{ id: generateUniqueLogId(), text: "You eat the cooked apple. You feel a surge of energy.", type: 'success', timestamp: Date.now() }, ...state.log],
         };
     }
 
@@ -421,7 +428,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             ...state,
             inventory: newInventory,
             equipment: newEquipment,
-            log: [...state.log, { id: generateUniqueLogId(), text: `Equipped ${itemData[item].name}.`, type: 'info', timestamp: Date.now() }],
+            log: [{ id: generateUniqueLogId(), text: `Equipped ${itemData[item].name}.`, type: 'info', timestamp: Date.now() }, ...state.log],
         };
     }
 
@@ -440,7 +447,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             ...state,
             inventory: newInventory,
             equipment: newEquipment,
-            log: [...state.log, { id: generateUniqueLogId(), text: `Unequipped ${itemData[itemToUnequip].name}.`, type: 'info', timestamp: Date.now() }],
+            log: [{ id: generateUniqueLogId(), text: `Unequipped ${itemData[itemToUnequip].name}.`, type: 'info', timestamp: Date.now() }, ...state.log],
         };
     }
 
@@ -459,7 +466,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (newInventory.scrap < totalScrapNeeded || newInventory.wood < totalWoodNeeded) {
         return {
           ...state,
-          log: [...state.log, { id: generateUniqueLogId(), text: "Not enough resources to start smelting.", type: 'danger', timestamp: Date.now() }],
+          log: [{ id: generateUniqueLogId(), text: "Not enough resources to start smelting.", type: 'danger', timestamp: Date.now() }, ...state.log],
         };
       }
       
@@ -470,7 +477,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         ...state, 
         inventory: newInventory,
         smeltingQueue: state.smeltingQueue + amount,
-        log: [...state.log, { id: generateUniqueLogId(), text: `The furnace roars to life... Queued ${amount} batch(es).`, type: 'info', timestamp: Date.now() }],
+        log: [{ id: generateUniqueLogId(), text: `The furnace roars to life... Queued ${amount} batch(es).`, type: 'info', timestamp: Date.now() }, ...state.log],
       };
     }
 
@@ -491,7 +498,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             ...state,
             inventory: newInventory,
             smeltingQueue: newSmeltingQueue,
-            log: [...state.log, { id: generateUniqueLogId(), text: logMessage, type: 'craft', item: 'components', timestamp: Date.now() }],
+            log: [{ id: generateUniqueLogId(), text: logMessage, type: 'craft', item: 'components', timestamp: Date.now() }, ...state.log],
         };
     }
 
@@ -539,7 +546,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (gameState.isInitialized) {
       try {
-        localStorage.setItem(SAVE_KEY, JSON.stringify(gameState));
+        const stateToSave = { ...gameState };
+        // We reverse the log before saving and then reverse it back after,
+        // so that the in-memory state is correct but the saved state has the log in chronological order.
+        stateToSave.log = [...stateToSave.log].reverse();
+        localStorage.setItem(SAVE_KEY, JSON.stringify(stateToSave));
       } catch (error) {
         console.error("Failed to save game to localStorage", error);
       }

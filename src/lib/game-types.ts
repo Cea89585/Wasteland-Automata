@@ -81,6 +81,7 @@ export type GameAction =
   | { type: 'INITIALIZE'; payload: GameState }
   | { type: 'GAME_TICK' }
   | { type: 'ADD_LOG'; payload: { text: string; type: LogMessage['type'], item?: Resource | Item } }
+  | { type: 'CLEAR_LOG' }
   | { type: 'TRIGGER_ENCOUNTER'; payload: FixedEncounter }
   | { type: 'GATHER'; payload: { resource: Resource; amount: number } }
   | { type: 'CRAFT'; payload: { recipeId: string } }

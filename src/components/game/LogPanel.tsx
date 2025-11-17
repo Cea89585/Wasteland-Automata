@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
-import { Info, AlertTriangle, ShieldCheck, Hammer, Clock, BookOpen } from 'lucide-react';
+import { Info, AlertTriangle, ShieldCheck, Hammer, Clock, BookOpen, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import {
   Dialog,
@@ -13,7 +13,20 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { Button } from '../ui/button';
 import { allIcons } from './GameIcons';
 
@@ -55,7 +68,7 @@ const LogEntry = ({ message }: { message: ReturnType<typeof useGame>['gameState'
 )};
 
 export default function LogPanel() {
-  const { gameState: { log } } = useGame();
+  const { gameState: { log }, dispatch } = useGame();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -89,13 +102,40 @@ export default function LogPanel() {
                 ))}
               </div>
             </ScrollArea>
+             <DialogFooter className="mt-4">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive">
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Clear History
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will permanently delete your log history. This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => dispatch({ type: 'CLEAR_LOG' })}>
+                        Yes, clear history
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                 <DialogClose asChild>
+                    <Button variant="outline">Close</Button>
+                 </DialogClose>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden h-[300px]">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
           <div className="flex flex-col gap-3 pr-4">
-            {log.slice().reverse().map((message) => (
+            {log.slice(0, 15).map((message) => (
               <LogEntry key={message.id} message={message} />
             ))}
           </div>
