@@ -26,12 +26,12 @@ const FactionEncounterOutputSchema = z.object({
   outcome: z.object({
     type: z.enum(['positive', 'negative', 'neutral']).describe("The type of outcome for the player: 'positive', 'negative', or 'neutral'."),
     reward: z.object({
-        item: z.enum(['components', 'banana', 'peach', 'water']).optional().describe("The item rewarded to the player, if any."),
-        quantity: z.number().optional().describe("The quantity of the item rewarded."),
+        item: z.enum(['components', 'banana', 'peach', 'water']).describe("The item rewarded to the player, if any."),
+        quantity: z.number().describe("The quantity of the item rewarded."),
       }).optional().describe("The reward for a positive outcome."),
     penalty: z.object({
-        stat: z.enum(['health', 'hunger', 'thirst']).optional().describe("The player stat that is penalized, if any."),
-        amount: z.number().optional().describe("The percentage to reduce the stat by (e.g., 15 for 15%)."),
+        stat: z.enum(['health', 'hunger', 'thirst']).describe("The player stat that is penalized, if any."),
+        amount: z.number().describe("The percentage to reduce the stat by (e.g., 15 for 15%)."),
       }).optional().describe("The penalty for a negative outcome."),
   }).describe("The result of the encounter for the player."),
 });
