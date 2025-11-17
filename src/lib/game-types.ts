@@ -4,10 +4,13 @@ export const Resources = {
   wood: 'Wood',
   stone: 'Stone',
   scrap: 'Scrap Metal',
-  food: 'Food',
+  apple: 'Apple',
   water: 'Water',
   components: 'Components',
   uranium: 'Uranium',
+  lemon: 'Lemon',
+  banana: 'Banana',
+  peach: 'Peach',
 } as const;
 export type Resource = keyof typeof Resources;
 

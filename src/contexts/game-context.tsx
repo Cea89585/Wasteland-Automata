@@ -21,7 +21,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const loadedState = action.payload;
       // Reset the counter based on the highest existing ID to prevent future collisions
       if (loadedState.log && loadedState.log.length > 0) {
-        logIdCounter = loadedState.log.reduce((max, l) => Math.max(max, l.id), 0) - Date.now() + 1;
+        const maxId = loadedState.log.reduce((max, l) => Math.max(max, l.id), 0);
+        // Ensure the new counter starts well after any existing ID
+        logIdCounter = (maxId > Date.now()) ? (maxId - Date.now() + 1) : 1;
       } else {
         logIdCounter = 1;
       }
@@ -182,9 +184,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'EAT': {
-      if (state.inventory.food <= 0) return state;
+      if (state.inventory.apple <= 0) return state;
 
-      const newInventory = { ...state.inventory, food: state.inventory.food - 1 };
+      const newInventory = { ...state.inventory, apple: state.inventory.apple - 1 };
       const newStats = { ...state.playerStats };
       newStats.hunger = Math.min(100, newStats.hunger + 40);
       newStats.health = Math.min(100, newStats.health + 5);
@@ -193,7 +195,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         ...state,
         inventory: newInventory,
         playerStats: newStats,
-        log: [...state.log, { id: generateUniqueLogId(), text: "You eat some food, restoring some health and hunger.", type: 'success', timestamp: Date.now() }],
+        log: [...state.log, { id: generateUniqueLogId(), text: "You eat an apple, restoring some health and hunger.", type: 'success', timestamp: Date.now() }],
       };
     }
 

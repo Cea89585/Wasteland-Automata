@@ -32,7 +32,7 @@ export const recipes: Recipe[] = [
     name: 'Cooked Apple',
     description: 'Cook an apple with water to make it more restorative.',
     creates: 'cookedApple',
-    requirements: { food: 1, water: 3 },
+    requirements: { apple: 1, water: 3 },
     unlockedBy: ['workbench'],
   },
   {

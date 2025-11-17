@@ -6,10 +6,13 @@ export const itemData: Record<Resource | Item, { name: string; description: stri
   wood: { name: Resources.wood, description: 'A sturdy piece of wood. Useful for building and fuel.' },
   stone: { name: Resources.stone, description: 'A chunk of rock. Good for basic tools and structures.' },
   scrap: { name: Resources.scrap, description: 'Twisted metal from the old world. Can be smelted and repurposed.' },
-  food: { name: Resources.food, description: 'Canned goods or preserved rations. Keeps hunger at bay.' },
+  apple: { name: Resources.apple, description: 'A tough, slightly mutated apple. Keeps hunger at bay.' },
   water: { name: Resources.water, description: 'Purified water, safe to drink.' },
   components: { name: Resources.components, description: 'Advanced electronic parts. Key to automation.' },
   uranium: { name: Resources.uranium, description: 'A rare, radioactive element needed for high-tier power.' },
+  lemon: { name: Resources.lemon, description: 'A sour, yellow fruit.' },
+  banana: { name: Resources.banana, description: 'A long, yellow fruit.' },
+  peach: { name: Resources.peach, description: 'A fuzzy, sweet fruit.' },
 
   // Crafted Items
   stoneAxe: { name: Items.stoneAxe, description: 'A simple axe for chopping wood more efficiently.', equipSlot: 'hand' },

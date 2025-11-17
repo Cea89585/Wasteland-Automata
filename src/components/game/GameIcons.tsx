@@ -22,6 +22,9 @@ import {
   Zap,
   Bed,
   type LucideProps,
+  Banana,
+  Citrus, // Changed from Lemon
+  Grape, // Changed from Beef
 } from 'lucide-react';
 import type { Resource, Item } from '@/lib/game-types';
 
@@ -35,10 +38,13 @@ export const resourceIcons: Record<Resource, React.ReactElement<LucideProps>> = 
   wood: <Trees {...iconProps} />,
   stone: <Gem {...iconProps} />,
   scrap: <Wrench {...iconProps} />,
-  food: <Apple {...iconProps} />,
+  apple: <Apple {...iconProps} />,
   water: <GlassWater {...iconProps} />,
   components: <Cpu {...iconProps} />,
   uranium: <Atom {...iconProps} />,
+  lemon: <Citrus {...iconProps} />,
+  banana: <Banana {...iconProps} />,
+  peach: <Grape {...iconProps} />,
 };
 
 export const itemIcons: Record<Item, React.ReactElement<LucideProps>> = {

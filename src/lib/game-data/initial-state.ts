@@ -5,10 +5,13 @@ const emptyInventory = {
   wood: 0,
   stone: 0,
   scrap: 0,
-  food: 0,
+  apple: 0,
   water: 0,
   components: 0,
   uranium: 0,
+  lemon: 0,
+  banana: 0,
+  peach: 0,
   stoneAxe: 0,
   workbench: 0,
   waterPurifier: 0,
@@ -29,7 +32,7 @@ export const initialState: GameState = {
   },
   inventory: {
     ...emptyInventory,
-    food: 5,
+    apple: 5,
     water: 5,
   },
   equipment: {

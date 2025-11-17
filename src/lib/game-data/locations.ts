@@ -25,7 +25,7 @@ export const locations: Record<LocationId, LocationData> = {
       { resource: 'wood', min: 1, max: 3, chance: 0.7 },
       { resource: 'stone', min: 2, max: 4, chance: 0.8 },
       { resource: 'scrap', min: 1, max: 2, chance: 0.4 },
-      { resource: 'food', min: 1, max: 1, chance: 0.1 },
+      { resource: 'apple', min: 1, max: 1, chance: 0.1 },
     ],
     flavorText: [
       'A rusted car sits silently, its doors creaking in the wind.',
@@ -40,7 +40,7 @@ export const locations: Record<LocationId, LocationData> = {
     description: 'A dense, overgrown forest with strangely colored flora. The air is thick and humid.',
     resources: [
       { resource: 'wood', min: 3, max: 6, chance: 0.9 },
-      { resource: 'food', min: 1, max: 2, chance: 0.3 },
+      { resource: 'apple', min: 1, max: 2, chance: 0.3 },
     ],
     flavorText: [
       'The trees here have an unsettling, almost intelligent look to them.',
@@ -78,7 +78,7 @@ export const locations: Record<LocationId, LocationData> = {
     name: 'Underground Bunker',
     description: 'A sealed metal door leads into a pre-apocalypse fallout shelter.',
      resources: [
-      { resource: 'food', min: 2, max: 5, chance: 0.5 },
+      { resource: 'apple', min: 2, max: 5, chance: 0.5 },
       { resource: 'water', min: 2, max: 5, chance: 0.5 },
       { resource: 'components', min: 1, max: 3, chance: 0.2 },
     ],

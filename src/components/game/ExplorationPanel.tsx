@@ -109,16 +109,16 @@ export default function ExplorationPanel() {
     dispatch({ type: 'CONSUME', payload: { stat: 'energy', amount: 5 } });
 
     setTimeout(() => {
-        let foundFood = false;
+        let foundApple = false;
         let foundWater = false;
         let scavengeText = "You search nearby ruins for supplies..."
 
-        // Higher chance for food/water, but less of other things
+        // Higher chance for apple/water, but less of other things
         if (Math.random() < 0.3) {
             const amount = 1;
-            dispatch({ type: 'GATHER', payload: { resource: 'food', amount } });
-            scavengeText += ` You found ${amount} ${itemData['food'].name}.`;
-            foundFood = true;
+            dispatch({ type: 'GATHER', payload: { resource: 'apple', amount } });
+            scavengeText += ` You found ${amount} ${itemData['apple'].name}.`;
+            foundApple = true;
         }
 
         if (Math.random() < 0.2) {
@@ -128,7 +128,7 @@ export default function ExplorationPanel() {
             foundWater = true;
         }
 
-        if (!foundFood && !foundWater) {
+        if (!foundApple && !foundWater) {
             scavengeText += " You found nothing of use."
         }
 

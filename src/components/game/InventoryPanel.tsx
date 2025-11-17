@@ -13,7 +13,7 @@ export default function InventoryPanel() {
   const { gameState, dispatch } = useGame();
   const { inventory, equipment } = gameState;
 
-  const consumableSortOrder = ['food', 'water', 'cookedApple'];
+  const consumableSortOrder = ['apple', 'water', 'cookedApple'];
 
   const ownedItems = Object.entries(inventory)
     .filter(([, quantity]) => quantity > 0)
@@ -34,7 +34,7 @@ export default function InventoryPanel() {
   const isBusy = gameState.isResting;
 
   const handleEat = () => {
-    if (inventory.food > 0) {
+    if (inventory.apple > 0) {
       dispatch({ type: 'EAT' });
     }
   };
@@ -68,7 +68,7 @@ export default function InventoryPanel() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {ownedItems.map((itemId) => {
                   const data = itemData[itemId as keyof typeof itemData];
-                  const isFood = itemId === 'food';
+                  const isApple = itemId === 'apple';
                   const isWater = itemId === 'water';
                   const isCookedApple = itemId === 'cookedApple';
                   const isEquippable = data.equipSlot === 'hand';
@@ -85,8 +85,8 @@ export default function InventoryPanel() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-lg font-semibold text-primary">{inventory[itemId as keyof typeof inventory]}</span>
-                        {isFood && (
-                            <Button size="icon" variant="outline" onClick={handleEat} disabled={isDead || inventory.food === 0 || isBusy} aria-label="Eat food">
+                        {isApple && (
+                            <Button size="icon" variant="outline" onClick={handleEat} disabled={isDead || inventory.apple === 0 || isBusy} aria-label="Eat apple">
                                 <Apple className="h-4 w-4" />
                             </Button>
                         )}
