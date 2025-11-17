@@ -49,7 +49,7 @@ export default function GameUI() {
   }
 
   const isGameOver = gameState.playerStats.health <= 0;
-  const isBusy = gameState.isResting || gameState.isSmelting;
+  const isBusy = gameState.isResting || gameState.smeltingQueue > 0;
 
   const showFurnace = gameState.builtStructures.includes('furnace');
   const showMarket = gameState.builtStructures.includes('workbench');

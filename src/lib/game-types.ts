@@ -73,7 +73,7 @@ export interface GameState {
   isInitialized: boolean;
   gameTick: number;
   isResting: boolean;
-  isSmelting: boolean;
+  smeltingQueue: number;
 }
 
 export type GameAction =
@@ -95,7 +95,7 @@ export type GameAction =
   | { type: 'EAT_COOKED_APPLE' }
   | { type: 'START_RESTING' }
   | { type: 'FINISH_RESTING' }
-  | { type: 'START_SMELTING' }
-  | { type: 'FINISH_SMELTING'; payload: { components: number } }
+  | { type: 'START_SMELTING'; payload: { amount: number } }
+  | { type: 'FINISH_SMELTING' }
   | { type: 'EQUIP'; payload: { item: Item, slot: EquipmentSlot } }
   | { type: 'UNEQUIP'; payload: { slot: EquipmentSlot } };

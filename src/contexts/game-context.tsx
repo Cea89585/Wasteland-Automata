@@ -43,7 +43,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let newInventory = { ...state.inventory };
       const logMessages: LogMessage[] = [];
       
-      if (state.isResting || state.isSmelting || newStats.health <= 0) return state;
+      if (state.isResting || state.smeltingQueue > 0 || newStats.health <= 0) return state;
       
       // Passive systems
       if(state.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP) {
@@ -447,20 +447,48 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'FINISH_RESTING':
         return { ...state, isResting: false };
     
-    case 'START_SMELTING':
-        return { ...state, isSmelting: true };
+    case 'START_SMELTING': {
+      const { amount } = action.payload;
+      const newInventory = { ...state.inventory };
+      const totalScrapNeeded = 10 * amount;
+      const totalWoodNeeded = 4 * amount;
+
+      if (newInventory.scrap < totalScrapNeeded || newInventory.wood < totalWoodNeeded) {
+        return {
+          ...state,
+          log: [...state.log, { id: generateUniqueLogId(), text: "Not enough resources to start smelting.", type: 'danger', timestamp: Date.now() }],
+        };
+      }
+      
+      newInventory.scrap -= totalScrapNeeded;
+      newInventory.wood -= totalWoodNeeded;
+
+      return { 
+        ...state, 
+        inventory: newInventory,
+        smeltingQueue: state.smeltingQueue + amount,
+        log: [...state.log, { id: generateUniqueLogId(), text: `The furnace roars to life... Queued ${amount} batch(es).`, type: 'info', timestamp: Date.now() }],
+      };
+    }
 
     case 'FINISH_SMELTING': {
+        if (state.smeltingQueue <= 0) return state;
+
         const newInventory = { ...state.inventory };
-        newInventory.components = Math.min(INVENTORY_CAP, newInventory.components + action.payload.components);
-        newInventory.scrap -= 10;
-        newInventory.wood -= 4;
+        newInventory.components = Math.min(INVENTORY_CAP, newInventory.components + 1);
+
+        const newSmeltingQueue = state.smeltingQueue - 1;
+        
+        let logMessage = "The furnace cools. You retrieve 1 Component.";
+        if (newSmeltingQueue === 0) {
+          logMessage += " The queue is empty.";
+        }
 
         return {
             ...state,
             inventory: newInventory,
-            isSmelting: false,
-            log: [...state.log, { id: generateUniqueLogId(), text: `The furnace cools. You retrieve ${action.payload.components} Component(s).`, type: 'craft', timestamp: Date.now() }],
+            smeltingQueue: newSmeltingQueue,
+            log: [...state.log, { id: generateUniqueLogId(), text: logMessage, type: 'craft', timestamp: Date.now() }],
         };
     }
 
@@ -485,7 +513,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         // Ensure new properties exist on old save files
         const migratedState = { ...initialState, ...loadedState };
         migratedState.isResting = false; // Never load into a resting state
-        migratedState.isSmelting = false; // Never load into a smelting state
+        migratedState.smeltingQueue = 0; // Never load into a smelting state
         if (!migratedState.builtStructures) { // migration for old saves
           migratedState.builtStructures = [];
           if (migratedState.inventory.workbench > 0) {
