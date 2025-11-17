@@ -80,6 +80,7 @@ export type GameAction =
   | { type: 'CRAFT'; payload: { recipeId: string } }
   | { type: 'BUILD_STRUCTURE'; payload: { recipeId: string } }
   | { type: 'CONSUME'; payload: { stat: keyof PlayerStats, resource?: Resource, amount: number } }
+  | { type: 'PENALTY'; payload: { stat: keyof PlayerStats; percentage: number } }
   | { type: 'REGEN_ENERGY'; payload: { amount: number } }
   | { type: 'EAT' }
   | { type: 'DRINK' }

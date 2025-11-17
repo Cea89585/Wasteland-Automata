@@ -18,7 +18,10 @@ export async function getFactionEncounter(
     // Return a fallback encounter on error
     return {
       faction: 'Unknown',
-      description: 'A chill runs down your spine as you scan the horizon, but you see nothing out of the ordinary. The feeling of being watched lingers.'
+      description: 'A chill runs down your spine as you scan the horizon, but you see nothing out of the ordinary. The feeling of being watched lingers.',
+      outcome: {
+        type: 'neutral'
+      }
     };
   }
 }

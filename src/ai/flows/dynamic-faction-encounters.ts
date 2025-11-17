@@ -22,6 +22,17 @@ export type FactionEncounterInput = z.infer<typeof FactionEncounterInputSchema>;
 const FactionEncounterOutputSchema = z.object({
   faction: z.string().describe('The faction encountered.'),
   description: z.string().describe('A description of the encounter.'),
+  outcome: z.object({
+    type: z.enum(['positive', 'negative', 'neutral']).describe("The type of outcome for the player: 'positive', 'negative', or 'neutral'."),
+    reward: z.object({
+        item: z.enum(['components', 'banana', 'peach', 'water']).optional().describe("The item rewarded to the player, if any."),
+        quantity: z.number().optional().describe("The quantity of the item rewarded."),
+      }).optional().describe("The reward for a positive outcome."),
+    penalty: z.object({
+        stat: z.enum(['health', 'hunger', 'thirst']).optional().describe("The player stat that is penalized, if any."),
+        amount: z.number().optional().describe("The percentage to reduce the stat by (e.g., 15 for 15%)."),
+      }).optional().describe("The penalty for a negative outcome."),
+  }).describe("The result of the encounter for the player."),
 });
 export type FactionEncounterOutput = z.infer<typeof FactionEncounterOutputSchema>;
 
@@ -39,8 +50,15 @@ const factionEncounterPrompt = ai.definePrompt({
   The environment is described as: {{{environment}}}
   The possible factions in this area are: {{#each factions}}{{{this}}}{{#unless @last}}, {{/unless}}{{/each}}
 
-  Generate a short description of an encounter with one of these factions. Include which faction was encountered.  The description should describe the scene, the faction's demeanor, and the immediate implications for the player.
-  Do not offer choices to the player or suggest any follow-up actions. Just describe the scene.
+  Generate a short description of an encounter with one of these factions. Include which faction was encountered.
+  
+  The encounter should have a 50/50 chance of being 'positive' or 'negative' for the player.
+  - If the outcome is 'positive', the player should receive a small reward. Choose one of the following rewards: 1-3 components, 1-3 bananas, or 1-3 peaches. The description should reflect how the player obtained this reward (e.g., a grateful scavenger shared their food, you found a hidden stash). Set the 'outcome.type' to 'positive' and fill in the 'outcome.reward' object.
+  - If the outcome is 'negative', the player should suffer a penalty. Choose one of the following stats to penalize: health, hunger, or thirst. The penalty should be a 15% reduction. The description should reflect why this penalty occurred (e.g., a brief scuffle, a chase that left you exhausted and thirsty). Set the 'outcome.type' to 'negative' and fill in the 'outcome.penalty' object.
+  - If for some reason neither fits, make it 'neutral'.
+  
+  The description must narrate the scene, the faction's demeanor, the action that leads to the outcome, and the immediate result for the player.
+  Do not offer choices to the player or suggest any follow-up actions. Just describe the scene and its direct result.
 `,
 });
 

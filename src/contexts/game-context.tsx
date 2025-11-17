@@ -208,6 +208,15 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         newStats[stat] = Math.max(0, newStats[stat] - amount);
         return {...state, playerStats: newStats, inventory: newInventory };
     }
+    
+    case 'PENALTY': {
+      const { stat, percentage } = action.payload;
+      const newStats = { ...state.playerStats };
+      const currentStatValue = newStats[stat];
+      const reduction = currentStatValue * (percentage / 100);
+      newStats[stat] = Math.max(0, currentStatValue - reduction);
+      return {...state, playerStats: newStats };
+    }
 
     case 'REGEN_ENERGY': {
       const { amount } = action.payload;

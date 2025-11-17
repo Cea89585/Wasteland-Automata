@@ -96,8 +96,24 @@ export default function ExplorationPanel() {
             environment: 'Gloomy and irradiated',
             factions: ['Scavengers', 'Mutants', 'Enclave Remnants'],
           });
-          const encounterText = `Encounter: ${result.description}`;
-          dispatch({ type: 'ADD_LOG', payload: { text: encounterText, type: 'event' } });
+
+          let encounterLogText = `Encounter: ${result.description}`;
+          let logType: 'event' | 'success' | 'danger' = 'event';
+
+          // Process encounter outcome
+          if (result.outcome.type === 'positive' && result.outcome.reward?.item && result.outcome.reward?.quantity) {
+              const { item, quantity } = result.outcome.reward;
+              dispatch({ type: 'GATHER', payload: { resource: item as Resource, amount: quantity } });
+              encounterLogText += ` You received ${quantity} ${itemData[item as Resource].name}.`;
+              logType = 'success';
+          } else if (result.outcome.type === 'negative' && result.outcome.penalty?.stat && result.outcome.penalty?.amount) {
+              const { stat, amount } = result.outcome.penalty;
+              dispatch({ type: 'PENALTY', payload: { stat, percentage: amount } });
+              encounterLogText += ` You lost ${amount}% ${stat}.`;
+              logType = 'danger';
+          }
+
+          dispatch({ type: 'ADD_LOG', payload: { text: encounterLogText, type: logType } });
           setLastEncounter({ title: `Encounter with ${result.faction}`, text: result.description });
         } catch (error) {
           console.error('Failed to generate faction encounter', error);
