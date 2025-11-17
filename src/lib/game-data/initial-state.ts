@@ -60,4 +60,5 @@ export const initialState: GameState = {
   isInitialized: false,
   gameTick: 0,
   isResting: false,
+  isSmelting: false,
 };

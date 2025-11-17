@@ -68,6 +68,7 @@ export interface GameState {
   isInitialized: boolean;
   gameTick: number;
   isResting: boolean;
+  isSmelting: boolean;
 }
 
 export type GameAction =
@@ -77,12 +78,14 @@ export type GameAction =
   | { type: 'GATHER'; payload: { resource: Resource; amount: number } }
   | { type: 'CRAFT'; payload: { recipeId: string } }
   | { type: 'BUILD_STRUCTURE'; payload: { recipeId: string } }
-  | { type: 'CONSUME'; payload: { stat: keyof PlayerStats; amount: number } }
+  | { type: 'CONSUME'; payload: { stat: keyof PlayerStats, resource?: Resource, amount: number } }
   | { type: 'REGEN_ENERGY'; payload: { amount: number } }
   | { type: 'EAT' }
   | { type: 'DRINK' }
   | { type: 'EAT_COOKED_APPLE' }
   | { type: 'START_RESTING' }
   | { type: 'FINISH_RESTING' }
+  | { type: 'START_SMELTING' }
+  | { type: 'FINISH_SMELTING'; payload: { components: number } }
   | { type: 'EQUIP'; payload: { item: Item, slot: EquipmentSlot } }
   | { type: 'UNEQUIP'; payload: { slot: EquipmentSlot } };

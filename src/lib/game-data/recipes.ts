@@ -46,7 +46,7 @@ export const recipes: Recipe[] = [
   {
     id: 'recipe_furnace',
     name: 'Build Furnace',
-    description: 'Smelts scrap into components.',
+    description: 'A structure to smelt scrap into more useful components.',
     creates: 'furnace',
     requirements: { stone: 50, scrap: 10 },
     unlockedBy: ['workbench'],

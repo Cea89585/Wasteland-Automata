@@ -42,7 +42,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let newInventory = { ...state.inventory };
       const logMessages: LogMessage[] = [];
       
-      if (state.isResting || newStats.health <= 0) return state;
+      if (state.isResting || state.isSmelting || newStats.health <= 0) return state;
       
       // Passive systems
       if(state.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP) {
@@ -194,10 +194,19 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
     
     case 'CONSUME': {
-        const { stat, amount } = action.payload;
+        const { stat, amount, resource } = action.payload;
         const newStats = { ...state.playerStats };
+        const newInventory = { ...state.inventory };
+        
+        if (resource && newInventory[resource] > 0) {
+            newInventory[resource] -= 1;
+        } else if (resource) {
+            // Not enough resource to consume, do nothing.
+            return state;
+        }
+
         newStats[stat] = Math.max(0, newStats[stat] - amount);
-        return {...state, playerStats: newStats };
+        return {...state, playerStats: newStats, inventory: newInventory };
     }
 
     case 'REGEN_ENERGY': {
@@ -303,6 +312,23 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'FINISH_RESTING':
         return { ...state, isResting: false };
+    
+    case 'START_SMELTING':
+        return { ...state, isSmelting: true };
+
+    case 'FINISH_SMELTING': {
+        const newInventory = { ...state.inventory };
+        newInventory.components = Math.min(INVENTORY_CAP, newInventory.components + action.payload.components);
+        newInventory.scrap -= 10;
+        newInventory.wood -= 4;
+
+        return {
+            ...state,
+            inventory: newInventory,
+            isSmelting: false,
+            log: [...state.log, { id: generateUniqueLogId(), text: `The furnace cools. You retrieve ${action.payload.components} Component(s).`, type: 'craft', timestamp: Date.now() }],
+        };
+    }
 
     default:
       return state;
@@ -325,6 +351,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         // Ensure new properties exist on old save files
         const migratedState = { ...initialState, ...loadedState };
         migratedState.isResting = false; // Never load into a resting state
+        migratedState.isSmelting = false; // Never load into a smelting state
         if (!migratedState.builtStructures) { // migration for old saves
           migratedState.builtStructures = [];
           if (migratedState.inventory.workbench > 0) {

@@ -10,9 +10,10 @@ import InventoryPanel from './InventoryPanel';
 import CraftingPanel from './CraftingPanel';
 import BasePanel from './BasePanel';
 import TechPanel from './TechPanel';
-import CharacterPanel from './CharacterPanel'; // New Import
+import CharacterPanel from './CharacterPanel';
+import FurnacePanel from './FurnacePanel'; // New Import
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Backpack, Compass, Hammer, Home, BookOpen, User, RotateCcw } from 'lucide-react'; // New: User icon, RotateCcw
+import { Backpack, Compass, Hammer, Home, BookOpen, User, RotateCcw, Power } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +26,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from '../ui/button';
+import { cn } from '@/lib/utils';
 
 export default function GameUI() {
   const { gameState } = useGame();
@@ -34,7 +36,9 @@ export default function GameUI() {
   }
 
   const isGameOver = gameState.playerStats.health <= 0;
-  const isBusy = gameState.isResting;
+  const isBusy = gameState.isResting || gameState.isSmelting;
+
+  const showFurnace = gameState.builtStructures.includes('furnace');
 
   return (
     <div className="flex flex-col gap-4">
@@ -74,12 +78,13 @@ export default function GameUI() {
         </div>
         <div className="lg:col-span-3">
           <Tabs defaultValue="explore" className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className={cn("grid w-full", showFurnace ? "grid-cols-7" : "grid-cols-6")}>
               <TabsTrigger value="explore" disabled={isBusy}><Compass className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Explore</span></TabsTrigger>
               <TabsTrigger value="inventory" disabled={isBusy}><Backpack className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Inventory</span></TabsTrigger>
               <TabsTrigger value="craft" disabled={isBusy}><Hammer className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Craft</span></TabsTrigger>
               <TabsTrigger value="character" disabled={isBusy}><User className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Character</span></TabsTrigger>
               <TabsTrigger value="base" disabled={isBusy}><Home className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Base</span></TabsTrigger>
+              {showFurnace && <TabsTrigger value="furnace" disabled={isBusy}><Power className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Furnace</span></TabsTrigger>}
               <TabsTrigger value="tech" disabled={isBusy}><BookOpen className="h-4 w-4 sm:mr-2" /><span className="hidden sm:inline">Tech</span></TabsTrigger>
             </TabsList>
             <TabsContent value="explore" className="mt-4"><ExplorationPanel /></TabsContent>
@@ -87,6 +92,7 @@ export default function GameUI() {
             <TabsContent value="craft" className="mt-4"><CraftingPanel /></TabsContent>
             <TabsContent value="character" className="mt-4"><CharacterPanel /></TabsContent>
             <TabsContent value="base" className="mt-4"><BasePanel /></TabsContent>
+            {showFurnace && <TabsContent value="furnace" className="mt-4"><FurnacePanel /></TabsContent>}
             <TabsContent value="tech" className="mt-4"><TechPanel /></TabsContent>
           </Tabs>
         </div>

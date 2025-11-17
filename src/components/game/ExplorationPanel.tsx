@@ -146,7 +146,7 @@ export default function ExplorationPanel() {
     dispatch({ type: 'ADD_LOG', payload: { text: "You find a relatively safe spot to rest your eyes for a moment...", type: 'info' } });
   };
   
-  const isBusy = isExploring || isScavenging || gameState.isResting;
+  const isBusy = isExploring || isScavenging || gameState.isResting || gameState.isSmelting;
   
   return (
     <Card>

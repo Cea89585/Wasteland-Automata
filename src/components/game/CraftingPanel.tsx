@@ -18,7 +18,8 @@ export default function CraftingPanel() {
   const availableRecipes = recipes.filter(r => 
     unlockedRecipes.includes(r.id) && 
     r.id !== 'recipe_workbench' &&
-    r.id !== 'recipe_waterPurifier'
+    r.id !== 'recipe_waterPurifier' &&
+    r.id !== 'recipe_furnace'
   );
 
   const canCraft = (recipeId: string) => {
