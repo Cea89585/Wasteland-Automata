@@ -3,11 +3,10 @@
 import { useGame } from '@/hooks/use-game';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { itemData } from '@/lib/game-data/items';
-import { allIcons, resourceIcons } from './GameIcons';
+import { allIcons } from './GameIcons';
 import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
 import { Apple, GlassWater } from 'lucide-react';
-import type { Resource } from '@/lib/game-types';
 
 export default function InventoryPanel() {
   const { gameState, dispatch } = useGame();
@@ -15,7 +14,19 @@ export default function InventoryPanel() {
 
   const ownedItems = Object.entries(inventory)
     .filter(([, quantity]) => quantity > 0)
-    .map(([id]) => id);
+    .map(([id]) => id)
+    .sort((a, b) => {
+      if (a === 'food' || a === 'water') {
+        if (b === 'food' || b === 'water') {
+          return a.localeCompare(b); // sort food and water alphabetically
+        }
+        return -1; // a is food/water, b is not, so a comes first
+      }
+      if (b === 'food' || b === 'water') {
+        return 1; // b is food/water, a is not, so b comes first
+      }
+      return a.localeCompare(b); // neither are food/water, sort alphabetically
+    });
 
   const isDead = gameState.playerStats.health <= 0;
 
