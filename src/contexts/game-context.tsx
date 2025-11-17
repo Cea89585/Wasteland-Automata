@@ -9,23 +9,24 @@ import { recipes } from '@/lib/game-data/recipes';
 const SAVE_KEY = 'wastelandAutomata_save';
 
 let logIdCounter = 0;
-const generateUniqueLogId = () => {
-  // Combine timestamp with a counter to guarantee uniqueness even in rapid succession
-  return Date.now() + logIdCounter++;
-};
 
 const reducer = (state: GameState, action: GameAction): GameState => {
+  const generateUniqueLogId = () => {
+    return logIdCounter++;
+  };
+
   switch (action.type) {
-    case 'INITIALIZE':
-      if (action.payload.log.length > 0) {
+    case 'INITIALIZE': {
+      const loadedState = action.payload;
+      if (loadedState.log && loadedState.log.length > 0) {
         // Set the counter to be higher than any existing ID to avoid future collisions after loading.
-        const maxId = Math.max(...action.payload.log.map(l => l.id));
-        logIdCounter = maxId + 1;
+        const maxId = Math.max(...loadedState.log.map(l => l.id));
+        logIdCounter = isFinite(maxId) ? maxId + 1 : 1;
       } else {
-        // Initialize with a starting value based on current time if no log exists
-        logIdCounter = Date.now();
+        logIdCounter = 1;
       }
-      return { ...action.payload, isInitialized: true };
+      return { ...loadedState, isInitialized: true };
+    }
 
     case 'GAME_TICK': {
       const newStats = { ...state.playerStats };
