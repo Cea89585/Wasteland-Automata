@@ -8,13 +8,20 @@ import { recipes } from '@/lib/game-data/recipes';
 
 const SAVE_KEY = 'wastelandAutomata_save';
 
+let logIdCounter = 0;
 const generateUniqueLogId = () => {
-  return Date.now() + Math.random();
+  return Date.now() + (logIdCounter++);
 };
 
 const reducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
     case 'INITIALIZE':
+      // When loading a saved game, we need to reset the logIdCounter to prevent potential collisions
+      // if the app is reloaded and new messages are generated with IDs that were already used in the saved log.
+      if (action.payload.log.length > 0) {
+        const maxId = Math.max(...action.payload.log.map(l => l.id), 0);
+        logIdCounter = maxId > Date.now() ? maxId - Date.now() + 1 : 1;
+      }
       return { ...action.payload, isInitialized: true };
 
     case 'GAME_TICK': {
