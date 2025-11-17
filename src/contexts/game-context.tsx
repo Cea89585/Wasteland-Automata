@@ -18,10 +18,16 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     return Date.now() + logIdCounter++;
   };
 
-  const addResource = (inventory: GameState['inventory'], resource: Resource, amount: number) => {
+  const addResource = (inventory: GameState['inventory'], statistics: GameState['statistics'], resource: Resource | Item, amount: number) => {
     const newInventory = { ...inventory };
     newInventory[resource] = Math.min(INVENTORY_CAP, newInventory[resource] + amount);
-    return newInventory;
+    
+    const newStatistics = { ...statistics };
+    const newTotalItemsGained = { ...newStatistics.totalItemsGained };
+    newTotalItemsGained[resource] = (newTotalItemsGained[resource] || 0) + amount;
+    newStatistics.totalItemsGained = newTotalItemsGained;
+
+    return { newInventory, newStatistics };
   };
 
   switch (action.type) {
@@ -93,11 +99,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let newInventory = { ...state.inventory };
       let newStats = { ...state.playerStats };
       let newEquipment = { ...state.equipment };
+      let { newStatistics } = addResource(state.inventory, state.statistics, 'wood', 0); // Just to get the object
       let logText = encounter.message;
     
       if (encounter.type === 'positive' && encounter.reward) {
         const { item, amount } = encounter.reward;
-        newInventory[item] = Math.min(INVENTORY_CAP, (newInventory[item] || 0) + amount);
+        const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(newInventory, newStatistics, item, amount);
+        newInventory = updatedInventory;
+        newStatistics = updatedStatistics;
         logText += ` You found ${amount} ${itemData[item].name}.`;
       }
     
@@ -135,7 +144,18 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         inventory: newInventory,
         playerStats: newStats,
         equipment: newEquipment,
+        statistics: newStatistics,
         log: [{ id: generateUniqueLogId(), text: logText, type: encounter.type === 'positive' ? 'success' : 'danger', timestamp: Date.now() }, ...state.log],
+      };
+    }
+
+    case 'TRACK_STAT': {
+      const { stat } = action.payload;
+      const newStatistics = { ...state.statistics };
+      newStatistics[stat] = (newStatistics[stat] || 0) + 1;
+      return {
+        ...state,
+        statistics: newStatistics,
       };
     }
 
@@ -156,7 +176,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'GATHER': {
       const { resource, amount } = action.payload;
-      return { ...state, inventory: addResource(state.inventory, resource, amount) };
+      const { newInventory, newStatistics } = addResource(state.inventory, state.statistics, resource, amount);
+      return { ...state, inventory: newInventory, statistics: newStatistics };
     }
 
     case 'BUILD_STRUCTURE': {
@@ -194,12 +215,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       
       const itemDetails = itemData[recipe.creates];
       const logMessageText = `You built a ${itemDetails.name}.\n${itemDetails.description}`;
+      const { newStatistics } = addResource(state.inventory, state.statistics, recipe.creates, 1);
 
       return {
         ...state,
         inventory: newInventory,
         builtStructures: newBuiltStructures,
         unlockedRecipes: newUnlockedRecipes,
+        statistics: newStatistics,
         log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
       };
     }
@@ -208,7 +231,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const recipe = recipes.find((r) => r.id === action.payload.recipeId);
       if (!recipe) return state;
 
-      const newInventory = { ...state.inventory };
+      let newInventory = { ...state.inventory };
       let canCraft = true;
 
       for (const [resource, requiredAmount] of Object.entries(recipe.requirements)) {
@@ -236,7 +259,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         newInventory[resource as keyof typeof newInventory] -= requiredAmount;
       }
       
-      newInventory[recipe.creates] = Math.min(INVENTORY_CAP, newInventory[recipe.creates] + 1);
+      const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, 1);
       
       const newUnlockedRecipes = [...state.unlockedRecipes];
       recipes.forEach(r => {
@@ -250,7 +273,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       
       return {
         ...state,
-        inventory: newInventory,
+        inventory: finalInventory,
+        statistics: newStatistics,
         unlockedRecipes: newUnlockedRecipes,
         log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
       };
@@ -485,8 +509,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'FINISH_SMELTING': {
         if (state.smeltingQueue <= 0) return state;
 
-        const newInventory = { ...state.inventory };
-        newInventory.components = Math.min(INVENTORY_CAP, newInventory.components + 1);
+        let { newInventory, newStatistics } = addResource(state.inventory, state.statistics, 'components', 1);
 
         const newSmeltingQueue = state.smeltingQueue - 1;
         
@@ -498,6 +521,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         return {
             ...state,
             inventory: newInventory,
+            statistics: newStatistics,
             smeltingQueue: newSmeltingQueue,
             log: [{ id: generateUniqueLogId(), text: logMessage, type: 'craft', item: 'components', timestamp: Date.now() }, ...state.log],
         };
@@ -533,6 +557,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
         }
         if (!migratedState.lockedItems) { // migration for locked items
           migratedState.lockedItems = [];
+        }
+        if (!migratedState.statistics) { // migration for statistics
+          migratedState.statistics = initialState.statistics;
         }
         dispatch({ type: 'INITIALIZE', payload: migratedState });
       } else {

@@ -40,6 +40,12 @@ export interface PlayerStats {
   energy: number;
 }
 
+export type Statistics = {
+    timesExplored: number;
+    timesScavenged: number;
+    totalItemsGained: Partial<Record<Resource | Item, number>>;
+}
+
 export type LogMessage = {
   id: number;
   text: string;
@@ -65,6 +71,7 @@ export interface GameState {
   playerStats: PlayerStats;
   inventory: Inventory;
   equipment: Equipment;
+  statistics: Statistics;
   log: LogMessage[];
   currentLocation: LocationId;
   unlockedRecipes: string[];
@@ -80,6 +87,7 @@ export interface GameState {
 export type GameAction =
   | { type: 'INITIALIZE'; payload: GameState }
   | { type: 'GAME_TICK' }
+  | { type: 'TRACK_STAT'; payload: { stat: keyof Pick<Statistics, 'timesExplored' | 'timesScavenged'> } }
   | { type: 'ADD_LOG'; payload: { text: string; type: LogMessage['type'], item?: Resource | Item } }
   | { type: 'CLEAR_LOG' }
   | { type: 'TRIGGER_ENCOUNTER'; payload: FixedEncounter }

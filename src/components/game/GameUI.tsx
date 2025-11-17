@@ -1,6 +1,7 @@
 // src/components/game/GameUI.tsx
 'use client';
 
+import Link from 'next/link';
 import { useGame } from '@/hooks/use-game';
 import { useBreakpoint } from '@/hooks/use-breakpoint';
 import LoadingScreen from './LoadingScreen';
@@ -16,20 +17,17 @@ import CharacterPanel from './CharacterPanel';
 import FurnacePanel from './FurnacePanel';
 import MarketPanel from './MarketPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Backpack, Compass, Hammer, Home, BookOpen, User, RotateCcw, Power, AlertTriangle, Coins } from 'lucide-react';
+import { Backpack, Compass, Hammer, Home, BookOpen, User, Power, AlertTriangle, Coins, Settings } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '../ui/button';
 import {
   Select,
   SelectContent,
@@ -40,7 +38,7 @@ import {
 import { useState } from 'react';
 
 export default function GameUI() {
-  const { gameState, dispatch } = useGame();
+  const { gameState } = useGame();
   const isMobile = useBreakpoint('sm');
   const [activeTab, setActiveTab] = useState('explore');
 
@@ -76,27 +74,12 @@ export default function GameUI() {
             <h1 className="text-xl sm:text-2xl font-bold font-headline text-primary">
             Wasteland Automata
             </h1>
-             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" className="w-fit">
-                    <RotateCcw className="mr-2 h-4 w-4" /> Reset Game
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will permanently delete all your game progress. This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => { localStorage.clear(); window.location.reload(); }}>
-                    Yes, delete my save
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <Link href="/settings">
+                <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 bg-secondary text-secondary-foreground hover:bg-secondary/80 w-fit">
+                    <Settings className="h-4 w-4" />
+                    Settings
+                </div>
+            </Link>
         </div>
         <div className="flex flex-col gap-4 w-full sm:w-auto">
             <Alert variant="destructive" className="border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive">

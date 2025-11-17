@@ -42,6 +42,16 @@ export const initialState: GameState = {
     hand: null,
     body: null,
   },
+  statistics: {
+    timesExplored: 0,
+    timesScavenged: 0,
+    totalItemsGained: {
+      ...emptyInventory,
+      apple: 5,
+      water: 5,
+      silver: 20,
+    },
+  },
   log: [
     {
       id: 1,

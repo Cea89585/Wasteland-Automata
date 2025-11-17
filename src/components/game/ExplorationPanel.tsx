@@ -64,6 +64,7 @@ export default function ExplorationPanel() {
     }
 
     setIsExploring(true);
+    dispatch({ type: 'TRACK_STAT', payload: { stat: 'timesExplored' } });
     dispatch({ type: 'CONSUME', payload: { stat: 'energy', amount: 10 } });
 
     setTimeout(() => {
@@ -124,6 +125,7 @@ export default function ExplorationPanel() {
     }
 
     setIsScavenging(true);
+    dispatch({ type: 'TRACK_STAT', payload: { stat: 'timesScavenged' } });
     dispatch({ type: 'CONSUME', payload: { stat: 'energy', amount: 5 } });
 
     setTimeout(() => {

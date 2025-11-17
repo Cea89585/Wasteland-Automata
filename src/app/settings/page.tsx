@@ -1,10 +1,10 @@
-// src/app/page.tsx
+// src/app/settings/page.tsx
 'use client';
 
 import { GameProvider } from '@/contexts/game-context';
-import GameUI from '@/components/game/GameUI';
+import SettingsPage from '@/components/game/SettingsPage';
 
-export default function Home() {
+export default function Settings() {
   return (
     <GameProvider>
       <main className="relative min-h-screen w-full overflow-x-hidden">
@@ -15,7 +15,7 @@ export default function Home() {
           }}
         />
         <div className="container mx-auto p-2 sm:p-4">
-          <GameUI />
+          <SettingsPage />
         </div>
       </main>
     </GameProvider>
