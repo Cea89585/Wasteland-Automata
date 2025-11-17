@@ -1,3 +1,4 @@
+
 // src/ai/flows/dynamic-faction-encounters.ts
 'use server';
 
@@ -44,6 +45,7 @@ const factionEncounterPrompt = ai.definePrompt({
   name: 'factionEncounterPrompt',
   input: {schema: FactionEncounterInputSchema},
   output: {schema: FactionEncounterOutputSchema},
+  model: ai.model, // Use the model from the global AI config
   prompt: `You are creating a dynamic encounter for a player in a post-apocalyptic game.
 
   The player is currently in the following location: {{{location}}}
