@@ -150,7 +150,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'CLEAR_LOG': {
       return {
         ...state,
-        log: initialState.log,
+        log: [],
       }
     }
 
@@ -193,9 +193,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       });
       
       const itemName = itemData[recipe.creates].name;
-      const logMessageText = recipe.id === 'recipe_waterPurifier' 
-        ? `You built a ${itemName}. It will passively generate water.`
-        : `You built a ${itemName}.`;
+      const logMessageText = `You built a ${itemName}.`;
 
       return {
         ...state,
