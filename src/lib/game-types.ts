@@ -69,6 +69,7 @@ export interface GameState {
   unlockedRecipes: string[];
   builtStructures: string[];
   unlockedTech: TechId[];
+  lockedItems: Resource[];
   isInitialized: boolean;
   gameTick: number;
   isResting: boolean;
@@ -84,6 +85,8 @@ export type GameAction =
   | { type: 'CRAFT'; payload: { recipeId: string } }
   | { type: 'BUILD_STRUCTURE'; payload: { recipeId: string } }
   | { type: 'SELL_ITEM'; payload: { item: Resource, amount: number, price: number } }
+  | { type: 'SELL_ALL_UNLOCKED' }
+  | { type: 'TOGGLE_LOCK_ITEM'; payload: { item: Resource } }
   | { type: 'CONSUME'; payload: { stat: keyof PlayerStats, resource?: Resource, amount: number } }
   | { type: 'PENALTY'; payload: { stat: keyof PlayerStats; percentage: number } }
   | { type: 'REGEN_ENERGY'; payload: { amount: number } }

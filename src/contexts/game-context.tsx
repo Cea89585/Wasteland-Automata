@@ -249,6 +249,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const { item, amount, price } = action.payload;
       const newInventory = { ...state.inventory };
 
+      if (state.lockedItems.includes(item)) {
+        return {
+          ...state,
+          log: [...state.log, { id: generateUniqueLogId(), text: `${itemData[item].name} is locked and cannot be sold.`, type: 'danger', timestamp: Date.now() }],
+        }
+      }
+
       if (newInventory[item] < amount) {
         return {
           ...state,
@@ -264,6 +271,51 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         inventory: newInventory,
         log: [...state.log, { id: generateUniqueLogId(), text: `Sold ${amount} ${itemData[item].name} for ${amount * price} silver.`, type: 'success', timestamp: Date.now() }],
       }
+    }
+
+    case 'SELL_ALL_UNLOCKED': {
+      const newInventory = { ...state.inventory };
+      let totalSilverGained = 0;
+      let itemsSold = 0;
+
+      for (const item of Object.keys(newInventory) as (Resource[])) {
+        const itemInfo = itemData[item];
+        const quantity = newInventory[item];
+        if (quantity > 0 && itemInfo?.sellPrice && !state.lockedItems.includes(item)) {
+          const silverGained = quantity * itemInfo.sellPrice;
+          totalSilverGained += silverGained;
+          newInventory[item] = 0;
+          itemsSold++;
+        }
+      }
+
+      if (itemsSold === 0) {
+        return {
+            ...state,
+            log: [...state.log, { id: generateUniqueLogId(), text: `No unlocked items to sell.`, type: 'info', timestamp: Date.now() }],
+        }
+      }
+
+      newInventory.silver += totalSilverGained;
+
+      return {
+        ...state,
+        inventory: newInventory,
+        log: [...state.log, { id: generateUniqueLogId(), text: `Sold all unlocked goods for ${totalSilverGained} silver.`, type: 'success', timestamp: Date.now() }],
+      };
+    }
+    
+    case 'TOGGLE_LOCK_ITEM': {
+      const { item } = action.payload;
+      const newLockedItems = [...state.lockedItems];
+      const itemIndex = newLockedItems.indexOf(item);
+
+      if (itemIndex > -1) {
+        newLockedItems.splice(itemIndex, 1); // Unlock
+      } else {
+        newLockedItems.push(item); // Lock
+      }
+      return { ...state, lockedItems: newLockedItems };
     }
     
     case 'CONSUME': {
@@ -439,6 +491,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
           if (migratedState.inventory.workbench > 0) {
             migratedState.builtStructures.push('workbench');
           }
+        }
+        if (!migratedState.lockedItems) { // migration for locked items
+          migratedState.lockedItems = [];
         }
         dispatch({ type: 'INITIALIZE', payload: migratedState });
       } else {

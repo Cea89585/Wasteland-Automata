@@ -60,6 +60,7 @@ export const initialState: GameState = {
   unlockedRecipes: ['recipe_stoneAxe'],
   builtStructures: [],
   unlockedTech: [],
+  lockedItems: [],
   isInitialized: false,
   gameTick: 0,
   isResting: false,
