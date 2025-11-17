@@ -102,6 +102,37 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         return {...state, playerStats: newStats };
     }
 
+    case 'EAT': {
+      if (state.inventory.food <= 0) return state;
+
+      const newInventory = { ...state.inventory, food: state.inventory.food - 1 };
+      const newStats = { ...state.playerStats };
+      newStats.hunger = Math.min(100, newStats.hunger + 40);
+      newStats.health = Math.min(100, newStats.health + 5);
+
+      return {
+        ...state,
+        inventory: newInventory,
+        playerStats: newStats,
+        log: [...state.log, { id: Date.now(), text: "You eat some food, restoring some health and hunger.", type: 'success', timestamp: Date.now() }],
+      };
+    }
+
+    case 'DRINK': {
+      if (state.inventory.water <= 0) return state;
+
+      const newInventory = { ...state.inventory, water: state.inventory.water - 1 };
+      const newStats = { ...state.playerStats };
+      newStats.thirst = Math.min(100, newStats.thirst + 40);
+
+      return {
+        ...state,
+        inventory: newInventory,
+        playerStats: newStats,
+        log: [...state.log, { id: Date.now(), text: "You drink some water, quenching your thirst.", type: 'success', timestamp: Date.now() }],
+      };
+    }
+
     default:
       return state;
   }
