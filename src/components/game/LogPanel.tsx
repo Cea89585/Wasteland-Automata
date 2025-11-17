@@ -15,6 +15,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Button } from '../ui/button';
+import { allIcons } from './GameIcons';
 
 
 const logTypeIcons = {
@@ -33,9 +34,16 @@ const logTypeColors = {
   craft: 'text-accent-foreground',
 }
 
-const LogEntry = ({ message }: { message: ReturnType<typeof useGame>['gameState']['log'][0] }) => (
+const LogEntry = ({ message }: { message: ReturnType<typeof useGame>['gameState']['log'][0] }) => {
+    let icon = logTypeIcons[message.type];
+
+    if (message.type === 'craft' && message.item) {
+        icon = allIcons[message.item] || logTypeIcons.craft;
+    }
+  
+  return (
   <div className="flex items-start gap-3 text-sm animate-in fade-in-0 duration-500">
-    <div className="pt-0.5">{logTypeIcons[message.type]}</div>
+    <div className="pt-0.5">{icon}</div>
     <div className="flex-1">
       <p className={cn(logTypeColors[message.type])}>{message.text}</p>
       <div className="text-xs text-muted-foreground/50 flex items-center pt-1">
@@ -44,7 +52,7 @@ const LogEntry = ({ message }: { message: ReturnType<typeof useGame>['gameState'
       </div>
     </div>
   </div>
-);
+)};
 
 export default function LogPanel() {
   const { gameState: { log } } = useGame();
@@ -87,7 +95,7 @@ export default function LogPanel() {
       <CardContent className="flex-grow overflow-hidden h-[300px]">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
           <div className="flex flex-col gap-3 pr-4">
-            {log.slice(-15).reverse().map((message) => (
+            {log.slice().reverse().map((message) => (
               <LogEntry key={message.id} message={message} />
             ))}
           </div>

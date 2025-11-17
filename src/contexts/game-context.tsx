@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useReducer, useEffect, type ReactNode } from 'react';
-import type { GameState, GameAction, LogMessage, Resource } from '@/lib/game-types';
+import type { GameState, GameAction, LogMessage, Resource, Item } from '@/lib/game-types';
 import { initialState } from '@/lib/game-data/initial-state';
 import { recipes } from '@/lib/game-data/recipes';
 import { itemData } from '@/lib/game-data/items';
@@ -139,11 +139,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       };
     }
 
-    case 'ADD_LOG':
+    case 'ADD_LOG': {
+      const { item, ...rest } = action.payload;
       return {
         ...state,
-        log: [...state.log, { ...action.payload, id: generateUniqueLogId(), timestamp: Date.now() }],
+        log: [...state.log, { ...rest, item, id: generateUniqueLogId(), timestamp: Date.now() }],
       };
+    }
 
     case 'GATHER': {
       const { resource, amount } = action.payload;
@@ -183,16 +185,17 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         }
       });
       
+      const itemName = itemData[recipe.creates].name;
       const logMessageText = recipe.id === 'recipe_waterPurifier' 
-        ? `You built a Water Purifier. It will passively generate water.`
-        : `You built a ${recipe.name}.`;
+        ? `You built a ${itemName}. It will passively generate water.`
+        : `You built a ${itemName}.`;
 
       return {
         ...state,
         inventory: newInventory,
         builtStructures: newBuiltStructures,
         unlockedRecipes: newUnlockedRecipes,
-        log: [...state.log, { id: generateUniqueLogId(), text: logMessageText, type: 'craft', timestamp: Date.now() }],
+        log: [...state.log, { id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }],
       };
     }
 
@@ -220,7 +223,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if(newInventory[recipe.creates] >= INVENTORY_CAP) {
         return {
           ...state,
-          log: [...state.log, { id: generateUniqueLogId(), text: `You can't carry any more ${recipe.name}.`, type: 'danger', timestamp: Date.now() }],
+          log: [...state.log, { id: generateUniqueLogId(), text: `You can't carry any more ${itemData[recipe.creates].name}.`, type: 'danger', timestamp: Date.now() }],
         };
       }
       
@@ -241,7 +244,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         ...state,
         inventory: newInventory,
         unlockedRecipes: newUnlockedRecipes,
-        log: [...state.log, { id: generateUniqueLogId(), text: `Crafted ${recipe.name}.`, type: 'craft', timestamp: Date.now() }],
+        log: [...state.log, { id: generateUniqueLogId(), text: `Crafted ${itemData[recipe.creates].name}.`, type: 'craft', item: recipe.creates, timestamp: Date.now() }],
       };
     }
 
@@ -488,7 +491,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             ...state,
             inventory: newInventory,
             smeltingQueue: newSmeltingQueue,
-            log: [...state.log, { id: generateUniqueLogId(), text: logMessage, type: 'craft', timestamp: Date.now() }],
+            log: [...state.log, { id: generateUniqueLogId(), text: logMessage, type: 'craft', item: 'components', timestamp: Date.now() }],
         };
     }
 

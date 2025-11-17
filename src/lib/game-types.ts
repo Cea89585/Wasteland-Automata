@@ -45,6 +45,7 @@ export type LogMessage = {
   text: string;
   timestamp: number;
   type: 'info' | 'event' | 'danger' | 'success' | 'craft';
+  item?: Resource | Item;
 };
 
 export type LocationId =
@@ -79,7 +80,7 @@ export interface GameState {
 export type GameAction =
   | { type: 'INITIALIZE'; payload: GameState }
   | { type: 'GAME_TICK' }
-  | { type: 'ADD_LOG'; payload: { text: string; type: LogMessage['type'] } }
+  | { type: 'ADD_LOG'; payload: { text: string; type: LogMessage['type'], item?: Resource | Item } }
   | { type: 'TRIGGER_ENCOUNTER'; payload: FixedEncounter }
   | { type: 'GATHER'; payload: { resource: Resource; amount: number } }
   | { type: 'CRAFT'; payload: { recipeId: string } }
