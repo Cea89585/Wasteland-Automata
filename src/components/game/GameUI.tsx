@@ -73,7 +73,6 @@ export default function GameUI() {
         <div className="flex flex-col gap-4 w-full sm:w-auto">
             <Alert variant="destructive" className="border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertTitle className="font-semibold">High Stakes</AlertTitle>
                 <AlertDescription>
                     If your health reaches 0%, you will die and your progress will be reset.
                 </AlertDescription>
