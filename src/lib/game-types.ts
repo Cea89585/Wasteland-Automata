@@ -16,6 +16,7 @@ export type Resource = keyof typeof Resources;
 
 export const Items = {
   stoneAxe: 'Stone Axe',
+  metalDetector: 'Metal Detector',
   workbench: 'Workbench',
   waterPurifier: 'Water Purifier',
   furnace: 'Furnace',

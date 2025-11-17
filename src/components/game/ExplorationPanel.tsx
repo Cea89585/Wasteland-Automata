@@ -21,6 +21,7 @@ export default function ExplorationPanel() {
   const [lastEncounter, setLastEncounter] = useState<{title: string, text: string} | null>(null);
 
   const currentLocation = locations[gameState.currentLocation];
+  const { equipment } = gameState;
 
   const finishResting = useCallback(() => {
     dispatch({ type: 'FINISH_RESTING' });
@@ -64,7 +65,16 @@ export default function ExplorationPanel() {
     setTimeout(async () => {
       currentLocation.resources.forEach((res) => {
         if (Math.random() < res.chance) {
-          const amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
+          let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
+          
+          // Apply bonuses from equipped items
+          if (res.resource === 'wood' && equipment.hand === 'stoneAxe') {
+            amount = Math.ceil(amount * 1.10); // 10% bonus
+          }
+          if (res.resource === 'scrap' && equipment.hand === 'metalDetector') {
+            amount = Math.ceil(amount * 1.20); // 20% bonus
+          }
+
           dispatch({ type: 'GATHER', payload: { resource: res.resource, amount } });
           foundText += ` You found ${amount} ${itemData[res.resource].name}.`;
           foundSomething = true;

@@ -15,7 +15,8 @@ export const itemData: Record<Resource | Item, { name: string; description: stri
   peach: { name: Resources.peach, description: 'A fuzzy, sweet fruit.' },
 
   // Crafted Items
-  stoneAxe: { name: Items.stoneAxe, description: 'A simple axe for chopping wood more efficiently.', equipSlot: 'hand' },
+  stoneAxe: { name: Items.stoneAxe, description: 'A simple axe. Increases wood gathering by 10%.', equipSlot: 'hand' },
+  metalDetector: { name: Items.metalDetector, description: 'A device that helps find metal. Increases scrap finding by 20%.', equipSlot: 'hand' },
   workbench: { name: Items.workbench, description: 'Unlocks more complex crafting recipes.' },
   waterPurifier: { name: Items.waterPurifier, description: 'A device to turn contaminated water into a drinkable resource.' },
   furnace: { name: Items.furnace, description: 'Used to smelt ores and scrap metal into ingots.' },

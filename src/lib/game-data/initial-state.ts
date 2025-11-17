@@ -13,6 +13,7 @@ const emptyInventory = {
   banana: 0,
   peach: 0,
   stoneAxe: 0,
+  metalDetector: 0,
   workbench: 0,
   waterPurifier: 0,
   furnace: 0,

@@ -25,6 +25,7 @@ import {
   Banana,
   Citrus, // Changed from Lemon
   Grape, // Changed from Beef
+  Signal,
 } from 'lucide-react';
 import type { Resource, Item } from '@/lib/game-types';
 
@@ -49,6 +50,7 @@ export const resourceIcons: Record<Resource, React.ReactElement<LucideProps>> = 
 
 export const itemIcons: Record<Item, React.ReactElement<LucideProps>> = {
   stoneAxe: <Hammer {...iconProps} />,
+  metalDetector: <Signal {...iconProps} />,
   workbench: <Factory {...iconProps} />,
   waterPurifier: <Droplets {...iconProps} />,
   furnace: <Power {...iconProps} />,

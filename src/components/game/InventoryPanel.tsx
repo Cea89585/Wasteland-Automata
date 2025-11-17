@@ -52,7 +52,10 @@ export default function InventoryPanel() {
   }
 
   const handleEquip = (itemId: Item) => {
-    dispatch({ type: 'EQUIP', payload: { item: itemId, slot: 'hand' } });
+    const itemDetails = itemData[itemId];
+    if (itemDetails && itemDetails.equipSlot) {
+      dispatch({ type: 'EQUIP', payload: { item: itemId, slot: itemDetails.equipSlot } });
+    }
   }
 
   return (

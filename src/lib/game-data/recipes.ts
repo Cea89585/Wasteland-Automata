@@ -20,6 +20,14 @@ export const recipes: Recipe[] = [
     unlockedBy: ['start'],
   },
   {
+    id: 'recipe_metalDetector',
+    name: 'Craft Metal Detector',
+    description: 'A crude device to find scrap metal.',
+    creates: 'metalDetector',
+    requirements: { scrap: 15, components: 5 },
+    unlockedBy: ['workbench'],
+  },
+  {
     id: 'recipe_workbench',
     name: 'Workbench',
     description: 'A station for advanced crafting.',
