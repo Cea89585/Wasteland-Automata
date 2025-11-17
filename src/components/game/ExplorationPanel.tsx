@@ -70,6 +70,7 @@ export default function ExplorationPanel() {
         // Resource finding
         let foundSomething = false;
         let foundText = 'You explore the area...';
+        let foundScrapThisTurn = false;
 
         currentLocation.resources.forEach((res) => {
             if (Math.random() < res.chance) {
@@ -79,8 +80,11 @@ export default function ExplorationPanel() {
             if (res.resource === 'wood' && equipment.hand === 'stoneAxe') {
                 amount = Math.ceil(amount * 1.50); // 50% bonus
             }
-            if (res.resource === 'scrap' && equipment.hand === 'metalDetector') {
-                amount = Math.ceil(amount * 1.20); // 20% bonus
+            if (res.resource === 'scrap') {
+                foundScrapThisTurn = true;
+                if(equipment.hand === 'metalDetector') {
+                    amount = Math.ceil(amount * 1.20); // 20% bonus
+                }
             }
 
             dispatch({ type: 'GATHER', payload: { resource: res.resource, amount } });
@@ -88,6 +92,14 @@ export default function ExplorationPanel() {
             foundSomething = true;
             }
         });
+        
+        // Metal detector guarantees at least 1 scrap if none was found via normal roll
+        if (equipment.hand === 'metalDetector' && !foundScrapThisTurn && currentLocation.resources.some(r => r.resource === 'scrap')) {
+            const amount = 1;
+            dispatch({ type: 'GATHER', payload: { resource: 'scrap', amount } });
+            foundText += ` Your metal detector chirps, leading you to ${amount} ${itemData['scrap'].name}.`;
+            foundSomething = true;
+        }
     
         if (!foundSomething) {
             const flavor = currentLocation.flavorText[Math.floor(Math.random() * currentLocation.flavorText.length)];
