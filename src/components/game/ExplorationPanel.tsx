@@ -110,26 +110,25 @@ export default function ExplorationPanel() {
 
     setTimeout(() => {
         let foundApple = false;
-        let foundWater = false;
-        let scavengeText = "You search nearby ruins for supplies..."
+        let scavengeText = "You search nearby ruins for supplies...";
 
-        // Higher chance for apple/water, but less of other things
+        // Always find water
+        const waterAmount = 1;
+        dispatch({ type: 'GATHER', payload: { resource: 'water', amount: waterAmount } });
+        scavengeText += ` You found ${waterAmount} ${itemData['water'].name}.`;
+
+        // Chance to find an apple
         if (Math.random() < 0.3) {
-            const amount = 1;
-            dispatch({ type: 'GATHER', payload: { resource: 'apple', amount } });
-            scavengeText += ` You found ${amount} ${itemData['apple'].name}.`;
+            const appleAmount = 1;
+            dispatch({ type: 'GATHER', payload: { resource: 'apple', amount: appleAmount } });
+            scavengeText += ` You found ${appleAmount} ${itemData['apple'].name}.`;
             foundApple = true;
         }
 
-        if (Math.random() < 0.2) {
-            const amount = 1;
-            dispatch({ type: 'GATHER', payload: { resource: 'water', amount } });
-            scavengeText += ` You found ${amount} ${itemData['water'].name}.`;
-            foundWater = true;
-        }
-
-        if (!foundApple && !foundWater) {
-            scavengeText += " You found nothing of use."
+        if (!foundApple) {
+             // This part of the message might be redundant if we always find water,
+             // but we can adjust the text to reflect what was found.
+             // For now, let's keep it simple.
         }
 
         dispatch({ type: 'ADD_LOG', payload: { text: scavengeText, type: 'info' } });
