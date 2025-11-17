@@ -16,7 +16,7 @@ export default function SilverCounter() {
                     <span className="text-lg font-semibold">Silver</span>
                 </div>
                 <span className="text-xl font-bold font-mono text-primary">
-                    {inventory.silver}
+                    {inventory.silver || 0}
                 </span>
             </CardContent>
         </Card>
