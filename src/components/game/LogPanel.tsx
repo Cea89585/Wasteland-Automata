@@ -44,7 +44,7 @@ const logTypeColors = {
   event: 'text-foreground',
   danger: 'text-destructive',
   success: 'text-green-400',
-  craft: 'text-accent-foreground',
+  craft: 'text-accent',
 }
 
 const LogEntry = ({ message }: { message: ReturnType<typeof useGame>['gameState']['log'][0] }) => {
@@ -97,9 +97,9 @@ export default function LogPanel() {
             </DialogHeader>
             <ScrollArea className="h-[60vh] mt-4">
               <div className="flex flex-col gap-3 pr-4">
-                {log.slice().reverse().map((message) => (
+                {log.map((message) => (
                   <LogEntry key={message.id} message={message} />
-                ))}
+                )).reverse()}
               </div>
             </ScrollArea>
              <DialogFooter className="mt-4">
