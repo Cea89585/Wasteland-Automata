@@ -115,7 +115,7 @@ export default function SettingsPage() {
             <Card className="border-destructive">
                 <CardHeader>
                     <CardTitle>Danger Zone</CardTitle>
-                    <CardDescription>These actions are permanent and cannot be undone.</CardDescription>
+                    <CardDescription>This action is permanent and cannot be undone.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <AlertDialog>
@@ -126,15 +126,15 @@ export default function SettingsPage() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                This will permanently delete your current game progress, but will keep your statistics. This action cannot be undone.
+                                This will permanently delete ALL data, including your current game progress and all-time statistics. This action cannot be undone.
                             </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction onClick={() => dispatch({ type: 'RESET_GAME' })}>
-                                Yes, delete my save
+                                Yes, delete everything
                             </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>

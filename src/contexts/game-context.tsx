@@ -45,11 +45,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     
     case 'RESET_GAME': {
       localStorage.removeItem(SAVE_KEY);
-      // We are not resetting the statistics here.
-      // We can trigger a reload to re-initialize the game state from scratch,
-      // while the stats will be loaded again from their own storage.
+      localStorage.removeItem(STATS_KEY);
       window.location.reload();
-      return state; // This will be replaced by the reloaded state.
+      return state;
     }
 
     case 'GAME_TICK': {
