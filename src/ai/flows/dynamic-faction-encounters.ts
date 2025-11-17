@@ -54,14 +54,19 @@ const factionEncounterFlow = ai.defineFlow(
     outputSchema: FactionEncounterOutputSchema,
   },
   async input => {
-    // Removing the faulty try/catch block to allow errors to surface properly for debugging.
-    const {output} = await factionEncounterPrompt(input);
-    
-    if (!output) {
-      // This will now cause the action to fail if the AI returns an empty response.
-      throw new Error('AI model returned no output.');
+    try {
+      const {output} = await factionEncounterPrompt(input);
+      if (output) {
+        return output;
+      }
+      throw new Error('AI failed to generate a valid encounter.');
+    } catch(e) {
+       console.error("Error in factionEncounterFlow, returning a fallback neutral encounter:", e);
+       // Return a structured, neutral fallback encounter on any error
+       return {
+          faction: 'Unknown',
+          description: 'A chill runs down your spine as you scan the horizon, but you see nothing out of the ordinary. The feeling of being watched lingers.',
+        };
     }
-    
-    return output;
   }
 );
