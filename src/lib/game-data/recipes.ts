@@ -29,10 +29,10 @@ export const recipes: Recipe[] = [
   },
   {
     id: 'recipe_cookedApple',
-    name: 'Cook Apple',
+    name: 'Cooked Apple',
     description: 'Cook an apple with water to make it more restorative.',
     creates: 'cookedApple',
-    requirements: { food: 1, water: 1 },
+    requirements: { food: 1, water: 3 },
     unlockedBy: ['workbench'],
   },
   {

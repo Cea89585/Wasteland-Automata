@@ -12,16 +12,16 @@ let logIdCounter = 0;
 
 const reducer = (state: GameState, action: GameAction): GameState => {
   const generateUniqueLogId = () => {
-    const newId = Date.now() + logIdCounter;
-    logIdCounter++;
-    return newId;
+    // Combine timestamp with a counter to ensure uniqueness
+    return Date.now() + logIdCounter++;
   };
 
   switch (action.type) {
     case 'INITIALIZE': {
       const loadedState = action.payload;
+      // Reset the counter based on the highest existing ID to prevent future collisions
       if (loadedState.log && loadedState.log.length > 0) {
-        logIdCounter = loadedState.log.reduce((max, l) => Math.max(max, l.id), 0) + 1;
+        logIdCounter = loadedState.log.reduce((max, l) => Math.max(max, l.id), 0) - Date.now() + 1;
       } else {
         logIdCounter = 1;
       }
@@ -30,14 +30,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'GAME_TICK': {
       let newStats = { ...state.playerStats };
-      let hasChanged = false;
-
+      
       if (state.isResting) return state;
       
       // Passive energy regeneration
       if(newStats.energy < 100) {
         newStats.energy = Math.min(100, newStats.energy + 1);
-        hasChanged = true;
       }
 
       newStats.thirst = Math.max(0, newStats.thirst - 1);
@@ -53,7 +51,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             newStats.health = Math.min(100, newStats.health + 0.5);
         }
       }
-
 
       const logMessages: LogMessage[] = [];
       if (state.playerStats.health > 0 && newStats.health <= 0) {
@@ -220,7 +217,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
   
         const newInventory = { ...state.inventory, cookedApple: state.inventory.cookedApple - 1 };
         const newStats = { ...state.playerStats };
-        newStats.energy = Math.min(100, newStats.energy + 50);
+        newStats.energy = Math.min(100, newStats.energy + 20);
         newStats.hunger = Math.min(100, newStats.hunger + 10);
   
         return {
