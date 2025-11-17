@@ -74,13 +74,24 @@ const factionEncounterFlow = ai.defineFlow(
   async input => {
     try {
       const {output} = await factionEncounterPrompt(input);
-      if (output) {
+      // Validate that the output exists and seems plausible
+      if (output && output.faction && output.description && output.outcome) {
+        // Further check for consistency
+        if (output.outcome.type === 'positive' && !output.outcome.reward) {
+           // AI said it was positive but didn't provide a reward. Let's call it neutral.
+           output.outcome.type = 'neutral';
+        }
+        if (output.outcome.type === 'negative' && !output.outcome.penalty) {
+           // AI said it was negative but didn't provide a penalty. Let's call it neutral.
+           output.outcome.type = 'neutral';
+        }
         return output;
       }
-      throw new Error('AI failed to generate a valid encounter.');
+      // If we reach here, the output is invalid.
+      throw new Error('AI failed to generate a valid or complete encounter.');
     } catch(e) {
-       console.error("Error in factionEncounterFlow", e);
-       // Return a fallback neutral encounter on error
+       console.error("Error in factionEncounterFlow, returning a fallback neutral encounter:", e);
+       // Return a structured, neutral fallback encounter on any error
        return {
           faction: 'Unknown',
           description: 'A chill runs down your spine as you scan the horizon, but you see nothing out of the ordinary. The feeling of being watched lingers.',
