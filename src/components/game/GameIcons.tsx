@@ -20,6 +20,7 @@ import {
   Battery,
   Search,
   Zap,
+  Bed,
   type LucideProps,
 } from 'lucide-react';
 import type { Resource, Item } from '@/lib/game-types';

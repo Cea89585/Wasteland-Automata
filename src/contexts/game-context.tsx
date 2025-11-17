@@ -102,6 +102,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         return {...state, playerStats: newStats };
     }
 
+    case 'REGEN_ENERGY': {
+      const { amount } = action.payload;
+      const newStats = { ...state.playerStats };
+      newStats.energy = Math.min(100, newStats.energy + amount);
+      return {...state, playerStats: newStats };
+    }
+
     case 'EAT': {
       if (state.inventory.food <= 0) return state;
 

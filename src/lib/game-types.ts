@@ -69,6 +69,7 @@ export type GameAction =
   | { type: 'GATHER'; payload: { resource: Resource; amount: number } }
   | { type: 'CRAFT'; payload: { recipeId: string } }
   | { type: 'CONSUME'; payload: { stat: keyof PlayerStats; amount: number } }
+  | { type: 'REGEN_ENERGY'; payload: { amount: number } }
   | { type: 'EAT' }
   | { type: 'DRINK' }
   | { type: 'EAT_COOKED_APPLE' };
