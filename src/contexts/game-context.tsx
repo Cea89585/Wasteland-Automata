@@ -86,6 +86,48 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       return { ...state, inventory: newInventory };
     }
 
+    case 'BUILD_STRUCTURE': {
+      const recipe = recipes.find((r) => r.id === action.payload.recipeId);
+      if (!recipe) return state;
+
+      const newInventory = { ...state.inventory };
+      let canBuild = true;
+
+      for (const [resource, requiredAmount] of Object.entries(recipe.requirements)) {
+        if (newInventory[resource as keyof typeof newInventory] < requiredAmount) {
+          canBuild = false;
+          break;
+        }
+      }
+      if (!canBuild) {
+        return {
+          ...state,
+          log: [...state.log, { id: generateUniqueLogId(), text: "Not enough resources to build this.", type: 'danger', timestamp: Date.now() }],
+        };
+      }
+      
+      for (const [resource, requiredAmount] of Object.entries(recipe.requirements)) {
+        newInventory[resource as keyof typeof newInventory] -= requiredAmount;
+      }
+      
+      const newBuiltStructures = [...state.builtStructures, recipe.creates];
+
+      const newUnlockedRecipes = [...state.unlockedRecipes];
+      recipes.forEach(r => {
+        if(r.unlockedBy.includes(recipe.creates) && !newUnlockedRecipes.includes(r.id)) {
+          newUnlockedRecipes.push(r.id);
+        }
+      });
+
+      return {
+        ...state,
+        inventory: newInventory,
+        builtStructures: newBuiltStructures,
+        unlockedRecipes: newUnlockedRecipes,
+        log: [...state.log, { id: generateUniqueLogId(), text: `You built a ${recipe.name}.`, type: 'craft', timestamp: Date.now() }],
+      };
+    }
+
     case 'CRAFT': {
       const recipe = recipes.find((r) => r.id === action.payload.recipeId);
       if (!recipe) return state;
@@ -260,6 +302,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
         // Ensure new properties exist on old save files
         const migratedState = { ...initialState, ...loadedState };
         migratedState.isResting = false; // Never load into a resting state
+        if (!migratedState.builtStructures) { // migration for old saves
+          migratedState.builtStructures = [];
+          if (migratedState.inventory.workbench > 0) {
+            migratedState.builtStructures.push('workbench');
+          }
+        }
         dispatch({ type: 'INITIALIZE', payload: migratedState });
       } else {
         dispatch({ type: 'INITIALIZE', payload: initialState });

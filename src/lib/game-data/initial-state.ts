@@ -51,7 +51,7 @@ export const initialState: GameState = {
     },
   ],
   currentLocation: 'outskirts',
-  unlockedRecipes: ['recipe_stoneAxe', 'recipe_workbench'],
+  unlockedRecipes: ['recipe_stoneAxe'],
   builtStructures: [],
   unlockedTech: [],
   isInitialized: false,

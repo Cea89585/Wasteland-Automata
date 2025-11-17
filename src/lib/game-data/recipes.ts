@@ -21,11 +21,11 @@ export const recipes: Recipe[] = [
   },
   {
     id: 'recipe_workbench',
-    name: 'Build Workbench',
+    name: 'Workbench',
     description: 'A station for advanced crafting.',
     creates: 'workbench',
     requirements: { wood: 20, stone: 10, scrap: 5 },
-    unlockedBy: ['start'],
+    unlockedBy: [], // No longer unlocked at start
   },
   {
     id: 'recipe_cookedApple',

@@ -14,7 +14,8 @@ export default function CraftingPanel() {
   const { gameState, dispatch } = useGame();
   const { inventory, unlockedRecipes } = gameState;
 
-  const availableRecipes = recipes.filter(r => unlockedRecipes.includes(r.id));
+  // Filter out the workbench since it's now built in the Base panel
+  const availableRecipes = recipes.filter(r => unlockedRecipes.includes(r.id) && r.id !== 'recipe_workbench');
 
   const canCraft = (recipeId: string) => {
     const recipe = recipes.find(r => r.id === recipeId);
@@ -36,7 +37,9 @@ export default function CraftingPanel() {
         <CardDescription>Use resources to craft new tools and structures.</CardDescription>
       </CardHeader>
       <CardContent>
-        {availableRecipes.length === 0 ? (
+        {!gameState.builtStructures.includes('workbench') ? (
+          <p className="text-muted-foreground">You need to build a workbench in your base to unlock most crafting recipes.</p>
+        ) : availableRecipes.length === 0 ? (
            <p className="text-muted-foreground">No recipes unlocked. Explore to find more.</p>
         ) : (
           <ScrollArea className="h-[300px]">

@@ -73,6 +73,7 @@ export type GameAction =
   | { type: 'ADD_LOG'; payload: { text: string; type: LogMessage['type'] } }
   | { type: 'GATHER'; payload: { resource: Resource; amount: number } }
   | { type: 'CRAFT'; payload: { recipeId: string } }
+  | { type: 'BUILD_STRUCTURE'; payload: { recipeId: string } }
   | { type: 'CONSUME'; payload: { stat: keyof PlayerStats; amount: number } }
   | { type: 'REGEN_ENERGY'; payload: { amount: number } }
   | { type: 'EAT' }
