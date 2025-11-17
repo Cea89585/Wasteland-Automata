@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef } from 'react';
-import { Info, AlertTriangle, ShieldCheck, Hammer } from 'lucide-react';
+import { Info, AlertTriangle, ShieldCheck, Hammer, Clock } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 const logTypeIcons = {
   info: <Info className="h-4 w-4" />,
@@ -47,7 +48,13 @@ export default function LogPanel() {
             {log.slice().reverse().map((message) => (
               <div key={message.id} className="flex items-start gap-3 text-sm animate-in fade-in-0 duration-500">
                 <div className="pt-0.5">{logTypeIcons[message.type]}</div>
-                <p className={cn("flex-1", logTypeColors[message.type])}>{message.text}</p>
+                <div className="flex-1">
+                  <p className={cn(logTypeColors[message.type])}>{message.text}</p>
+                  <div className="text-xs text-muted-foreground/50 flex items-center pt-1">
+                      <Clock className="h-3 w-3 mr-1" />
+                      {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
