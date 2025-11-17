@@ -60,6 +60,7 @@ export interface GameState {
   unlockedTech: TechId[];
   isInitialized: boolean;
   gameTick: number;
+  isResting: boolean;
 }
 
 export type GameAction =
@@ -72,4 +73,6 @@ export type GameAction =
   | { type: 'REGEN_ENERGY'; payload: { amount: number } }
   | { type: 'EAT' }
   | { type: 'DRINK' }
-  | { type: 'EAT_COOKED_APPLE' };
+  | { type: 'EAT_COOKED_APPLE' }
+  | { type: 'START_RESTING' }
+  | { type: 'FINISH_RESTING' };

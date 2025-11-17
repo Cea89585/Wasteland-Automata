@@ -33,6 +33,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'GAME_TICK': {
+      if (state.isResting) return state;
+
       const newStats = { ...state.playerStats };
       newStats.thirst = Math.max(0, newStats.thirst - 1);
       newStats.hunger = Math.max(0, newStats.hunger - 0.5);
@@ -173,7 +175,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           playerStats: newStats,
           log: [...state.log, { id: generateUniqueLogId(), text: "You eat the cooked apple. You feel a surge of energy.", type: 'success', timestamp: Date.now() }],
         };
-      }
+    }
+
+    case 'START_RESTING':
+        return { ...state, isResting: true };
+
+    case 'FINISH_RESTING':
+        return { ...state, isResting: false };
 
     default:
       return state;

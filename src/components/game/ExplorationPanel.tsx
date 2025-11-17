@@ -17,14 +17,13 @@ export default function ExplorationPanel() {
   const { gameState, dispatch } = useGame();
   const [isExploring, setIsExploring] = useState(false);
   const [isScavenging, setIsScavenging] = useState(false);
-  const [isResting, setIsResting] = useState(false);
   const [restingProgress, setRestingProgress] = useState(0);
   const [lastEncounter, setLastEncounter] = useState<{title: string, text: string} | null>(null);
 
   const currentLocation = locations[gameState.currentLocation];
 
   const finishResting = useCallback(() => {
-    setIsResting(false);
+    dispatch({ type: 'FINISH_RESTING' });
     dispatch({ type: 'REGEN_ENERGY', payload: { amount: 10 } });
     dispatch({ type: 'ADD_LOG', payload: { text: "You feel rested and ready for action.", type: 'success' } });
     setRestingProgress(0);
@@ -32,7 +31,7 @@ export default function ExplorationPanel() {
   
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined;
-    if (isResting) {
+    if (gameState.isResting) {
       interval = setInterval(() => {
         setRestingProgress(prev => prev + (100 / 30));
       }, 1000);
@@ -40,7 +39,7 @@ export default function ExplorationPanel() {
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isResting]);
+  }, [gameState.isResting]);
 
   useEffect(() => {
     if (restingProgress >= 100) {
@@ -143,12 +142,12 @@ export default function ExplorationPanel() {
       dispatch({ type: 'ADD_LOG', payload: { text: "You are already fully rested.", type: 'info' } });
       return;
     }
-    setIsResting(true);
+    dispatch({ type: 'START_RESTING' });
     setRestingProgress(0);
     dispatch({ type: 'ADD_LOG', payload: { text: "You find a relatively safe spot to rest your eyes for a moment...", type: 'info' } });
   };
   
-  const isBusy = isExploring || isScavenging || isResting;
+  const isBusy = isExploring || isScavenging || gameState.isResting;
   
   return (
     <Card>
@@ -175,16 +174,16 @@ export default function ExplorationPanel() {
               {isScavenging ? 'Scavenging...' : 'Scavenge (5 Energy)'}
             </Button>
             <Button variant="outline" onClick={handleRest} disabled={isBusy || gameState.playerStats.health <= 0} className="flex-1">
-              {isResting ? (
+              {gameState.isResting ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 <Bed className="mr-2 h-4 w-4" />
               )}
-              {isResting ? 'Resting...' : 'Rest'}
+              {gameState.isResting ? 'Resting...' : 'Rest'}
             </Button>
         </div>
 
-        {isResting && (
+        {gameState.isResting && (
           <div className="flex flex-col gap-2">
             <p className="text-sm text-muted-foreground text-center">Recovering energy...</p>
             <Progress value={restingProgress} className="w-full" />
@@ -203,7 +202,7 @@ export default function ExplorationPanel() {
             </Card>
         )}
 
-        {lastEncounter && !isExploring && !isResting &&(
+        {lastEncounter && !isExploring && !gameState.isResting &&(
             <Card className="animate-in fade-in-0 duration-500 border-accent">
                 <CardHeader>
                     <CardTitle className="text-accent">{lastEncounter.title}</CardTitle>

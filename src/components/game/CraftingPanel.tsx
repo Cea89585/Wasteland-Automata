@@ -27,6 +27,8 @@ export default function CraftingPanel() {
     return true;
   };
   
+  const isBusy = gameState.isResting;
+
   return (
     <Card>
       <CardHeader>
@@ -59,7 +61,7 @@ export default function CraftingPanel() {
                   </div>
                   <Button 
                     onClick={() => dispatch({ type: 'CRAFT', payload: { recipeId: recipe.id }})} 
-                    disabled={!canCraft(recipe.id) || gameState.playerStats.health <= 0}
+                    disabled={!canCraft(recipe.id) || gameState.playerStats.health <= 0 || isBusy}
                     className="w-full sm:w-auto"
                   >
                     <Hammer className="mr-2 h-4 w-4" />

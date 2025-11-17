@@ -52,4 +52,5 @@ export const initialState: GameState = {
   unlockedTech: [],
   isInitialized: false,
   gameTick: 0,
+  isResting: false,
 };

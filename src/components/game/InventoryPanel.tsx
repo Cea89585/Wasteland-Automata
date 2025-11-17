@@ -30,6 +30,7 @@ export default function InventoryPanel() {
     });
 
   const isDead = gameState.playerStats.health <= 0;
+  const isBusy = gameState.isResting;
 
   const handleEat = () => {
     if (inventory.food > 0) {
@@ -77,17 +78,17 @@ export default function InventoryPanel() {
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-lg font-semibold text-primary">{inventory[itemId as keyof typeof inventory]}</span>
                         {isFood && (
-                            <Button size="icon" variant="outline" onClick={handleEat} disabled={isDead || inventory.food === 0} aria-label="Eat food">
+                            <Button size="icon" variant="outline" onClick={handleEat} disabled={isDead || inventory.food === 0 || isBusy} aria-label="Eat food">
                                 <Apple className="h-4 w-4" />
                             </Button>
                         )}
                         {isWater && (
-                            <Button size="icon" variant="outline" onClick={handleDrink} disabled={isDead || inventory.water === 0} aria-label="Drink water">
+                            <Button size="icon" variant="outline" onClick={handleDrink} disabled={isDead || inventory.water === 0 || isBusy} aria-label="Drink water">
                                 <GlassWater className="h-4 w-4" />
                             </Button>
                         )}
                         {isCookedApple && (
-                            <Button size="icon" variant="outline" onClick={handleEatCookedApple} disabled={isDead || inventory.cookedApple === 0} aria-label="Eat Cooked Apple">
+                            <Button size="icon" variant="outline" onClick={handleEatCookedApple} disabled={isDead || inventory.cookedApple === 0 || isBusy} aria-label="Eat Cooked Apple">
                                 <Zap className="h-4 w-4" />
                             </Button>
                         )}
