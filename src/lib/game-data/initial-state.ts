@@ -1,5 +1,5 @@
 // src/lib/game-data/initial-state.ts
-import type { GameState } from '@/lib/game-types';
+import type { GameState, Statistics } from '@/lib/game-types';
 
 const emptyInventory = {
   wood: 0,
@@ -25,7 +25,17 @@ const emptyInventory = {
   cookedApple: 0,
 };
 
-export const initialState: GameState = {
+export const initialStatistics: Statistics = {
+  timesExplored: 0,
+  timesScavenged: 0,
+  deaths: 0,
+  totalItemsGained: {
+    ...emptyInventory
+  },
+};
+
+
+export const initialState: Omit<GameState, 'statistics'> = {
   playerStats: {
     health: 100,
     hunger: 100,
@@ -41,16 +51,6 @@ export const initialState: GameState = {
   equipment: {
     hand: null,
     body: null,
-  },
-  statistics: {
-    timesExplored: 0,
-    timesScavenged: 0,
-    totalItemsGained: {
-      ...emptyInventory,
-      apple: 5,
-      water: 5,
-      silver: 20,
-    },
   },
   log: [
     {

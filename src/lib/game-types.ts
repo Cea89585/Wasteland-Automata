@@ -43,6 +43,7 @@ export interface PlayerStats {
 export type Statistics = {
     timesExplored: number;
     timesScavenged: number;
+    deaths: number;
     totalItemsGained: Partial<Record<Resource | Item, number>>;
 }
 
@@ -85,7 +86,8 @@ export interface GameState {
 }
 
 export type GameAction =
-  | { type: 'INITIALIZE'; payload: GameState }
+  | { type: 'INITIALIZE'; payload: { gameState: Omit<GameState, 'statistics'>, statistics: Statistics } }
+  | { type: 'RESET_GAME' }
   | { type: 'GAME_TICK' }
   | { type: 'TRACK_STAT'; payload: { stat: keyof Pick<Statistics, 'timesExplored' | 'timesScavenged'> } }
   | { type: 'ADD_LOG'; payload: { text: string; type: LogMessage['type'], item?: Resource | Item } }

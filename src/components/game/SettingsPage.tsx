@@ -4,7 +4,7 @@ import { useGame } from '@/hooks/use-game';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, ArrowLeft, BarChart, Package, Compass, Search } from 'lucide-react';
+import { RotateCcw, ArrowLeft, BarChart, Package, Compass, Search, Skull } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +21,7 @@ import { itemData } from '@/lib/game-data/items';
 import { allIcons } from './GameIcons';
 
 export default function SettingsPage() {
-    const { gameState } = useGame();
+    const { gameState, dispatch } = useGame();
 
     if (!gameState.isInitialized) {
         return null;
@@ -71,15 +71,21 @@ export default function SettingsPage() {
                             </div>
                             <span className="font-mono text-lg font-semibold text-primary">{statistics.timesScavenged}</span>
                         </div>
+                         <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
+                            <div className="flex items-center gap-2 font-medium">
+                                <Skull /> Times Died
+                            </div>
+                            <span className="font-mono text-lg font-semibold text-primary">{statistics.deaths}</span>
+                        </div>
                     </CardContent>
                 </Card>
 
                  <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Package /> Item Collection
+                            <Package /> Item Collection (All Time)
                         </CardTitle>
-                        <CardDescription>All items you have gathered throughout your journey.</CardDescription>
+                        <CardDescription>All items you have gathered throughout all your journeys.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {totalItemsGained.length === 0 ? (
@@ -122,12 +128,12 @@ export default function SettingsPage() {
                             <AlertDialogHeader>
                             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                             <AlertDialogDescription>
-                                This will permanently delete all your game progress. This action cannot be undone.
+                                This will permanently delete your current game progress, but will keep your statistics. This action cannot be undone.
                             </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => { localStorage.clear(); window.location.href = '/'; }}>
+                            <AlertDialogAction onClick={() => dispatch({ type: 'RESET_GAME' })}>
                                 Yes, delete my save
                             </AlertDialogAction>
                             </AlertDialogFooter>

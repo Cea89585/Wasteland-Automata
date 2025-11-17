@@ -2,12 +2,13 @@
 'use client';
 
 import React, { createContext, useReducer, useEffect, type ReactNode } from 'react';
-import type { GameState, GameAction, LogMessage, Resource, Item } from '@/lib/game-types';
-import { initialState } from '@/lib/game-data/initial-state';
+import type { GameState, GameAction, LogMessage, Resource, Item, Statistics } from '@/lib/game-types';
+import { initialState, initialStatistics } from '@/lib/game-data/initial-state';
 import { recipes } from '@/lib/game-data/recipes';
 import { itemData } from '@/lib/game-data/items';
 
 const SAVE_KEY = 'wastelandAutomata_save';
+const STATS_KEY = 'wastelandAutomata_stats';
 const INVENTORY_CAP = 200;
 
 let logIdCounter = 0;
@@ -32,16 +33,23 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
   switch (action.type) {
     case 'INITIALIZE': {
-      const loadedState = action.payload;
-      // Reset the counter based on the highest existing ID to prevent future collisions
-      if (loadedState.log && loadedState.log.length > 0) {
-        const maxId = loadedState.log.reduce((max, l) => Math.max(max, l.id), 0);
-        // Ensure the new counter starts well after any existing ID
+      const { gameState, statistics } = action.payload;
+      if (gameState.log && gameState.log.length > 0) {
+        const maxId = gameState.log.reduce((max, l) => Math.max(max, l.id), 0);
         logIdCounter = (maxId > Date.now()) ? (maxId - Date.now() + 1) : 1;
       } else {
         logIdCounter = 1;
       }
-      return { ...loadedState, isInitialized: true };
+      return { ...gameState, statistics, isInitialized: true };
+    }
+    
+    case 'RESET_GAME': {
+      localStorage.removeItem(SAVE_KEY);
+      // We are not resetting the statistics here.
+      // We can trigger a reload to re-initialize the game state from scratch,
+      // while the stats will be loaded again from their own storage.
+      window.location.reload();
+      return state; // This will be replaced by the reloaded state.
     }
 
     case 'GAME_TICK': {
@@ -83,6 +91,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           timestamp: Date.now(),
           type: 'danger',
         });
+        const newStatistics = { ...state.statistics, deaths: state.statistics.deaths + 1 };
+        localStorage.setItem(STATS_KEY, JSON.stringify(newStatistics));
+        return {
+          ...state,
+          playerStats: newStats,
+          statistics: newStatistics,
+          log: [...logMessages, ...state.log],
+        }
       }
 
       return {
@@ -99,7 +115,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let newInventory = { ...state.inventory };
       let newStats = { ...state.playerStats };
       let newEquipment = { ...state.equipment };
-      let { newStatistics } = addResource(state.inventory, state.statistics, 'wood', 0); // Just to get the object
+      let newStatistics = { ...state.statistics };
       let logText = encounter.message;
     
       if (encounter.type === 'positive' && encounter.reward) {
@@ -283,6 +299,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'SELL_ITEM': {
       const { item, amount, price } = action.payload;
       const newInventory = { ...state.inventory };
+      const newStatistics = { ...state.statistics };
 
       if (state.lockedItems.includes(item)) {
         return {
@@ -298,18 +315,26 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         }
       }
 
+      const silverEarned = amount * price;
       newInventory[item] -= amount;
-      newInventory.silver += amount * price;
+      newInventory.silver += silverEarned;
+      
+      const newTotalItemsGained = { ...newStatistics.totalItemsGained };
+      newTotalItemsGained.silver = (newTotalItemsGained.silver || 0) + silverEarned;
+      newStatistics.totalItemsGained = newTotalItemsGained;
+
 
       return {
         ...state,
         inventory: newInventory,
-        log: [{ id: generateUniqueLogId(), text: `Sold ${amount} ${itemData[item].name} for ${amount * price} silver.`, type: 'success', timestamp: Date.now() }, ...state.log],
+        statistics: newStatistics,
+        log: [{ id: generateUniqueLogId(), text: `Sold ${amount} ${itemData[item].name} for ${silverEarned} silver.`, type: 'success', timestamp: Date.now() }, ...state.log],
       }
     }
 
     case 'SELL_ALL_UNLOCKED': {
       const newInventory = { ...state.inventory };
+      const newStatistics = { ...state.statistics };
       let totalSilverGained = 0;
       let itemsSold = 0;
 
@@ -333,9 +358,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
       newInventory.silver += totalSilverGained;
 
+      const newTotalItemsGained = { ...newStatistics.totalItemsGained };
+      newTotalItemsGained.silver = (newTotalItemsGained.silver || 0) + totalSilverGained;
+      newStatistics.totalItemsGained = newTotalItemsGained;
+
       return {
         ...state,
         inventory: newInventory,
+        statistics: newStatistics,
         log: [{ id: generateUniqueLogId(), text: `Sold all unlocked goods for ${totalSilverGained} silver.`, type: 'success', timestamp: Date.now() }, ...state.log],
       };
     }
@@ -543,42 +573,53 @@ export function GameProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const savedGame = localStorage.getItem(SAVE_KEY);
-      if (savedGame) {
-        const loadedState = JSON.parse(savedGame);
-        // Ensure new properties exist on old save files
-        const migratedState = { ...initialState, ...loadedState };
-        migratedState.isResting = false; // Never load into a resting state
-        migratedState.smeltingQueue = 0; // Never load into a smelting state
-        if (!migratedState.builtStructures) { // migration for old saves
-          migratedState.builtStructures = [];
-          if (migratedState.inventory.workbench > 0) {
-            migratedState.builtStructures.push('workbench');
-          }
+      const savedStats = localStorage.getItem(STATS_KEY);
+      
+      let loadedState = savedGame ? JSON.parse(savedGame) : initialState;
+      let loadedStats = savedStats ? JSON.parse(savedStats) : initialStatistics;
+
+      // Ensure new properties exist on old save files
+      const migratedState = { ...initialState, ...loadedState };
+      const migratedStats = { ...initialStatistics, ...loadedStats };
+      
+      migratedState.isResting = false;
+      migratedState.smeltingQueue = 0;
+      
+      if (!migratedState.builtStructures) {
+        migratedState.builtStructures = [];
+        if (migratedState.inventory.workbench > 0) {
+          migratedState.builtStructures.push('workbench');
         }
-        if (!migratedState.lockedItems) { // migration for locked items
-          migratedState.lockedItems = [];
-        }
-        if (!migratedState.statistics) { // migration for statistics
-          migratedState.statistics = initialState.statistics;
-        }
-        dispatch({ type: 'INITIALIZE', payload: migratedState });
-      } else {
-        dispatch({ type: 'INITIALIZE', payload: initialState });
       }
+      if (!migratedState.lockedItems) {
+        migratedState.lockedItems = [];
+      }
+      // IMPORTANT: Remove statistics from the main game state if it exists from an old save
+      if ('statistics' in migratedState) {
+        delete (migratedState as any).statistics;
+      }
+      
+      dispatch({ type: 'INITIALIZE', payload: { gameState: migratedState, statistics: migratedStats } });
+
     } catch (error) {
       console.error("Failed to load game from localStorage", error);
-      dispatch({ type: 'INITIALIZE', payload: initialState });
+      dispatch({ type: 'INITIALIZE', payload: { gameState: initialState, statistics: initialStatistics } });
     }
   }, []);
 
   useEffect(() => {
     if (gameState.isInitialized) {
       try {
-        const stateToSave = { ...gameState };
-        // We reverse the log before saving and then reverse it back after,
-        // so that the in-memory state is correct but the saved state has the log in chronological order.
-        stateToSave.log = [...stateToSave.log].reverse();
-        localStorage.setItem(SAVE_KEY, JSON.stringify(stateToSave));
+        const { statistics, ...stateToSave } = gameState;
+        
+        // Save game state without statistics
+        const savableState = { ...stateToSave };
+        savableState.log = [...savableState.log].reverse();
+        localStorage.setItem(SAVE_KEY, JSON.stringify(savableState));
+
+        // Save statistics separately
+        localStorage.setItem(STATS_KEY, JSON.stringify(statistics));
+
       } catch (error) {
         console.error("Failed to save game to localStorage", error);
       }
