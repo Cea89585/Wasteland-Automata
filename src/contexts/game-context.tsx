@@ -108,16 +108,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           logText += ` You lost ${amount} health.`;
         } else if (penaltyType === 'stoneAxe') {
           // Special case for breaking the equipped item
-          let axeLost = false;
           if (newEquipment.hand === 'stoneAxe') {
             newEquipment.hand = null;
-            axeLost = true;
-          } else if (newInventory.stoneAxe > 0) {
-            newInventory.stoneAxe -= 1;
-            axeLost = true;
-          }
-          if (axeLost) {
-             // The log message from encounters.ts is already descriptive
+            // Log message is already descriptive, no need to add more text
+          } else {
+            // Axe not equipped, so it can't break from use. Don't apply penalty.
+            // We'll also prevent the log message from showing to avoid confusion.
+            return state; // Exit early
           }
         }
         else { // For all other resource/item penalties
@@ -126,6 +123,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           if (amountLost > 0) {
             newInventory[penaltyType] = currentAmount - amountLost;
             logText += ` You lost ${amountLost} ${itemData[penaltyType].name}.`;
+          } else {
+            // Player didn't have the item to lose, so don't show the encounter message.
+            return state;
           }
         }
       }
