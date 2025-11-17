@@ -67,52 +67,52 @@ export default function ExplorationPanel() {
     dispatch({ type: 'CONSUME', payload: { stat: 'energy', amount: 10 } });
 
     setTimeout(() => {
-        // Resource finding
-        let foundSomething = false;
-        let foundText = 'You explore the area...';
-        let foundScrapThisTurn = false;
-
-        currentLocation.resources.forEach((res) => {
-            if (Math.random() < res.chance) {
-            let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
-            
-            // Apply bonuses from equipped items
-            if (res.resource === 'wood' && equipment.hand === 'stoneAxe') {
-                amount = Math.ceil(amount * 1.50); // 50% bonus
-            }
-            if (res.resource === 'scrap') {
-                foundScrapThisTurn = true;
-                if(equipment.hand === 'metalDetector') {
-                    amount = Math.ceil(amount * 1.20); // 20% bonus
-                }
-            }
-
-            dispatch({ type: 'GATHER', payload: { resource: res.resource, amount } });
-            foundText += ` You found ${amount} ${itemData[res.resource].name}.`;
-            foundSomething = true;
-            }
-        });
-        
-        // Metal detector guarantees at least 1 scrap if none was found via normal roll
-        if (equipment.hand === 'metalDetector' && !foundScrapThisTurn && currentLocation.resources.some(r => r.resource === 'scrap')) {
-            const amount = 1;
-            dispatch({ type: 'GATHER', payload: { resource: 'scrap', amount } });
-            foundText += ` Your metal detector chirps, leading you to ${amount} ${itemData['scrap'].name}.`;
-            foundSomething = true;
-        }
-    
-        if (!foundSomething) {
-            const flavor = currentLocation.flavorText[Math.floor(Math.random() * currentLocation.flavorText.length)];
-            foundText += ` ${flavor}`;
-        }
-
-        dispatch({ type: 'ADD_LOG', payload: { text: foundText, type: 'info' } });
-
-        // Fixed Encounter
+        // Decide if an encounter or resource finding happens.
         if (Math.random() < 0.25) { // 25% chance of a fixed encounter
             handleFixedEncounter();
-        }
+        } else {
+            // No encounter, proceed with resource finding
+            let foundSomething = false;
+            let foundText = 'You explore the area...';
+            let foundScrapThisTurn = false;
 
+            currentLocation.resources.forEach((res) => {
+                if (Math.random() < res.chance) {
+                    let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
+                    
+                    // Apply bonuses from equipped items
+                    if (res.resource === 'wood' && equipment.hand === 'stoneAxe') {
+                        amount = Math.ceil(amount * 1.50); // 50% bonus
+                    }
+                    if (res.resource === 'scrap') {
+                        foundScrapThisTurn = true;
+                        if(equipment.hand === 'metalDetector') {
+                            amount = Math.ceil(amount * 1.20); // 20% bonus
+                        }
+                    }
+
+                    dispatch({ type: 'GATHER', payload: { resource: res.resource, amount } });
+                    foundText += ` You found ${amount} ${itemData[res.resource].name}.`;
+                    foundSomething = true;
+                }
+            });
+            
+            // Metal detector guarantees at least 1 scrap if none was found via normal roll
+            if (equipment.hand === 'metalDetector' && !foundScrapThisTurn && currentLocation.resources.some(r => r.resource === 'scrap')) {
+                const amount = 1;
+                dispatch({ type: 'GATHER', payload: { resource: 'scrap', amount } });
+                foundText += ` Your metal detector chirps, leading you to ${amount} ${itemData['scrap'].name}.`;
+                foundSomething = true;
+            }
+        
+            if (!foundSomething) {
+                const flavor = currentLocation.flavorText[Math.floor(Math.random() * currentLocation.flavorText.length)];
+                foundText += ` ${flavor}`;
+            }
+
+            dispatch({ type: 'ADD_LOG', payload: { text: foundText, type: 'info' } });
+        }
+        
         setIsExploring(false);
     }, 1000); // Simulate exploration time
   };
