@@ -54,32 +54,34 @@ export default function CraftingPanel() {
            <p className="text-muted-foreground">No recipes unlocked. Explore to find more.</p>
         ) : (
           <ScrollArea className="h-[300px]">
-            <div className="space-y-4 pr-4">
+            <div className="space-y-2 pr-4">
             {availableRecipes.map(recipe => (
               <Card key={recipe.id} className="bg-muted/50">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center text-lg">{allIcons[recipe.creates]} {recipe.name}</CardTitle>
-                  <CardDescription>{recipe.description}</CardDescription>
-                </CardHeader>
-                <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                  <div className="flex flex-col gap-1 text-sm">
-                    <span className="font-semibold text-muted-foreground">Requires:</span>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1">
-                      {Object.entries(recipe.requirements).map(([resource, amount]) => (
-                        <span key={resource} className="flex items-center">
-                          {resourceIcons[resource as Resource]}
-                          {itemData[resource as Resource].name}: {amount}
-                        </span>
-                      ))}
-                    </div>
+                <CardContent className="p-4 flex items-center justify-between gap-4">
+                  <div className="flex-grow">
+                      <div className="flex items-center font-semibold text-base mb-2">
+                        {allIcons[recipe.creates]} {recipe.name}
+                      </div>
+                      <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                        <span>Requires:</span>
+                        <div className="flex flex-wrap gap-x-3 gap-y-1">
+                          {Object.entries(recipe.requirements).map(([resource, amount]) => (
+                            <span key={resource} className="flex items-center">
+                              {resourceIcons[resource as Resource]}
+                              {itemData[resource as Resource].name}: {amount}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                   </div>
                   <Button 
+                    size="icon"
+                    variant="outline"
                     onClick={() => dispatch({ type: 'CRAFT', payload: { recipeId: recipe.id }})} 
                     disabled={!canCraft(recipe.id) || gameState.playerStats.health <= 0 || isBusy}
-                    className="w-full sm:w-auto"
+                    aria-label={`Craft ${recipe.name}`}
                   >
-                    <Hammer className="mr-2 h-4 w-4" />
-                    Craft
+                    <Hammer className="h-4 w-4" />
                   </Button>
                 </CardContent>
               </Card>
