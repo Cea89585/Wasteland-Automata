@@ -50,38 +50,26 @@ export default function StatsPanel() {
             </TooltipContent>
           </Tooltip>
         ))}
-        {/* Energy Stat with Button */}
-        <div className="flex items-center gap-1">
-            <Tooltip>
-                <TooltipTrigger asChild>
-                <div className="flex flex-col gap-1 w-24">
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <div className="flex items-center">
-                            {statIcons['energy']}
-                            <span className="font-medium">Energy</span>
-                        </div>
-                        <span className="font-mono text-primary">{Math.round(playerStats['energy'])}</span>
+        {/* Energy Stat */}
+        <Tooltip>
+            <TooltipTrigger asChild>
+            <div className="flex flex-col gap-1 w-24">
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <div className="flex items-center">
+                        {statIcons['energy']}
+                        <span className="font-medium">Energy</span>
                     </div>
-                    <Progress value={(playerStats['energy'] / maxEnergy) * 100} className="h-2" indicatorClassName={
-                    playerStats['energy'] < (maxEnergy * 0.2) ? 'bg-destructive' : 'bg-primary'
-                    } />
+                    <span className="font-mono text-primary">{Math.round(playerStats['energy'])}</span>
                 </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                <p>Energy: {Math.round(playerStats['energy'])} / {maxEnergy}</p>
-                </TooltipContent>
-            </Tooltip>
-            <Tooltip>
-                <TooltipTrigger asChild>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleRefillEnergy}>
-                        <Zap className="h-4 w-4 text-yellow-500" />
-                    </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                    <p>Dev: Refill Energy</p>
-                </TooltipContent>
-            </Tooltip>
-        </div>
+                <Progress value={(playerStats['energy'] / maxEnergy) * 100} className="h-2" indicatorClassName={
+                playerStats['energy'] < (maxEnergy * 0.2) ? 'bg-destructive' : 'bg-primary'
+                } />
+            </div>
+            </TooltipTrigger>
+            <TooltipContent>
+            <p>Energy: {Math.round(playerStats['energy'])} / {maxEnergy}</p>
+            </TooltipContent>
+        </Tooltip>
       </div>
     </TooltipProvider>
   );
