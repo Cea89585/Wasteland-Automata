@@ -16,9 +16,9 @@ let logIdCounter = 0;
 const reducer = (state: GameState, action: GameAction): GameState => {
   const getInventoryCap = () => 200 + (state.storageLevel || 0) * 50;
   const getMaxEnergy = () => 100 + (state.energyLevel || 0) * 5;
-  const getMaxHunger = () => 100 + (state.hungerLevel || 0) * 25;
-  const getMaxThirst = () => 100 + (state.thirstLevel || 0) * 25;
-  const getMaxHealth = () => 100 + (state.healthLevel || 0) * 25;
+  const getMaxHunger = () => Math.min(500, 100 + (state.hungerLevel || 0) * 25);
+  const getMaxThirst = () => Math.min(500, 100 + (state.thirstLevel || 0) * 25);
+  const getMaxHealth = () => Math.min(1000, 100 + (state.healthLevel || 0) * 25);
 
   const generateUniqueLogId = () => {
     // Combine timestamp with a counter to ensure uniqueness
@@ -129,7 +129,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 1);
       }
 
-      newStats.thirst = Math.max(0, newStats.thirst - 1);
+      newStats.thirst = Math.max(0, newStats.thirst - 0.5);
       newStats.hunger = Math.max(0, newStats.hunger - 0.5);
 
       if (newStats.thirst === 0 || newStats.hunger === 0) {
