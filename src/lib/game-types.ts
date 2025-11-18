@@ -80,6 +80,7 @@ export interface GameState {
   unlockedTech: TechId[];
   lockedItems: Resource[];
   storageLevel: number;
+  energyLevel: number;
   isInitialized: boolean;
   gameTick: number;
   isResting: boolean;
@@ -112,4 +113,5 @@ export type GameAction =
   | { type: 'FINISH_SMELTING' }
   | { type: 'EQUIP'; payload: { item: Item, slot: EquipmentSlot } }
   | { type: 'UNEQUIP'; payload: { slot: EquipmentSlot } }
-  | { type: 'UPGRADE_STORAGE' };
+  | { type: 'UPGRADE_STORAGE' }
+  | { type: 'UPGRADE_ENERGY' };

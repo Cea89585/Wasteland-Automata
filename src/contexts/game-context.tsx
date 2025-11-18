@@ -14,6 +14,7 @@ let logIdCounter = 0;
 
 const reducer = (state: GameState, action: GameAction): GameState => {
   const getInventoryCap = () => 200 + (state.storageLevel || 0) * 50;
+  const getMaxEnergy = () => 100 + (state.energyLevel || 0) * 5;
 
   const generateUniqueLogId = () => {
     // Combine timestamp with a counter to ensure uniqueness
@@ -57,6 +58,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let newInventory = { ...state.inventory };
       const logMessages: LogMessage[] = [];
       const INVENTORY_CAP = getInventoryCap();
+      const MAX_ENERGY = getMaxEnergy();
       
       if (state.isResting || state.smeltingQueue > 0 || newStats.health <= 0) return state;
       
@@ -67,8 +69,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
 
       // Passive energy regeneration
-      if(newStats.energy < 100) {
-        newStats.energy = Math.min(100, newStats.energy + 1);
+      if(newStats.energy < MAX_ENERGY) {
+        newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 1);
       }
 
       newStats.thirst = Math.max(0, newStats.thirst - 1);
@@ -413,7 +415,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'REGEN_ENERGY': {
       const { amount } = action.payload;
       const newStats = { ...state.playerStats };
-      newStats.energy = Math.min(100, newStats.energy + amount);
+      const MAX_ENERGY = getMaxEnergy();
+      newStats.energy = Math.min(MAX_ENERGY, newStats.energy + amount);
       return {...state, playerStats: newStats };
     }
 
@@ -450,10 +453,11 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'EAT_COOKED_APPLE': {
         if (state.inventory.cookedApple <= 0) return state;
-  
+        
+        const MAX_ENERGY = getMaxEnergy();
         const newInventory = { ...state.inventory, cookedApple: state.inventory.cookedApple - 1 };
         const newStats = { ...state.playerStats };
-        newStats.energy = Math.min(100, newStats.energy + 20);
+        newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 20);
         newStats.hunger = Math.min(100, newStats.hunger + 10);
   
         return {
@@ -589,6 +593,37 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         log: [{ id: generateUniqueLogId(), text: `Storage upgraded to Level ${newStorageLevel}! New capacity: ${newCapacity}.`, type: 'success', timestamp: Date.now() }, ...state.log],
       }
     }
+    
+    case 'UPGRADE_ENERGY': {
+      const calculateCost = (level: number): number => {
+        if (level === 0) return 5000;
+        let cost = 5000;
+        for (let i = 1; i <= level; i++) {
+          cost = cost * 2 + 1000;
+        }
+        return cost;
+      };
+      
+      const cost = calculateCost(state.energyLevel);
+      if (state.inventory.silver < cost) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: "Not enough silver to upgrade energy core.", type: 'danger', timestamp: Date.now() }, ...state.log],
+        }
+      }
+
+      const newInventory = { ...state.inventory };
+      newInventory.silver -= cost;
+      const newEnergyLevel = state.energyLevel + 1;
+      const newMaxEnergy = 100 + newEnergyLevel * 5;
+      
+      return {
+        ...state,
+        inventory: newInventory,
+        energyLevel: newEnergyLevel,
+        log: [{ id: generateUniqueLogId(), text: `Energy Core upgraded to Level ${newEnergyLevel}! New max energy: ${newMaxEnergy}.`, type: 'success', timestamp: Date.now() }, ...state.log],
+      }
+    }
 
     default:
       return state;
@@ -629,6 +664,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
       if (!migratedState.storageLevel) {
           migratedState.storageLevel = 0;
+      }
+      if (!migratedState.energyLevel) {
+          migratedState.energyLevel = 0;
       }
       // IMPORTANT: Remove statistics from the main game state if it exists from an old save
       if ('statistics' in migratedState) {

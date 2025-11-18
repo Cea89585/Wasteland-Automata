@@ -8,11 +8,13 @@ import { Button } from '../ui/button';
 import { Zap } from 'lucide-react';
 
 export default function StatsPanel() {
-  const { gameState: { playerStats }, dispatch } = useGame();
+  const { gameState: { playerStats, energyLevel }, dispatch } = useGame();
 
   const handleRefillEnergy = () => {
-    dispatch({ type: 'REGEN_ENERGY', payload: { amount: 100 } });
+    dispatch({ type: 'REGEN_ENERGY', payload: { amount: 1000 } }); // Give a large amount to ensure full refill
   };
+  
+  const maxEnergy = 100 + (energyLevel * 5);
 
   const stats: { name: keyof Omit<typeof playerStats, 'energy'>; label: string }[] = [
     { name: 'health', label: 'Health' },
@@ -54,15 +56,15 @@ export default function StatsPanel() {
                             {statIcons['energy']}
                             <span className="font-medium">Energy</span>
                         </div>
-                        <span className="font-mono text-primary">{Math.round(playerStats['energy'])}%</span>
+                        <span className="font-mono text-primary">{Math.round(playerStats['energy'])}</span>
                     </div>
-                    <Progress value={playerStats['energy']} className="h-2" indicatorClassName={
-                    playerStats['energy'] < 20 ? 'bg-destructive' : 'bg-primary'
+                    <Progress value={(playerStats['energy'] / maxEnergy) * 100} className="h-2" indicatorClassName={
+                    playerStats['energy'] < (maxEnergy * 0.2) ? 'bg-destructive' : 'bg-primary'
                     } />
                 </div>
                 </TooltipTrigger>
                 <TooltipContent>
-                <p>Energy: {Math.round(playerStats['energy'])}%</p>
+                <p>Energy: {Math.round(playerStats['energy'])} / {maxEnergy}</p>
                 </TooltipContent>
             </Tooltip>
             <Tooltip>
