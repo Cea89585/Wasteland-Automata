@@ -5,7 +5,7 @@ import { useGame } from '@/hooks/use-game';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react';
-import { Info, AlertTriangle, ShieldCheck, Hammer, Clock, BookOpen, Trash2, ChevronDown } from 'lucide-react';
+import { Info, AlertTriangle, ShieldCheck, Hammer, Clock, BookOpen, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import {
   Dialog,
@@ -25,7 +25,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from '../ui/button';
 import { allIcons } from './GameIcons';
@@ -49,38 +48,18 @@ const logTypeColors = {
 
 const LogEntry = ({ message }: { message: ReturnType<typeof useGame>['gameState']['log'][0] }) => {
     let icon = logTypeIcons[message.type];
-    const [isExpanded, setIsExpanded] = useState(false);
     
     if (message.type === 'craft' && message.item) {
         icon = allIcons[message.item] || logTypeIcons.craft;
     }
-
-    const isCollapsible = message.text.includes('\n') || message.text.length > 100;
   
     return (
         <div className="flex items-start gap-3 text-sm animate-in fade-in-0 duration-500">
             <div className="pt-0.5">{icon}</div>
             <div className="flex-1">
-                <p
-                    className={cn(
-                        logTypeColors[message.type], 
-                        "whitespace-pre-wrap",
-                        isCollapsible && !isExpanded && "line-clamp-2"
-                    )}
-                >
+                <p className={cn(logTypeColors[message.type], "whitespace-pre-wrap")}>
                     {message.text}
                 </p>
-                
-                {isCollapsible && (
-                    <button 
-                        onClick={() => setIsExpanded(!isExpanded)} 
-                        className="text-xs text-primary hover:underline mt-1 flex items-center"
-                    >
-                        {isExpanded ? 'Show less' : 'Show more'}
-                        <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
-                    </button>
-                )}
-
                 <div className="text-xs text-muted-foreground/50 flex items-center pt-1">
                     <Clock className="h-3 w-3 mr-1" />
                     {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
@@ -111,7 +90,7 @@ export default function LogPanel() {
             <div className="mt-4 h-[60vh] -mx-6 px-6 overflow-y-auto">
                 <div className="flex flex-col gap-3 pr-4">
                     {[...log].reverse().map((message) => (
-                    <LogEntry key={message.id} message={message} />
+                      <LogEntry key={message.id} message={message} />
                     ))}
                 </div>
             </div>
@@ -147,7 +126,7 @@ export default function LogPanel() {
       </CardHeader>
       <CardContent>
         <div className="flex flex-col gap-3 pr-4">
-          {log.slice(0, 15).map((message) => (
+          {log.slice(0, 2).map((message) => (
             <LogEntry key={message.id} message={message} />
           ))}
         </div>
