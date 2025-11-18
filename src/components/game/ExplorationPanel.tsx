@@ -32,7 +32,6 @@ export default function ExplorationPanel() {
 
   const finishResting = useCallback(() => {
     dispatch({ type: 'FINISH_RESTING' });
-    dispatch({ type: 'REGEN_ENERGY', payload: { amount: 10 } });
     dispatch({ type: 'ADD_LOG', payload: { text: "You feel rested and ready for action.", type: 'success' } });
     setRestingProgress(0);
   }, [dispatch]);

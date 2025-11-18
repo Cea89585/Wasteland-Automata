@@ -635,8 +635,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'START_RESTING':
         return { ...state, isResting: true };
 
-    case 'FINISH_RESTING':
-        return { ...state, isResting: false };
+    case 'FINISH_RESTING': {
+        const newStats = { ...state.playerStats };
+        const MAX_ENERGY = getMaxEnergy();
+        newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 10);
+        return { ...state, isResting: false, playerStats: newStats };
+    }
     
     case 'START_SMELTING': {
       const { amount } = action.payload;
