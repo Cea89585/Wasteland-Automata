@@ -92,6 +92,7 @@ export interface GameState {
   isInitialized: boolean;
   gameTick: number;
   isResting: boolean;
+  isIdle: boolean;
   smeltingQueue: number;
   droneIsActive: boolean;
   droneReturnTimestamp: number | null;
@@ -101,6 +102,7 @@ export type GameAction =
   | { type: 'INITIALIZE'; payload: { gameState: Omit<GameState, 'statistics'>, statistics: Statistics } }
   | { type: 'RESET_GAME' }
   | { type: 'GAME_TICK' }
+  | { type: 'SET_IDLE', payload: boolean }
   | { type: 'TRACK_STAT'; payload: { stat: keyof Pick<Statistics, 'timesExplored' | 'timesScavenged'> } }
   | { type: 'ADD_LOG'; payload: { text: string; type: LogMessage['type'], item?: Resource | Item } }
   | { type: 'CLEAR_LOG' }

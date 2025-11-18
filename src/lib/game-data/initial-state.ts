@@ -82,6 +82,7 @@ export const initialState: Omit<GameState, 'statistics'> = {
   isInitialized: false,
   gameTick: 0,
   isResting: false,
+  isIdle: false,
   smeltingQueue: 0,
   droneIsActive: false,
   droneReturnTimestamp: null,

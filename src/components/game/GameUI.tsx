@@ -16,6 +16,7 @@ import TechPanel from './TechPanel';
 import CharacterPanel from './CharacterPanel';
 import FurnacePanel from './FurnacePanel';
 import MarketPanel from './MarketPanel';
+import IdleTimer from './IdleTimer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Backpack, Compass, Hammer, Home, BookOpen, User, Power, AlertTriangle, Coins, Settings } from 'lucide-react';
 import {
@@ -74,12 +75,15 @@ export default function GameUI() {
             <h1 className="text-xl sm:text-2xl font-bold font-headline text-primary">
             Wasteland Automata
             </h1>
-            <Link href="/settings">
-                <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 bg-secondary text-secondary-foreground hover:bg-secondary/80 w-fit">
-                    <Settings className="h-4 w-4" />
-                    Settings
-                </div>
-            </Link>
+            <div className='flex flex-col gap-2'>
+              <Link href="/settings">
+                  <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 bg-secondary text-secondary-foreground hover:bg-secondary/80 w-fit">
+                      <Settings className="h-4 w-4" />
+                      Settings
+                  </div>
+              </Link>
+              <IdleTimer />
+            </div>
         </div>
         <div className="flex flex-col gap-4 w-full sm:w-auto">
             <Alert variant="destructive" className="border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive">

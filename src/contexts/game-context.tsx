@@ -1,12 +1,13 @@
 // src/contexts/game-context.tsx
 'use client';
 
-import React, { createContext, useReducer, useEffect, type ReactNode } from 'react';
+import React, { createContext, useReducer, useEffect, type ReactNode, useState } from 'react';
 import type { GameState, GameAction, LogMessage, Resource, Item, Statistics } from '@/lib/game-types';
 import { initialState, initialStatistics } from '@/lib/game-data/initial-state';
 import { recipes } from '@/lib/game-data/recipes';
 import { itemData } from '@/lib/game-data/items';
 import { locations } from '@/lib/game-data/locations';
+import { useInactivityTimer } from '@/hooks/use-inactivity-timer';
 
 const SAVE_KEY = 'wastelandAutomata_save';
 const STATS_KEY = 'wastelandAutomata_stats';
@@ -117,34 +118,40 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             log: [...logMessages, ...state.log]
           }
       };
-      
-      // Passive systems
-      if(state.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP) {
-        newInventory.water = Math.min(INVENTORY_CAP, newInventory.water + 1);
-        // We don't log this every tick to avoid spam
-      }
-      if(state.builtStructures.includes('hydroponicsBay') && newInventory.apple < INVENTORY_CAP && (state.gameTick % 2 === 0)) {
-        newInventory.apple = Math.min(INVENTORY_CAP, newInventory.apple + 1);
-        // We don't log this every tick to avoid spam
+
+      // Idle state logic
+      if (state.isIdle) {
+         if (newStats.health < MAX_HEALTH) {
+            newStats.health = Math.min(MAX_HEALTH, newStats.health + 0.25);
+        }
+      } else {
+        // Normal tick logic when not idle
+        // Passive systems
+        if(state.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP) {
+          newInventory.water = Math.min(INVENTORY_CAP, newInventory.water + 1);
+        }
+        if(state.builtStructures.includes('hydroponicsBay') && newInventory.apple < INVENTORY_CAP && (state.gameTick % 2 === 0)) {
+          newInventory.apple = Math.min(INVENTORY_CAP, newInventory.apple + 1);
+        }
+
+        newStats.thirst = Math.max(0, newStats.thirst - 0.5);
+        newStats.hunger = Math.max(0, newStats.hunger - 0.5);
+
+        if (newStats.thirst === 0 || newStats.hunger === 0) {
+          newStats.health = Math.max(0, newStats.health - 2);
+        } else if (newStats.thirst < 20 || newStats.hunger < 20) {
+          // No health regen if starving or dehydrated
+        } else {
+          // Slow health regeneration if well-fed and hydrated
+          if (newStats.health < MAX_HEALTH) {
+              newStats.health = Math.min(MAX_HEALTH, newStats.health + 0.5);
+          }
+        }
       }
 
-      // Passive energy regeneration
+      // Universal logic (happens whether idle or not)
       if(newStats.energy < MAX_ENERGY) {
         newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 1);
-      }
-
-      newStats.thirst = Math.max(0, newStats.thirst - 0.5);
-      newStats.hunger = Math.max(0, newStats.hunger - 0.5);
-
-      if (newStats.thirst === 0 || newStats.hunger === 0) {
-        newStats.health = Math.max(0, newStats.health - 2);
-      } else if (newStats.thirst < 20 || newStats.hunger < 20) {
-        // No health regen if starving or dehydrated
-      } else {
-        // Slow health regeneration if well-fed and hydrated
-        if (newStats.health < MAX_HEALTH) {
-            newStats.health = Math.min(MAX_HEALTH, newStats.health + 0.5);
-        }
       }
 
       if (state.playerStats.health > 0 && newStats.health <= 0) {
@@ -251,6 +258,18 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         ...state,
         log: [],
       }
+    }
+
+    case 'SET_IDLE': {
+      if (state.isIdle === action.payload) return state;
+      const logText = action.payload
+        ? "You find a moment of peace. Your body begins to recover."
+        : "You stir, the brief respite over.";
+      return {
+        ...state,
+        isIdle: action.payload,
+        log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log],
+      };
     }
 
     case 'GATHER': {
@@ -853,10 +872,17 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 export const GameContext = createContext<{
   gameState: GameState;
   dispatch: React.Dispatch<GameAction>;
+  idleProgress: number;
 } | undefined>(undefined);
 
 export function GameProvider({ children }: { children: ReactNode }) {
   const [gameState, dispatch] = useReducer(reducer, { ...initialState, statistics: initialStatistics, isInitialized: false });
+
+  const { idleProgress } = useInactivityTimer({
+    onIdle: () => dispatch({ type: 'SET_IDLE', payload: true }),
+    onActive: () => dispatch({ type: 'SET_IDLE', payload: false }),
+    timeout: 30000,
+  });
 
   useEffect(() => {
     try {
@@ -872,6 +898,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       
       migratedState.isResting = false;
       migratedState.smeltingQueue = 0;
+      migratedState.isIdle = false; // Initialize idle state
       
       if (!migratedState.builtStructures) {
         migratedState.builtStructures = [];
@@ -967,7 +994,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   
 
   return (
-    <GameContext.Provider value={{ gameState, dispatch }}>
+    <GameContext.Provider value={{ gameState, dispatch, idleProgress }}>
       {children}
     </GameContext.Provider>
   );
