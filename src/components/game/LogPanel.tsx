@@ -50,36 +50,29 @@ const logTypeColors = {
 const LogEntry = ({ message }: { message: ReturnType<typeof useGame>['gameState']['log'][0] }) => {
     let icon = logTypeIcons[message.type];
     const [isExpanded, setIsExpanded] = useState(false);
-    const [isClamped, setIsClamped] = useState(false);
-    const textRef = useRef<HTMLParagraphElement>(null);
-
+    
     if (message.type === 'craft' && message.item) {
         icon = allIcons[message.item] || logTypeIcons.craft;
     }
 
-    useEffect(() => {
-        if (textRef.current) {
-            // Check if the text is overflowing its container
-            setIsClamped(textRef.current.scrollHeight > textRef.current.clientHeight);
-        }
-    }, [message.text]);
+    // A simpler check: does the text contain a newline? If so, it's collapsible.
+    const isCollapsible = message.text.includes('\n');
   
     return (
         <div className="flex items-start gap-3 text-sm animate-in fade-in-0 duration-500">
             <div className="pt-0.5">{icon}</div>
             <div className="flex-1">
                 <p
-                    ref={textRef}
                     className={cn(
                         logTypeColors[message.type], 
                         "whitespace-pre-wrap",
-                        !isExpanded && "line-clamp-2"
+                        isCollapsible && !isExpanded && "line-clamp-2"
                     )}
                 >
                     {message.text}
                 </p>
                 
-                {isClamped && (
+                {isCollapsible && (
                     <button 
                         onClick={() => setIsExpanded(!isExpanded)} 
                         className="text-xs text-primary hover:underline mt-1 flex items-center"
