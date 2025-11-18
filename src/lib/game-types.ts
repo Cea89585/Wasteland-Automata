@@ -92,6 +92,8 @@ export interface GameState {
   gameTick: number;
   isResting: boolean;
   smeltingQueue: number;
+  droneIsActive: boolean;
+  droneReturnTimestamp: number | null;
 }
 
 export type GameAction =
@@ -125,4 +127,6 @@ export type GameAction =
   | { type: 'UPGRADE_HUNGER' }
   | { type: 'UPGRADE_THIRST' }
   | { type: 'UPGRADE_HEALTH' }
-  | { type: 'TRAVEL'; payload: { locationId: LocationId } };
+  | { type: 'TRAVEL'; payload: { locationId: LocationId } }
+  | { type: 'SEND_DRONE' }
+  | { type: 'DRONE_RETURN'; payload: { resources: Partial<Record<Resource, number>> } };

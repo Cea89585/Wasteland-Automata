@@ -67,4 +67,12 @@ export const recipes: Recipe[] = [
     requirements: { stone: 50, scrap: 10 },
     unlockedBy: ['workbench'],
   },
+  {
+    id: 'recipe_droneBay',
+    name: 'Build Drone Bay',
+    description: 'Construct a bay to house and operate a scavenger drone.',
+    creates: 'droneBay',
+    requirements: { scrap: 25, components: 10 },
+    unlockedBy: ['workbench'],
+  }
 ];

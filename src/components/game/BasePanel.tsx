@@ -2,7 +2,7 @@
 'use client';
 import { useGame } from '@/hooks/use-game';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Home, Hammer, CheckCircle, Droplets, Power } from 'lucide-react';
+import { Home, Hammer, CheckCircle, Droplets, Power, Bot } from 'lucide-react';
 import { Button } from '../ui/button';
 import { recipes } from '@/lib/game-data/recipes';
 import type { Resource } from '@/lib/game-types';
@@ -16,11 +16,13 @@ export default function BasePanel() {
   const workbenchRecipe = recipes.find(r => r.id === 'recipe_workbench');
   const waterPurifierRecipe = recipes.find(r => r.id === 'recipe_waterPurifier');
   const furnaceRecipe = recipes.find(r => r.id === 'recipe_furnace');
+  const droneBayRecipe = recipes.find(r => r.id === 'recipe_droneBay');
 
 
   const isWorkbenchBuilt = gameState.builtStructures.includes('workbench');
   const isWaterPurifierBuilt = gameState.builtStructures.includes('waterPurifier');
   const isFurnaceBuilt = gameState.builtStructures.includes('furnace');
+  const isDroneBayBuilt = gameState.builtStructures.includes('droneBay');
   
   const isBusy = gameState.isResting;
 
@@ -158,6 +160,45 @@ export default function BasePanel() {
                 <CheckCircle className="h-12 w-12 text-green-500" />
                 <p className="mt-2 text-lg font-semibold">Furnace built!</p>
                 <p className="text-sm text-muted-foreground">Automated smelting is available.</p>
+            </div>
+        ): null}
+
+        <Separator />
+
+        {/* Drone Bay Section */}
+        {isWorkbenchBuilt && !isDroneBayBuilt && droneBayRecipe ? (
+          <Card className="bg-muted/50 p-6 w-full text-center">
+            <CardTitle className="flex items-center justify-center text-xl mb-4">
+              <Bot className="mr-2 h-6 w-6" /> Build a Drone Bay
+            </CardTitle>
+            <CardDescription className="mb-4">
+              Construct a bay to house and operate a scavenger drone for automated resource collection.
+            </CardDescription>
+            <div className="flex flex-col gap-2 text-sm my-4 items-start mx-auto max-w-xs">
+                <span className="font-semibold text-muted-foreground self-center">Requires:</span>
+                <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center">
+                    {Object.entries(droneBayRecipe.requirements).map(([resource, amount]) => (
+                    <span key={resource} className="flex items-center">
+                        {resourceIcons[resource as Resource]}
+                        {itemData[resource as Resource].name}: {amount}
+                    </span>
+                    ))}
+                </div>
+            </div>
+            <Button 
+                onClick={() => handleBuild('recipe_droneBay')} 
+                disabled={!canCraft('recipe_droneBay') || gameState.playerStats.health <= 0 || isBusy}
+                className="w-full sm:w-auto mt-4"
+              >
+                <Hammer className="mr-2 h-4 w-4" />
+                Build
+            </Button>
+          </Card>
+        ) : isDroneBayBuilt ? (
+            <div className="flex flex-col items-center justify-center text-center p-6 rounded-lg bg-muted/50">
+                <CheckCircle className="h-12 w-12 text-green-500" />
+                <p className="mt-2 text-lg font-semibold">Drone Bay built!</p>
+                <p className="text-sm text-muted-foreground">Scavenger drone is available for deployment.</p>
             </div>
         ): null}
       </CardContent>

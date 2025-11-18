@@ -20,7 +20,8 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog"
-import type { LocationId } from '@/lib/game-types';
+import type { LocationId, Resource } from '@/lib/game-types';
+import DronePanel from './DronePanel';
 
 export default function ExplorationPanel() {
   const { gameState, dispatch } = useGame();
@@ -55,6 +56,22 @@ export default function ExplorationPanel() {
       finishResting();
     }
   }, [restingProgress, finishResting]);
+
+  useEffect(() => {
+    if (gameState.droneIsActive && gameState.droneReturnTimestamp && Date.now() >= gameState.droneReturnTimestamp) {
+        // Simulate 5 exploration actions
+        let totalFound: Partial<Record<Resource, number>> = {};
+        for(let i = 0; i < 5; i++) {
+          currentLocation.resources.forEach((res) => {
+              if (Math.random() < res.chance) {
+                  let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
+                  totalFound[res.resource] = (totalFound[res.resource] || 0) + amount;
+              }
+          });
+        }
+        dispatch({ type: 'DRONE_RETURN', payload: { resources: totalFound } });
+    }
+  }, [gameState.droneIsActive, gameState.droneReturnTimestamp, currentLocation.resources, dispatch]);
 
   const handleFixedEncounter = () => {
     let encounter: FixedEncounter;
@@ -180,7 +197,7 @@ export default function ExplorationPanel() {
     dispatch({ type: 'TRAVEL', payload: { locationId } });
   }
   
-  const isBusy = isExploring || isScavenging || gameState.isResting || gameState.smeltingQueue > 0;
+  const isBusy = isExploring || isScavenging || gameState.isResting || gameState.smeltingQueue > 0 || gameState.droneIsActive;
   
   return (
     <Card>
@@ -189,6 +206,7 @@ export default function ExplorationPanel() {
         <CardDescription>{currentLocation.description}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
+        {gameState.builtStructures.includes('droneBay') && <DronePanel />}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <Button onClick={handleExplore} disabled={isBusy || gameState.playerStats.health <= 0} className="flex-1">
               {isExploring ? (

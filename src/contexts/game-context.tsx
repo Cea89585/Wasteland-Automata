@@ -765,6 +765,55 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       };
     }
 
+    case 'SEND_DRONE': {
+      if (state.inventory.apple < 2 || state.inventory.water < 2) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: "Not enough apples and water to fuel the drone.", type: 'danger', timestamp: Date.now() }],
+        };
+      }
+      const newInventory = { ...state.inventory };
+      newInventory.apple -= 2;
+      newInventory.water -= 2;
+      return {
+        ...state,
+        inventory: newInventory,
+        droneIsActive: true,
+        droneReturnTimestamp: Date.now() + 5000, // 5 seconds
+        log: [{ id: generateUniqueLogId(), text: "Scavenger drone launched. It will return in 5 seconds.", type: 'info', timestamp: Date.now() }],
+      };
+    }
+
+    case 'DRONE_RETURN': {
+      const { resources } = action.payload;
+      let newInventory = { ...state.inventory };
+      let newStatistics = { ...state.statistics };
+      let resourcesFoundText = "Drone has returned.";
+      let foundSomething = false;
+
+      for (const [resource, amount] of Object.entries(resources)) {
+        if (amount > 0) {
+          const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(newInventory, newStatistics, resource as Resource, amount);
+          newInventory = updatedInventory;
+          newStatistics = updatedStatistics;
+          resourcesFoundText += ` It collected ${amount} ${itemData[resource as Resource].name}.`;
+          foundSomething = true;
+        }
+      }
+      if (!foundSomething) {
+        resourcesFoundText += " It found nothing of value.";
+      }
+
+      return {
+        ...state,
+        inventory: newInventory,
+        statistics: newStatistics,
+        droneIsActive: false,
+        droneReturnTimestamp: null,
+        log: [{ id: generateUniqueLogId(), text: resourcesFoundText, type: 'success', timestamp: Date.now() }],
+      };
+    }
+
     default:
       return state;
   }
@@ -820,6 +869,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!migratedState.healthLevel) {
           migratedState.healthLevel = 0;
       }
+      if (!migratedState.droneIsActive) {
+        migratedState.droneIsActive = false;
+      }
+      if (!migratedState.droneReturnTimestamp) {
+        migratedState.droneReturnTimestamp = null;
+      }
+
       // IMPORTANT: Remove statistics from the main game state if it exists from an old save
       if ('statistics' in migratedState) {
         delete (migratedState as any).statistics;
