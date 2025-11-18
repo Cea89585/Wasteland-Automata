@@ -1,6 +1,7 @@
 // src/lib/game-types.ts
 
 import type { FixedEncounter } from "./game-data/encounters";
+import type { Quest } from "./game-data/quests";
 
 export const Resources = {
   wood: 'Wood',
@@ -90,6 +91,7 @@ export interface GameState {
   unlockedLocations: LocationId[];
   unlockedTech: TechId[];
   lockedItems: Resource[];
+  completedQuests: string[];
   storageLevel: number;
   energyLevel: number;
   hungerLevel: number;
@@ -118,6 +120,7 @@ export type GameAction =
   | { type: 'GATHER'; payload: { resource: Resource; amount: number } }
   | { type: 'CRAFT'; payload: { recipeId: string } }
   | { type: 'BUILD_STRUCTURE'; payload: { recipeId: string } }
+  | { type: 'COMPLETE_QUEST'; payload: { questId: string } }
   | { type: 'SELL_ITEM'; payload: { item: Resource, amount: number, price: number } }
   | { type: 'SELL_ALL_UNLOCKED' }
   | { type: 'TOGGLE_LOCK_ITEM'; payload: { item: Resource } }

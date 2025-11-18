@@ -18,8 +18,9 @@ import CharacterPanel from './CharacterPanel';
 import FurnacePanel from './FurnacePanel';
 import MarketPanel from './MarketPanel';
 import IdleTimer from './IdleTimer';
+import CommunityPanel from './CommunityPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Backpack, Compass, Hammer, Home, BookOpen, User, Power, AlertTriangle, Coins, Settings } from 'lucide-react';
+import { Backpack, Compass, Hammer, Home, BookOpen, User, Power, AlertTriangle, Coins, Settings, Users } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -59,6 +60,7 @@ export default function GameUI() {
 
   const tabs = [
     { value: "explore", label: "Explore", icon: <Compass className="h-4 w-4" /> },
+    { value: "community", label: "Community", icon: <Users className="h-4 w-4" /> },
     { value: "inventory", label: "Inventory", icon: <Backpack className="h-4 w-4" /> },
     { value: "craft", label: "Craft", icon: <Hammer className="h-4 w-4" /> },
     { value: "character", label: "Character", icon: <User className="h-4 w-4" /> },
@@ -142,6 +144,7 @@ export default function GameUI() {
             )}
 
             <TabsContent value="explore" className="mt-4"><ExplorationPanel /></TabsContent>
+            <TabsContent value="community" className="mt-4"><CommunityPanel /></TabsContent>
             <TabsContent value="inventory" className="mt-4"><InventoryPanel /></TabsContent>
             <TabsContent value="craft" className="mt-4"><CraftingPanel /></TabsContent>
             <TabsContent value="character" className="mt-4"><CharacterPanel /></TabsContent>

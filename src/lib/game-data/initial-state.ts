@@ -75,6 +75,7 @@ export const initialState: Omit<GameState, 'statistics'> = {
   unlockedLocations: ['outskirts'],
   unlockedTech: [],
   lockedItems: [],
+  completedQuests: [],
   storageLevel: 0,
   energyLevel: 0,
   hungerLevel: 0,

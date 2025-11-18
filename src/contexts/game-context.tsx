@@ -9,6 +9,7 @@ import { itemData } from '@/lib/game-data/items';
 import { locations } from '@/lib/game-data/locations';
 import { useInactivityTimer } from '@/hooks/use-inactivity-timer';
 import { locationOrder } from '@/lib/game-types';
+import { quests } from '@/lib/game-data/quests';
 
 
 const SAVE_KEY = 'wastelandAutomata_save';
@@ -412,6 +413,63 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         statistics: newStatistics,
         unlockedRecipes: newUnlockedRecipes,
         log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
+      };
+    }
+
+    case 'COMPLETE_QUEST': {
+      const { questId } = action.payload;
+      const quest = quests.find(q => q.id === questId);
+
+      if (!quest || state.completedQuests.includes(questId)) {
+        return state; // Quest not found or already completed
+      }
+
+      let newInventory = { ...state.inventory };
+      let newStatistics = { ...state.statistics };
+
+      // Check requirements
+      for (const req of quest.requirements) {
+        if (newInventory[req.item] < req.amount) {
+          return {
+            ...state,
+            log: [{ id: generateUniqueLogId(), text: `You don't have the required items to help.`, type: 'danger', timestamp: Date.now() }, ...state.log],
+          };
+        }
+      }
+
+      // Deduct requirements
+      for (const req of quest.requirements) {
+        newInventory[req.item] -= req.amount;
+      }
+      
+      let rewardLog = '';
+
+      // Grant rewards
+      for (const reward of quest.rewards) {
+        if (reward.type === 'item') {
+           const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(newInventory, newStatistics, reward.item, reward.amount);
+            newInventory = updatedInventory;
+            newStatistics = updatedStatistics;
+            rewardLog += `${reward.amount} ${itemData[reward.item].name}`;
+        } else if (reward.type === 'silver') {
+            newInventory.silver += reward.amount;
+             newStatistics.totalItemsGained.silver = (newStatistics.totalItemsGained.silver || 0) + reward.amount;
+             rewardLog += `${reward.amount} Silver`;
+        }
+      }
+      
+      const newCompletedQuests = [...state.completedQuests, questId];
+      
+      return {
+        ...state,
+        inventory: newInventory,
+        statistics: newStatistics,
+        completedQuests: newCompletedQuests,
+        log: [
+            { id: generateUniqueLogId(), text: `Quest Complete: ${quest.title}`, type: 'success', timestamp: Date.now() },
+            { id: generateUniqueLogId(), text: quest.completionMessage, type: 'event', timestamp: Date.now() },
+             { id: generateUniqueLogId(), text: `You received: ${rewardLog}.`, type: 'success', timestamp: Date.now() }
+        , ...state.log],
       };
     }
 
@@ -977,6 +1035,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
       if (!migratedState.inventory.hydroponicsBay) {
         migratedState.inventory.hydroponicsBay = 0;
+      }
+       if (!migratedState.completedQuests) {
+        migratedState.completedQuests = [];
       }
       if (!migratedState.theme) {
         migratedState.theme = 'dark';
