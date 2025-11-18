@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/select"
 import { useState } from 'react';
 import { Button } from '../ui/button';
+import { cn } from '@/lib/utils';
 
 export default function GameUI() {
   const { gameState } = useGame();
@@ -96,11 +97,14 @@ export default function GameUI() {
                 </AlertDescription>
             </Alert>
             <StatsPanel />
+            <div className={cn("block lg:hidden")}>
+                <SilverCounter />
+            </div>
         </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div className="lg:col-span-3 lg:order-1">
+        <div className={cn("lg:col-span-3 lg:order-1", isMobile ? "order-2" : "order-1")}>
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
              {isMobile ? (
               <Select value={activeTab} onValueChange={handleTabChange} disabled={isBusy}>
@@ -138,9 +142,11 @@ export default function GameUI() {
             <TabsContent value="tech" className="mt-4"><TechPanel /></TabsContent>
           </Tabs>
         </div>
-        <div className="lg:col-span-2 flex flex-col gap-4 lg:order-2">
+        <div className={cn("lg:col-span-2 flex flex-col gap-4", isMobile ? "order-1" : "order-2")}>
           <LogPanel />
-          <SilverCounter />
+          <div className="hidden lg:block">
+            <SilverCounter />
+          </div>
         </div>
       </div>
       <AlertDialog open={isGameOver}>
