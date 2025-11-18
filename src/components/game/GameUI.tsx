@@ -37,6 +37,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useState } from 'react';
+import { Button } from '../ui/button';
 
 export default function GameUI() {
   const { gameState } = useGame();
@@ -70,22 +71,24 @@ export default function GameUI() {
 
   return (
     <div className="flex flex-col gap-4">
-      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 rounded-lg border bg-card text-card-foreground p-4 shadow-sm">
-        <div className="flex flex-col gap-2">
-            <h1 className="text-xl sm:text-2xl font-bold font-headline text-primary">
-            Wasteland Automata
-            </h1>
-            <div className='flex flex-col gap-2'>
-              <Link href="/settings">
-                  <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 bg-secondary text-secondary-foreground hover:bg-secondary/80 w-fit">
-                      <Settings className="h-4 w-4" />
-                      Settings
-                  </div>
-              </Link>
-              <IdleTimer />
+      <header className="flex flex-col justify-between gap-4 rounded-lg border bg-card text-card-foreground p-4 shadow-sm">
+        <div className="flex flex-row justify-between items-center w-full gap-4">
+            <div className="flex flex-col gap-2">
+                <h1 className="text-xl sm:text-2xl font-bold font-headline text-primary">
+                Wasteland Automata
+                </h1>
+                <IdleTimer />
+            </div>
+            <div className="flex flex-col gap-4">
+                <Link href="/settings" className="self-end">
+                    <Button variant="ghost" size="icon">
+                        <Settings className="h-5 w-5" />
+                        <span className="sr-only">Settings</span>
+                    </Button>
+                </Link>
             </div>
         </div>
-        <div className="flex flex-col gap-4 w-full sm:w-auto">
+        <div className="flex flex-col gap-4 w-full">
             <Alert variant="destructive" className="border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
@@ -135,7 +138,7 @@ export default function GameUI() {
             <TabsContent value="tech" className="mt-4"><TechPanel /></TabsContent>
           </Tabs>
         </div>
-        <div className="lg:col-span-2 flex flex-col gap-4">
+        <div className="lg:col-span-2 flex flex-col gap-4 lg:order-2">
           <LogPanel />
           <SilverCounter />
         </div>
