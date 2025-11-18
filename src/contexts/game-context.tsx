@@ -74,7 +74,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (nextState.droneIsActive && nextState.droneReturnTimestamp && Date.now() >= nextState.droneReturnTimestamp) {
         const currentLocation = locations[nextState.currentLocation];
         let totalFound: Partial<Record<Resource, number>> = {};
-        for(let i = 0; i < 15; i++) { // Increased from 5 to 15
+        for(let i = 0; i < 15; i++) {
           currentLocation.resources.forEach((res) => {
               if (Math.random() < res.chance) {
                   let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
@@ -114,26 +114,24 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
 
 
-      if (state.isResting || newStats.health <= 0) {
-          // Universal passive systems (always on)
-          if(state.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP && (state.gameTick % 4 === 0)) {
-            newInventory.water = Math.min(INVENTORY_CAP, newInventory.water + 1);
+      // Universal passive systems (always on)
+      if(state.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP && (state.gameTick % 4 === 0)) {
+        newInventory.water = Math.min(INVENTORY_CAP, newInventory.water + 1);
+      }
+      if(state.builtStructures.includes('hydroponicsBay') && newInventory.apple < INVENTORY_CAP && (state.gameTick % 4 === 0)) {
+        newInventory.apple = Math.min(INVENTORY_CAP, newInventory.apple + 1);
+      }
+      
+      if (newStats.health <=0 ) {
+          return {
+            ...nextState,
+            log: [...logMessages, ...state.log]
           }
-          if(state.builtStructures.includes('hydroponicsBay') && newInventory.apple < INVENTORY_CAP && (state.gameTick % 4 === 0)) {
-            newInventory.apple = Math.min(INVENTORY_CAP, newInventory.apple + 1);
-          }
-          
-          if (newStats.health <=0 ) {
-             return {
-                ...nextState,
-                log: [...logMessages, ...state.log]
-              }
-          }
-      };
+      }
+      
 
-      // Idle state logic
-      if (state.isIdle && !state.droneIsActive && state.smeltingQueue <= 0) {
-         if (newStats.health < MAX_HEALTH) {
+      if (state.isResting || state.isIdle) {
+        if (newStats.health < MAX_HEALTH) {
             newStats.health = Math.min(MAX_HEALTH, newStats.health + 0.25);
         }
       } else {
@@ -844,7 +842,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (state.inventory.apple < 10 || state.inventory.water < 10) {
         return {
           ...state,
-          log: [{ id: generateUniqueLogId(), text: "Not enough apples and water to fuel the drone.", type: 'danger', timestamp: Date.now() }],
+          log: [{ id: generateUniqueLogId(), text: "Not enough apples and water to fuel the drone.", type: 'danger', timestamp: Date.now() }, ...state.log],
         };
       }
       const newInventory = { ...state.inventory };
@@ -855,7 +853,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         inventory: newInventory,
         droneIsActive: true,
         droneReturnTimestamp: Date.now() + 30000, // 30 seconds
-        log: [{ id: generateUniqueLogId(), text: "Scavenger drone launched. It will return in 30 seconds.", type: 'info', timestamp: Date.now() }],
+        log: [{ id: generateUniqueLogId(), text: "Scavenger drone launched. It will return in 30 seconds.", type: 'info', timestamp: Date.now() }, ...state.log],
       };
     }
 
