@@ -49,7 +49,7 @@ export default function CommunityPanel() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Users /> Community</CardTitle>
+                <CardTitle className="flex items-center gap-2"><Users /> Quests</CardTitle>
                 <CardDescription>Locals in the wasteland may have tasks for you.</CardDescription>
             </CardHeader>
             <CardContent>
