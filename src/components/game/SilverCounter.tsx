@@ -10,12 +10,12 @@ export default function SilverCounter() {
 
     return (
         <Card>
-            <CardContent className="p-4 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                    <Coins className="h-6 w-6 text-yellow-500" />
-                    <span className="text-lg font-semibold">Silver</span>
+            <CardContent className="p-2 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <Coins className="h-5 w-5 text-yellow-500" />
+                    <span className="text-sm font-semibold">Silver</span>
                 </div>
-                <span className="text-xl font-bold font-mono text-primary">
+                <span className="text-lg font-bold font-mono text-primary">
                     {inventory.silver || 0}
                 </span>
             </CardContent>
