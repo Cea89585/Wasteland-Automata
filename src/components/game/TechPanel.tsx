@@ -129,8 +129,7 @@ export default function TechPanel() {
         <CardDescription>Use silver to unlock permanent upgrades for your operation.</CardDescription>
       </CardHeader>
       <CardContent>
-       <ScrollArea className="h-[300px]">
-        <div className="space-y-2 pr-4">
+        <div className="space-y-2">
             {/* Drone Upgrade */}
             {gameState.builtStructures.includes('droneBay') && (
               <UpgradeItem
@@ -227,7 +226,6 @@ export default function TechPanel() {
                 isDead={isDead}
             />
         </div>
-       </ScrollArea>
       </CardContent>
     </Card>
   );

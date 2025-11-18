@@ -57,7 +57,6 @@ export default function MarketPanel() {
         {sellableItems.length === 0 ? (
           <p className="text-muted-foreground">You have nothing of value to sell. Go find some loot.</p>
         ) : (
-          <ScrollArea className="h-[300px] pr-4">
             <div className="grid grid-cols-1 gap-4">
               {sellableItems.map((item) => {
                 const isLocked = lockedItems.includes(item.id);
@@ -98,7 +97,6 @@ export default function MarketPanel() {
                 );
               })}
             </div>
-          </ScrollArea>
         )}
       </CardContent>
     </Card>

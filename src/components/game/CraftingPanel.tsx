@@ -53,8 +53,7 @@ export default function CraftingPanel() {
         ) : availableRecipes.length === 0 ? (
            <p className="text-muted-foreground">No recipes unlocked. Explore to find more.</p>
         ) : (
-          <ScrollArea className="h-[300px]">
-            <div className="space-y-2 pr-4">
+          <div className="space-y-2">
             {availableRecipes.map(recipe => {
               const isCraftable = canCraft(recipe.id);
               return (
@@ -90,7 +89,6 @@ export default function CraftingPanel() {
               )
             })}
             </div>
-          </ScrollArea>
         )}
       </CardContent>
     </Card>

@@ -67,7 +67,6 @@ export default function InventoryPanel() {
         {ownedItems.length === 0 ? (
           <p className="text-muted-foreground">Your inventory is empty. Time to start scavenging.</p>
         ) : (
-          <ScrollArea className="h-[300px] pr-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {ownedItems.map((itemId) => {
                   const data = itemData[itemId as keyof typeof itemData];
@@ -110,7 +109,6 @@ export default function InventoryPanel() {
                   );
                 })}
             </div>
-          </ScrollArea>
         )}
       </CardContent>
     </Card>

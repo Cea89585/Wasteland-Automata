@@ -132,10 +132,10 @@ export default function LogPanel() {
           </DialogContent>
         </Dialog>
       </CardHeader>
-      <CardContent className="flex-grow overflow-hidden h-[300px]">
+      <CardContent className="flex-grow overflow-hidden">
         <ScrollArea className="h-full" ref={scrollAreaRef}>
           <div className="flex flex-col gap-3 pr-4">
-            {log.slice(0, 15).map((message) => (
+            {log.slice(0, 50).map((message) => (
               <LogEntry key={message.id} message={message} />
             ))}
           </div>

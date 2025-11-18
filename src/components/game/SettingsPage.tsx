@@ -112,9 +112,8 @@ export default function SettingsPage() {
                     </CardHeader>
                     <CardContent>
                         {totalItemsGained.length === 0 ? (
-                            <p className="text-muted-foreground text-center h-[200px] flex items-center justify-center">No items gathered yet.</p>
+                            <p className="text-muted-foreground text-center flex items-center justify-center">No items gathered yet.</p>
                         ) : (
-                        <ScrollArea className="h-[200px] pr-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {totalItemsGained.map(([itemId, quantity]) => {
                                 const data = itemData[itemId as keyof typeof itemData];
@@ -129,7 +128,6 @@ export default function SettingsPage() {
                                 );
                                 })}
                             </div>
-                        </ScrollArea>
                         )}
                     </CardContent>
                 </Card>
