@@ -6,7 +6,8 @@ import { itemData } from '@/lib/game-data/items';
 import { allIcons } from './GameIcons';
 import type { EquipmentSlot, Item } from '@/lib/game-types';
 import { Button } from '../ui/button';
-import { Shirt, Hand, PersonStanding } from 'lucide-react';
+import { Shirt, Hand, PersonStanding, Map } from 'lucide-react';
+import { Separator } from '../ui/separator';
 
 const slotIcons: Record<EquipmentSlot, React.ReactElement> = {
     hand: <Hand className="h-6 w-6 text-muted-foreground" />,
@@ -73,6 +74,21 @@ export default function CharacterPanel() {
             );
           })}
         </div>
+        {gameState.unlockedFlags.includes('mapCrafted') && (
+            <>
+                <Separator className="my-4" />
+                <div className="space-y-2">
+                    <h3 className="text-lg font-medium text-muted-foreground">Discoveries</h3>
+                    <div className="flex items-center gap-3 p-3 rounded-md bg-muted/50">
+                        {allIcons['crudeMap']}
+                        <div className="flex flex-col">
+                            <span className="font-medium">Crude Map</span>
+                            <p className="text-xs text-muted-foreground">Wasteland travel unlocked.</p>
+                        </div>
+                    </div>
+                </div>
+            </>
+        )}
       </CardContent>
     </Card>
   );
