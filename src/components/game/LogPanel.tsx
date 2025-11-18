@@ -2,7 +2,6 @@
 'use client';
 import { useGame } from '@/hooks/use-game';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useEffect, useRef, useState } from 'react';
 import { Info, AlertTriangle, ShieldCheck, Hammer, Clock, BookOpen, Trash2, ChevronDown } from 'lucide-react';
@@ -25,7 +24,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from '../ui/button';
 import { allIcons } from './GameIcons';
@@ -116,14 +114,12 @@ export default function LogPanel() {
             <DialogHeader>
               <DialogTitle>Full Event Log</DialogTitle>
             </DialogHeader>
-            <div className="mt-4 h-[60vh] -mx-6 px-6">
-                <ScrollArea className="h-full">
+            <div className="mt-4 h-[60vh] -mx-6 px-6 overflow-y-auto">
                 <div className="flex flex-col gap-3 pr-4">
                     {[...log].reverse().map((message) => (
                     <LogEntry key={message.id} message={message} />
                     ))}
                 </div>
-                </ScrollArea>
             </div>
              <DialogFooter className="mt-4">
                 <AlertDialog>
@@ -155,7 +151,7 @@ export default function LogPanel() {
           </DialogContent>
         </Dialog>
       </CardHeader>
-      <CardContent className="flex-grow overflow-hidden">
+      <CardContent className="flex-grow overflow-y-auto">
         <div className="flex flex-col gap-3 pr-4">
           {log.slice(0, 15).map((message) => (
             <LogEntry key={message.id} message={message} />
