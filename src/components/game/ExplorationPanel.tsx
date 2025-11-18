@@ -41,7 +41,7 @@ export default function ExplorationPanel() {
     let interval: NodeJS.Timeout | undefined;
     if (gameState.isResting) {
       interval = setInterval(() => {
-        setRestingProgress(prev => prev + (100 / 30));
+        setRestingProgress(prev => prev + (100 / 20));
       }, 1000);
     }
     return () => {
