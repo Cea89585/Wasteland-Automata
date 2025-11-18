@@ -93,6 +93,7 @@ export interface GameState {
   hungerLevel: number;
   thirstLevel: number;
   healthLevel: number;
+  droneLevel: number;
   isInitialized: boolean;
   gameTick: number;
   isResting: boolean;
@@ -134,6 +135,7 @@ export type GameAction =
   | { type: 'UPGRADE_HUNGER' }
   | { type: 'UPGRADE_THIRST' }
   | { type: 'UPGRADE_HEALTH' }
+  | { type: 'UPGRADE_DRONE' }
   | { type: 'TRAVEL'; payload: { locationId: LocationId } }
   | { type: 'SEND_DRONE' }
   | { type: 'DRONE_RETURN'; payload: { resources: Partial<Record<Resource, number>> } };

@@ -73,11 +73,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       // Drone return logic
       if (nextState.droneIsActive && nextState.droneReturnTimestamp && Date.now() >= nextState.droneReturnTimestamp) {
         const currentLocation = locations[nextState.currentLocation];
+        const droneBuff = 1 + (nextState.droneLevel * 0.1);
         let totalFound: Partial<Record<Resource, number>> = {};
+
         for(let i = 0; i < 15; i++) {
           currentLocation.resources.forEach((res) => {
               if (Math.random() < res.chance) {
                   let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
+                  amount = Math.ceil(amount * droneBuff);
                   totalFound[res.resource] = (totalFound[res.resource] || 0) + amount;
               }
           });
@@ -826,6 +829,32 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
     }
 
+    case 'UPGRADE_DRONE': {
+      const cost = 10000;
+      if (state.inventory.silver < cost) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: "Not enough silver to upgrade drone efficiency.", type: 'danger', timestamp: Date.now() }, ...state.log],
+        }
+      }
+      if (state.droneLevel >= 20) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: "Drone efficiency is already at max level.", type: 'info', timestamp: Date.now() }, ...state.log],
+        }
+      }
+      const newInventory = { ...state.inventory };
+      newInventory.silver -= cost;
+      const newDroneLevel = state.droneLevel + 1;
+      const newBonus = newDroneLevel * 10;
+      return {
+        ...state,
+        inventory: newInventory,
+        droneLevel: newDroneLevel,
+        log: [{ id: generateUniqueLogId(), text: `Drone Efficiency upgraded to Level ${newDroneLevel}! Resource yield is now +${newBonus}%.`, type: 'success', timestamp: Date.now() }, ...state.log],
+      }
+    }
+
     case 'TRAVEL': {
       const { locationId } = action.payload;
       const newLocation = locations[locationId];
@@ -928,6 +957,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
       if (!migratedState.healthLevel) {
           migratedState.healthLevel = 0;
+      }
+      if (!migratedState.droneLevel) {
+        migratedState.droneLevel = 0;
       }
       if (!migratedState.droneIsActive) {
         migratedState.droneIsActive = false;

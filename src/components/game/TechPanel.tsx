@@ -3,7 +3,7 @@
 import { useGame } from '@/hooks/use-game';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Database, Coins, Battery, Sandwich, CupSoda, Heart } from 'lucide-react';
+import { Database, Coins, Battery, Sandwich, CupSoda, Heart, Bot } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 
 const BASE_STORAGE_COST = 10000;
@@ -21,10 +21,14 @@ const BASE_STAT = 100;
 const MAX_STAT_CAP = 500;
 const MAX_HEALTH_CAP = 1000;
 
+const DRONE_UPGRADE_COST = 10000;
+const DRONE_BONUS_PER_LEVEL = 10;
+const MAX_DRONE_LEVEL = 20;
+
 
 export default function TechPanel() {
   const { gameState, dispatch } = useGame();
-  const { storageLevel, energyLevel, hungerLevel, thirstLevel, healthLevel, inventory, playerStats, isResting, smeltingQueue } = gameState;
+  const { storageLevel, energyLevel, hungerLevel, thirstLevel, healthLevel, droneLevel, inventory, playerStats, isResting, smeltingQueue } = gameState;
 
   const calculateCost = (level: number, baseCost: number, increment: number): number => {
     if (level === 0) return baseCost;
@@ -53,11 +57,15 @@ export default function TechPanel() {
   const currentHealthCap = BASE_STAT + healthLevel * STAT_PER_LEVEL;
   const isHealthCapped = currentHealthCap >= MAX_HEALTH_CAP;
 
+  const currentDroneBonus = droneLevel * DRONE_BONUS_PER_LEVEL;
+  const isDroneCapped = droneLevel >= MAX_DRONE_LEVEL;
+
   const canAffordStorage = inventory.silver >= storageUpgradeCost;
   const canAffordEnergy = inventory.silver >= energyUpgradeCost;
   const canAffordHunger = inventory.silver >= hungerUpgradeCost;
   const canAffordThirst = inventory.silver >= thirstUpgradeCost;
   const canAffordHealth = inventory.silver >= healthUpgradeCost;
+  const canAffordDrone = inventory.silver >= DRONE_UPGRADE_COST;
 
   const isBusy = isResting || smeltingQueue > 0;
   const isDead = playerStats.health <= 0;
@@ -67,6 +75,7 @@ export default function TechPanel() {
   const handleUpgradeHunger = () => dispatch({ type: 'UPGRADE_HUNGER' });
   const handleUpgradeThirst = () => dispatch({ type: 'UPGRADE_THIRST' });
   const handleUpgradeHealth = () => dispatch({ type: 'UPGRADE_HEALTH' });
+  const handleUpgradeDrone = () => dispatch({ type: 'UPGRADE_DRONE' });
 
   return (
     <Card>
@@ -77,6 +86,36 @@ export default function TechPanel() {
       <CardContent>
        <ScrollArea className="h-[300px]">
         <div className="space-y-4 pr-4">
+            {/* Drone Upgrade */}
+            {gameState.builtStructures.includes('droneBay') && (
+              <Card className="bg-muted/50">
+                  <CardHeader>
+                      <CardTitle className="flex items-center text-xl gap-2"><Bot /> Drone Efficiency</CardTitle>
+                      <CardDescription>Improve the resource yield from scavenger drone missions.</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                      <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
+                          <span className="font-medium">Current Level:</span>
+                          <span className="font-mono text-lg font-semibold text-primary">{droneLevel}</span>
+                      </div>
+                      <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
+                          <span className="font-medium">Current Bonus:</span>
+                          <span className="font-mono text-lg font-semibold text-primary">+{currentDroneBonus}%</span>
+                      </div>
+                      <div className="text-center pt-4">
+                          <p className="text-sm text-muted-foreground">Next Upgrade Cost:</p>
+                          <p className="text-2xl font-bold font-mono text-primary flex items-center justify-center gap-2">
+                              <Coins className="h-6 w-6 text-yellow-500" />
+                              {isDroneCapped ? "MAX" : DRONE_UPGRADE_COST.toLocaleString()}
+                          </p>
+                      </div>
+                      <Button className="w-full mt-4" onClick={handleUpgradeDrone} disabled={!canAffordDrone || isBusy || isDead || isDroneCapped}>
+                          {isDroneCapped ? "Max Level Reached" : `Upgrade Drones (+${DRONE_BONUS_PER_LEVEL}% Yield)`}
+                      </Button>
+                  </CardContent>
+              </Card>
+            )}
+
             {/* Storage */}
             <Card className="bg-muted/50">
                 <CardHeader>
