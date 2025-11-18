@@ -1,3 +1,4 @@
+
 // src/components/game/GameUI.tsx
 'use client';
 
@@ -39,6 +40,7 @@ import {
 import { useState } from 'react';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
+import { ScrollArea } from '../ui/scroll-area';
 
 export default function GameUI() {
   const { gameState } = useGame();
@@ -110,7 +112,7 @@ export default function GameUI() {
         </div>
         <div className="flex flex-col gap-2 w-full">
             <StatsPanel />
-            <div className={cn("block lg:hidden")}>
+            <div className={cn("block")}>
                 <SilverCounter />
             </div>
         </div>
@@ -120,20 +122,16 @@ export default function GameUI() {
         <div className={cn("lg:col-span-3 lg:order-1", isMobile ? "order-1" : "order-1")}>
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
              {isMobile ? (
-              <Select value={activeTab} onValueChange={handleTabChange} disabled={isBusy}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a tab" />
-                </SelectTrigger>
-                <SelectContent>
+              <ScrollArea className="w-full whitespace-nowrap">
+                <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
                   {tabs.map((tab) => (
-                    <SelectItem key={tab.value} value={tab.value}>
-                       <div className="flex items-center gap-2">
-                         {tab.icon} {tab.label}
-                       </div>
-                    </SelectItem>
+                    <TabsTrigger key={tab.value} value={tab.value} disabled={isBusy} className="flex items-center gap-2 text-xs h-9">
+                      {tab.icon}
+                      <span>{tab.label}</span>
+                    </TabsTrigger>
                   ))}
-                </SelectContent>
-              </Select>
+                </TabsList>
+              </ScrollArea>
             ) : (
               <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
                 {tabs.map((tab) => (
@@ -157,9 +155,6 @@ export default function GameUI() {
         </div>
         <div className={cn("lg:col-span-2 flex flex-col gap-4", isMobile ? "order-2" : "order-2")}>
           <LogPanel />
-          <div className="hidden lg:block">
-            <SilverCounter />
-          </div>
         </div>
       </div>
       <AlertDialog open={isGameOver}>
