@@ -122,16 +122,14 @@ export default function GameUI() {
         <div className={cn("lg:col-span-3 lg:order-1", isMobile ? "order-1" : "order-2")}>
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
              {isMobile ? (
-              <ScrollArea className="w-full whitespace-nowrap">
-                <TabsList>
-                  {tabs.map((tab) => (
-                    <TabsTrigger key={tab.value} value={tab.value} disabled={isBusy} className="flex items-center gap-2 text-xs h-9">
-                      {tab.icon}
-                      <span>{tab.label}</span>
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </ScrollArea>
+              <TabsList className="h-auto flex-wrap">
+                {tabs.map((tab) => (
+                  <TabsTrigger key={tab.value} value={tab.value} disabled={isBusy} className="flex items-center gap-2 text-xs h-9">
+                    {tab.icon}
+                    <span>{tab.label}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
             ) : (
               <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
                 {tabs.map((tab) => (
