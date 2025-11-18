@@ -219,33 +219,33 @@ export default function ExplorationPanel() {
         </div>
         {gameState.unlockedFlags.includes('mapCrafted') && (
           <Dialog>
-              <DialogTrigger asChild>
+            <DialogTrigger asChild>
               <Button variant="outline" disabled={isBusy || gameState.playerStats.health <= 0} className="w-full">
                   <Map className="mr-2 h-4 w-4" /> Travel
               </Button>
-              </DialogTrigger>
-              <DialogContent>
+            </DialogTrigger>
+            <DialogContent>
               <DialogHeader>
                   <DialogTitle>Travel to a new location</DialogTitle>
               </DialogHeader>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
                   {Object.values(locations).map(location => (
-                  <DialogClose asChild key={location.id}>
-                      <Button 
-                          variant={currentLocation.id === location.id ? 'default' : 'secondary'}
-                          onClick={() => handleTravel(location.id)}
-                          disabled={currentLocation.id === location.id}
-                          className="h-auto"
-                      >
-                          <div className="flex flex-col text-left p-2">
-                              <span className="font-bold">{location.name}</span>
-                              <span className="text-xs font-normal">{location.description}</span>
-                          </div>
-                      </Button>
-                  </DialogClose>
+                    <DialogClose asChild key={location.id}>
+                        <Button 
+                            variant={currentLocation.id === location.id ? 'default' : 'secondary'}
+                            onClick={() => handleTravel(location.id)}
+                            disabled={currentLocation.id === location.id}
+                            className="h-auto"
+                        >
+                            <div className="flex flex-col text-left p-2">
+                                <span className="font-bold">{location.name}</span>
+                                <span className="text-xs font-normal">{location.description}</span>
+                            </div>
+                        </Button>
+                    </DialogClose>
                   ))}
               </div>
-              </DialogContent>
+            </DialogContent>
           </Dialog>
         )}
 
