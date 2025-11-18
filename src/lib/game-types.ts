@@ -1,7 +1,7 @@
 // src/lib/game-types.ts
 
 import type { FixedEncounter } from "./game-data/encounters";
-import type { Quest } from "./game-data/quests";
+import type { Quest, QuestRequirement } from "./game-data/quests";
 
 export const Resources = {
   wood: 'Wood',

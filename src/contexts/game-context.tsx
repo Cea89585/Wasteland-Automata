@@ -429,17 +429,28 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
       // Check requirements
       for (const req of quest.requirements) {
-        if (newInventory[req.item] < req.amount) {
-          return {
-            ...state,
-            log: [{ id: generateUniqueLogId(), text: `You don't have the required items to help.`, type: 'danger', timestamp: Date.now() }, ...state.log],
-          };
+        if (req.type === 'item') {
+            if ((newInventory[req.item] || 0) < req.amount) {
+                return {
+                    ...state,
+                    log: [{ id: generateUniqueLogId(), text: `You don't have the required items to help.`, type: 'danger', timestamp: Date.now() }, ...state.log],
+                };
+            }
+        } else if (req.type === 'structure') {
+            if (!state.builtStructures.includes(req.structure)) {
+                 return {
+                    ...state,
+                    log: [{ id: generateUniqueLogId(), text: `You haven't built the required structure to complete this.`, type: 'danger', timestamp: Date.now() }, ...state.log],
+                };
+            }
         }
       }
 
-      // Deduct requirements
+      // Deduct item requirements
       for (const req of quest.requirements) {
-        newInventory[req.item] -= req.amount;
+        if (req.type === 'item') {
+            newInventory[req.item] -= req.amount;
+        }
       }
       
       let rewardLog = '';
@@ -453,8 +464,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             rewardLog += `${reward.amount} ${itemData[reward.item].name}`;
         } else if (reward.type === 'silver') {
             newInventory.silver += reward.amount;
-             newStatistics.totalItemsGained.silver = (newStatistics.totalItemsGained.silver || 0) + reward.amount;
-             rewardLog += `${reward.amount} Silver`;
+            newStatistics.totalItemsGained.silver = (newStatistics.totalItemsGained.silver || 0) + reward.amount;
+            rewardLog += `${reward.amount} Silver`;
         }
       }
       

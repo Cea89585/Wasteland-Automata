@@ -1,8 +1,13 @@
 // src/lib/game-data/quests.ts
 import type { Resource, Item } from '../game-types';
 
-type QuestRequirement = {
+export type QuestRequirement = {
+    type: 'item';
     item: Resource | Item;
+    amount: number;
+} | {
+    type: 'structure';
+    structure: Item;
     amount: number;
 };
 
@@ -34,8 +39,8 @@ export const quests: Quest[] = [
         npc: 'Silas, the Watcher',
         description: 'A grizzled man named Silas watches you from the shadows of a collapsed building. "Another scavenger," he mutters. "The wasteland chews up your kind. If you want to prove you\'re different, bring me some supplies. An apple and a bottle of water. Let\'s see if you can even manage that."',
         requirements: [
-            { item: 'water', amount: 1 },
-            { item: 'apple', amount: 1 }
+            { type: 'item', item: 'water', amount: 1 },
+            { type: 'item', item: 'apple', amount: 1 }
         ],
         rewards: [
             { type: 'silver', amount: 10 }
@@ -49,7 +54,7 @@ export const quests: Quest[] = [
         npc: 'Silas, the Watcher',
         description: '"So, you can scavenge. Big deal," Silas scoffs, though he seems a bit less hostile. "Survival isn\'t just about what you can find, it\'s about what you can make. That pile of junk you call a camp won\'t last a season. Build a proper workbench. Then we can talk."',
         requirements: [
-            { item: 'workbench', amount: 1 }
+            { type: 'structure', structure: 'workbench', amount: 1 }
         ],
         rewards: [
             { type: 'item', item: 'cookedApple', amount: 2 },
@@ -65,7 +70,7 @@ export const quests: Quest[] = [
         npc: 'Silas, the Watcher',
         description: 'Silas points to your primitive tools. "A workbench is a start, but you need better gear. The key is components. You can\'t make them with your bare hands. Build a Furnace, smelt down some scrap, and bring me proof you can create something more advanced. Bring me one of those electronic components."',
         requirements: [
-            { item: 'components', amount: 1 }
+            { type: 'item', item: 'components', amount: 1 }
         ],
         rewards: [
             { type: 'silver', amount: 50 },
