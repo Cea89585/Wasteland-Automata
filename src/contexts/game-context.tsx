@@ -2,12 +2,14 @@
 'use client';
 
 import React, { createContext, useReducer, useEffect, type ReactNode, useState } from 'react';
-import type { GameState, GameAction, LogMessage, Resource, Item, Statistics } from '@/lib/game-types';
+import type { GameState, GameAction, LogMessage, Resource, Item, Statistics, LocationId } from '@/lib/game-types';
 import { initialState, initialStatistics } from '@/lib/game-data/initial-state';
 import { recipes } from '@/lib/game-data/recipes';
 import { itemData } from '@/lib/game-data/items';
 import { locations } from '@/lib/game-data/locations';
 import { useInactivityTimer } from '@/hooks/use-inactivity-timer';
+import { locationOrder } from '@/lib/game-types';
+
 
 const SAVE_KEY = 'wastelandAutomata_save';
 const STATS_KEY = 'wastelandAutomata_stats';
@@ -113,19 +115,21 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
 
       if (state.isResting || newStats.health <= 0) {
-          return {
-            ...nextState,
-            log: [...logMessages, ...state.log]
+          // Universal passive systems (always on)
+          if(state.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP && (state.gameTick % 4 === 0)) {
+            newInventory.water = Math.min(INVENTORY_CAP, newInventory.water + 1);
+          }
+          if(state.builtStructures.includes('hydroponicsBay') && newInventory.apple < INVENTORY_CAP && (state.gameTick % 4 === 0)) {
+            newInventory.apple = Math.min(INVENTORY_CAP, newInventory.apple + 1);
+          }
+          
+          if (newStats.health <=0 ) {
+             return {
+                ...nextState,
+                log: [...logMessages, ...state.log]
+              }
           }
       };
-
-      // Universal passive systems (always on)
-      if(state.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP && (state.gameTick % 4 === 0)) {
-        newInventory.water = Math.min(INVENTORY_CAP, newInventory.water + 1);
-      }
-      if(state.builtStructures.includes('hydroponicsBay') && newInventory.apple < INVENTORY_CAP && (state.gameTick % 4 === 0)) {
-        newInventory.apple = Math.min(INVENTORY_CAP, newInventory.apple + 1);
-      }
 
       // Idle state logic
       if (state.isIdle && !state.droneIsActive && state.smeltingQueue <= 0) {
@@ -335,42 +339,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const recipe = recipes.find((r) => r.id === action.payload.recipeId);
       if (!recipe) return state;
       
-      // Handle one-time flag crafts
-      if (recipe.id === 'recipe_crudeMap') {
-        if (state.unlockedFlags.includes('mapCrafted')) return state; // Already crafted
-
-        let canCraftMap = true;
-        for (const [resource, requiredAmount] of Object.entries(recipe.requirements)) {
-            if (state.inventory[resource as keyof typeof state.inventory] < requiredAmount) {
-                canCraftMap = false;
-                break;
-            }
-        }
-        if (!canCraftMap) {
-             return {
-              ...state,
-              log: [{ id: generateUniqueLogId(), text: "Not enough resources to craft this.", type: 'danger', timestamp: Date.now() }, ...state.log],
-            };
-        }
-
-        const newInventory = { ...state.inventory };
-        for (const [resource, requiredAmount] of Object.entries(recipe.requirements)) {
-            newInventory[resource as keyof typeof newInventory] -= requiredAmount;
-        }
-
-        const newUnlockedFlags = [...state.unlockedFlags, 'mapCrafted'];
-        const logMessageText = `You piece together a crude map, revealing the wider wasteland.`;
-        return {
-          ...state,
-          inventory: newInventory,
-          unlockedFlags: newUnlockedFlags,
-          log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
-        };
-      }
-
-      // Handle normal item crafts
-      const INVENTORY_CAP = getInventoryCap();
-      let newInventory = { ...state.inventory };
+      const newInventory = { ...state.inventory };
       let canCraft = true;
 
       for (const [resource, requiredAmount] of Object.entries(recipe.requirements)) {
@@ -386,16 +355,42 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           log: [{ id: generateUniqueLogId(), text: "Not enough resources to craft this.", type: 'danger', timestamp: Date.now() }, ...state.log],
         };
       }
+      
+      for (const [resource, requiredAmount] of Object.entries(recipe.requirements)) {
+        newInventory[resource as keyof typeof newInventory] -= requiredAmount;
+      }
 
+      // Handle map crafting as a special case for unlocking locations
+      if (recipe.id === 'recipe_crudeMap') {
+        const lastUnlockedIndex = locationOrder.indexOf(state.unlockedLocations[state.unlockedLocations.length - 1]);
+        const nextLocationIndex = lastUnlockedIndex + 1;
+
+        if (nextLocationIndex < locationOrder.length) {
+          const nextLocationId = locationOrder[nextLocationIndex];
+          const newUnlockedLocations = [...state.unlockedLocations, nextLocationId];
+          const logMessageText = `You piece together a crude map, revealing the way to the ${locations[nextLocationId].name}.`;
+          return {
+            ...state,
+            inventory: newInventory,
+            unlockedLocations: newUnlockedLocations,
+            log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
+          };
+        } else {
+          // All locations unlocked, maybe just give the item back or a message
+           return {
+              ...state,
+              log: [{ id: generateUniqueLogId(), text: "You've already mapped every known area.", type: 'info', timestamp: Date.now() }, ...state.log],
+            };
+        }
+      }
+
+      // Handle normal item crafts
+      const INVENTORY_CAP = getInventoryCap();
       if(newInventory[recipe.creates] >= INVENTORY_CAP) {
         return {
           ...state,
           log: [{ id: generateUniqueLogId(), text: `You can't carry any more ${itemData[recipe.creates].name}.`, type: 'danger', timestamp: Date.now() }, ...state.log],
         };
-      }
-      
-      for (const [resource, requiredAmount] of Object.entries(recipe.requirements)) {
-        newInventory[resource as keyof typeof newInventory] -= requiredAmount;
       }
       
       const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, 1);
@@ -836,7 +831,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'TRAVEL': {
       const { locationId } = action.payload;
       const newLocation = locations[locationId];
-      if (!newLocation) return state;
+      if (!newLocation || !state.unlockedLocations.includes(locationId)) return state;
 
       return {
         ...state,
@@ -917,6 +912,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
       if (!migratedState.unlockedFlags) {
         migratedState.unlockedFlags = [];
+      }
+      if (!migratedState.unlockedLocations) {
+        migratedState.unlockedLocations = ['outskirts'];
       }
       if (!migratedState.storageLevel) {
           migratedState.storageLevel = 0;

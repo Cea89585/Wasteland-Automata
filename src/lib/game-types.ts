@@ -65,6 +65,9 @@ export type LocationId =
   | 'bunker'
   | 'industrial';
 
+export const locationOrder: LocationId[] = ['outskirts', 'forest', 'tunnels', 'industrial', 'wasteland', 'bunker'];
+
+
 export type TechId = 'basicTools' | 'shelter' | 'power' | 'automation';
 export type Flag = 'mapCrafted';
 
@@ -82,6 +85,7 @@ export interface GameState {
   unlockedRecipes: string[];
   builtStructures: string[];
   unlockedFlags: Flag[];
+  unlockedLocations: LocationId[];
   unlockedTech: TechId[];
   lockedItems: Resource[];
   storageLevel: number;

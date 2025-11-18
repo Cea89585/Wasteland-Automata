@@ -9,10 +9,13 @@ import { itemData } from '@/lib/game-data/items';
 import type { Resource } from '@/lib/game-types';
 import { Hammer } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
+import { locationOrder } from '@/lib/game-types';
 
 export default function CraftingPanel() {
   const { gameState, dispatch } = useGame();
-  const { inventory, unlockedRecipes } = gameState;
+  const { inventory, unlockedRecipes, unlockedLocations } = gameState;
+
+  const allLocationsUnlocked = unlockedLocations.length >= locationOrder.length;
 
   // Filter out items that are now built in the Base panel
   const availableRecipes = recipes.filter(r => 
@@ -22,7 +25,7 @@ export default function CraftingPanel() {
     r.id !== 'recipe_furnace' &&
     r.id !== 'recipe_droneBay' &&
     r.id !== 'recipe_hydroponicsBay' &&
-    !(r.id === 'recipe_crudeMap' && gameState.unlockedFlags.includes('mapCrafted')) // Hide map if already crafted
+    !(r.id === 'recipe_crudeMap' && allLocationsUnlocked) // Hide map if all locations are unlocked
   );
 
   const canCraft = (recipeId: string) => {

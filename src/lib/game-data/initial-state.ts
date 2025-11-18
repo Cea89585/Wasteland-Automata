@@ -1,5 +1,5 @@
 // src/lib/game-data/initial-state.ts
-import type { GameState, Statistics } from '@/lib/game-types';
+import type { GameState, Statistics, LocationId } from '@/lib/game-types';
 
 const emptyInventory = {
   wood: 0,
@@ -72,6 +72,7 @@ export const initialState: Omit<GameState, 'statistics'> = {
   unlockedRecipes: ['recipe_stoneAxe'],
   builtStructures: [],
   unlockedFlags: [],
+  unlockedLocations: ['outskirts'],
   unlockedTech: [],
   lockedItems: [],
   storageLevel: 0,

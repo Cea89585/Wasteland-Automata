@@ -74,16 +74,16 @@ export default function CharacterPanel() {
             );
           })}
         </div>
-        {gameState.unlockedFlags.includes('mapCrafted') && (
+        {gameState.unlockedLocations.length > 1 && (
             <>
                 <Separator className="my-4" />
                 <div className="space-y-2">
                     <h3 className="text-lg font-medium text-muted-foreground">Discoveries</h3>
                     <div className="flex items-center gap-3 p-3 rounded-md bg-muted/50">
-                        {allIcons['crudeMap']}
+                        <Map className="h-4 w-4 text-muted-foreground" />
                         <div className="flex flex-col">
-                            <span className="font-medium">Crude Map</span>
-                            <p className="text-xs text-muted-foreground">Wasteland travel unlocked.</p>
+                            <span className="font-medium">Wasteland Travel</span>
+                            <p className="text-xs text-muted-foreground">You can now travel between discovered locations.</p>
                         </div>
                     </div>
                 </div>

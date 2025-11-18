@@ -17,10 +17,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
-  DialogClose,
 } from "@/components/ui/dialog"
-import type { LocationId, Resource } from '@/lib/game-types';
+import type { LocationId } from '@/lib/game-types';
 import DronePanel from './DronePanel';
 
 export default function ExplorationPanel() {
@@ -30,7 +28,7 @@ export default function ExplorationPanel() {
   const [restingProgress, setRestingProgress] = useState(0);
 
   const currentLocation = locations[gameState.currentLocation];
-  const { equipment } = gameState;
+  const { equipment, unlockedLocations } = gameState;
 
   const finishResting = useCallback(() => {
     dispatch({ type: 'FINISH_RESTING' });
@@ -217,7 +215,7 @@ export default function ExplorationPanel() {
               {gameState.isResting ? 'Resting...' : 'Rest'}
             </Button>
         </div>
-        {gameState.unlockedFlags.includes('mapCrafted') && (
+        {unlockedLocations.length > 1 && (
           <Dialog>
             <DialogTrigger asChild>
               <Button variant="outline" disabled={isBusy || gameState.playerStats.health <= 0} className="w-full">
@@ -229,17 +227,19 @@ export default function ExplorationPanel() {
                   <DialogTitle>Travel to a new location</DialogTitle>
               </DialogHeader>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
-                  {Object.values(locations).map(location => (
-                    <DialogClose asChild key={location.id}>
+                  {unlockedLocations.map(locationId => {
+                    const location = locations[locationId];
+                    return (
                         <Button 
+                            key={location.id}
                             variant={currentLocation.id === location.id ? 'default' : 'secondary'}
                             onClick={() => handleTravel(location.id)}
                             disabled={currentLocation.id === location.id}
                         >
                             {location.name}
                         </Button>
-                    </DialogClose>
-                  ))}
+                    )
+                  })}
               </div>
             </DialogContent>
           </Dialog>
