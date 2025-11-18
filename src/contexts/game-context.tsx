@@ -692,7 +692,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         if (level === 0) return 10000;
         let cost = 10000;
         for (let i = 1; i <= level; i++) {
-          cost = cost * 2 + 10000;
+          cost = Math.floor(cost * 1.5 + 1000);
         }
         return cost;
       };
@@ -723,7 +723,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         if (level === 0) return 5000;
         let cost = 5000;
         for (let i = 1; i <= level; i++) {
-          cost = cost * 2 + 1000;
+          cost = Math.floor(cost * 1.5 + 1000);
         }
         return cost;
       };
@@ -754,7 +754,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           if (level === 0) return 5000;
           let cost = 5000;
           for (let i = 1; i <= level; i++) {
-            cost = cost * 2 + 1000;
+            cost = Math.floor(cost * 1.5 + 1000);
           }
           return cost;
       };
@@ -782,7 +782,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           if (level === 0) return 5000;
           let cost = 5000;
           for (let i = 1; i <= level; i++) {
-            cost = cost * 2 + 1000;
+            cost = Math.floor(cost * 1.5 + 1000);
           }
           return cost;
       };
@@ -810,7 +810,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           if (level === 0) return 5000;
           let cost = 5000;
           for (let i = 1; i <= level; i++) {
-            cost = cost * 2 + 1000;
+            cost = Math.floor(cost * 1.5 + 1000);
           }
           return cost;
       };

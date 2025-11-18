@@ -3,7 +3,7 @@
 import { useGame } from '@/hooks/use-game';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Database, Coins, Battery, Sandwich, CupSoda, Heart, Bot } from 'lucide-react';
+import { Database, Coins, Battery, Sandwich, CupSoda, Heart, Bot, PlusCircle } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 
 const BASE_STORAGE_COST = 10000;
@@ -25,6 +25,51 @@ const DRONE_UPGRADE_COST = 10000;
 const DRONE_BONUS_PER_LEVEL = 10;
 const MAX_DRONE_LEVEL = 20;
 
+const UpgradeItem = ({ title, description, icon, level, currentEffect, nextEffect, cost, onUpgrade, canAfford, isCapped, isBusy, isDead }: {
+  title: string;
+  description: string;
+  icon: React.ReactNode;
+  level: number;
+  currentEffect: string;
+  nextEffect: string;
+  cost: number;
+  onUpgrade: () => void;
+  canAfford: boolean;
+  isCapped?: boolean;
+  isBusy: boolean;
+  isDead: boolean;
+}) => (
+    <Card className="bg-muted/50 w-full">
+      <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex-grow">
+          <div className="flex items-center font-semibold text-base mb-2">
+            {icon} {title} (Lvl {level})
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">{description}</p>
+          <div className="text-xs text-muted-foreground flex flex-col sm:flex-row sm:gap-4">
+              <span>Current: {currentEffect}</span>
+              {!isCapped && <span>Next: {nextEffect}</span>}
+          </div>
+        </div>
+        <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center justify-center font-bold font-mono text-sm text-primary gap-1">
+            <Coins className="h-4 w-4 text-yellow-500" />
+            {isCapped ? "MAX" : cost.toLocaleString()}
+          </div>
+          <Button 
+            size="sm"
+            className="w-full"
+            variant={canAfford && !isCapped ? 'default' : 'outline'}
+            onClick={onUpgrade} 
+            disabled={!canAfford || isBusy || isDead || isCapped}
+          >
+            <PlusCircle className="h-4 w-4 mr-2" />
+            {isCapped ? 'Max Level' : 'Upgrade'}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+);
 
 export default function TechPanel() {
   const { gameState, dispatch } = useGame();
@@ -34,26 +79,26 @@ export default function TechPanel() {
     if (level === 0) return baseCost;
     let cost = baseCost;
     for (let i = 1; i <= level; i++) {
-      cost = cost * 2 + increment;
+      cost = Math.floor(cost * 1.5 + increment);
     }
     return cost;
   };
   
-  const storageUpgradeCost = calculateCost(storageLevel, BASE_STORAGE_COST, BASE_STORAGE_COST);
+  const storageUpgradeCost = calculateCost(storageLevel, BASE_STORAGE_COST, BASE_STORAGE_COST / 10);
   const currentCapacity = BASE_CAPACITY + storageLevel * CAPACITY_PER_LEVEL;
 
-  const energyUpgradeCost = calculateCost(energyLevel, BASE_CORE_COST, 1000);
+  const energyUpgradeCost = calculateCost(energyLevel, BASE_CORE_COST, BASE_CORE_COST / 5);
   const currentEnergy = BASE_ENERGY + energyLevel * ENERGY_PER_LEVEL;
 
-  const hungerUpgradeCost = calculateCost(hungerLevel, BASE_STAT_COST, 1000);
+  const hungerUpgradeCost = calculateCost(hungerLevel, BASE_STAT_COST, BASE_STAT_COST / 5);
   const currentHungerCap = BASE_STAT + hungerLevel * STAT_PER_LEVEL;
   const isHungerCapped = currentHungerCap >= MAX_STAT_CAP;
 
-  const thirstUpgradeCost = calculateCost(thirstLevel, BASE_STAT_COST, 1000);
+  const thirstUpgradeCost = calculateCost(thirstLevel, BASE_STAT_COST, BASE_STAT_COST / 5);
   const currentThirstCap = BASE_STAT + thirstLevel * STAT_PER_LEVEL;
   const isThirstCapped = currentThirstCap >= MAX_STAT_CAP;
   
-  const healthUpgradeCost = calculateCost(healthLevel, BASE_STAT_COST, 1000);
+  const healthUpgradeCost = calculateCost(healthLevel, BASE_STAT_COST, BASE_STAT_COST / 5);
   const currentHealthCap = BASE_STAT + healthLevel * STAT_PER_LEVEL;
   const isHealthCapped = currentHealthCap >= MAX_HEALTH_CAP;
 
@@ -85,176 +130,102 @@ export default function TechPanel() {
       </CardHeader>
       <CardContent>
        <ScrollArea className="h-[300px]">
-        <div className="space-y-4 pr-4">
+        <div className="space-y-2 pr-4">
             {/* Drone Upgrade */}
             {gameState.builtStructures.includes('droneBay') && (
-              <Card className="bg-muted/50">
-                  <CardHeader>
-                      <CardTitle className="flex items-center text-xl gap-2"><Bot /> Drone Efficiency</CardTitle>
-                      <CardDescription>Improve the resource yield from scavenger drone missions.</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                      <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
-                          <span className="font-medium">Current Level:</span>
-                          <span className="font-mono text-lg font-semibold text-primary">{droneLevel}</span>
-                      </div>
-                      <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
-                          <span className="font-medium">Current Bonus:</span>
-                          <span className="font-mono text-lg font-semibold text-primary">+{currentDroneBonus}%</span>
-                      </div>
-                      <div className="text-center pt-4">
-                          <p className="text-sm text-muted-foreground">Next Upgrade Cost:</p>
-                          <p className="text-2xl font-bold font-mono text-primary flex items-center justify-center gap-2">
-                              <Coins className="h-6 w-6 text-yellow-500" />
-                              {isDroneCapped ? "MAX" : DRONE_UPGRADE_COST.toLocaleString()}
-                          </p>
-                      </div>
-                      <Button className="w-full mt-4" onClick={handleUpgradeDrone} disabled={!canAffordDrone || isBusy || isDead || isDroneCapped}>
-                          {isDroneCapped ? "Max Level Reached" : `Upgrade Drones (+${DRONE_BONUS_PER_LEVEL}% Yield)`}
-                      </Button>
-                  </CardContent>
-              </Card>
+              <UpgradeItem
+                title="Drone Efficiency"
+                description="Improve the resource yield from scavenger drone missions."
+                icon={<Bot className="mr-2 h-5 w-5" />}
+                level={droneLevel}
+                currentEffect={`+${currentDroneBonus}% Yield`}
+                nextEffect={`+${currentDroneBonus + DRONE_BONUS_PER_LEVEL}% Yield`}
+                cost={DRONE_UPGRADE_COST}
+                onUpgrade={handleUpgradeDrone}
+                canAfford={canAffordDrone}
+                isCapped={isDroneCapped}
+                isBusy={isBusy}
+                isDead={isDead}
+              />
             )}
 
             {/* Storage */}
-            <Card className="bg-muted/50">
-                <CardHeader>
-                    <CardTitle className="flex items-center text-xl gap-2"><Database /> Storage Expansion</CardTitle>
-                    <CardDescription>Increase your maximum inventory capacity.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
-                        <span className="font-medium">Current Level:</span>
-                        <span className="font-mono text-lg font-semibold text-primary">{storageLevel}</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
-                        <span className="font-medium">Current Capacity:</span>
-                        <span className="font-mono text-lg font-semibold text-primary">{currentCapacity}</span>
-                    </div>
-                    <div className="text-center pt-4">
-                        <p className="text-sm text-muted-foreground">Next Upgrade Cost:</p>
-                        <p className="text-2xl font-bold font-mono text-primary flex items-center justify-center gap-2">
-                            <Coins className="h-6 w-6 text-yellow-500" />
-                            {storageUpgradeCost.toLocaleString()}
-                        </p>
-                    </div>
-                    <Button className="w-full mt-4" onClick={handleUpgradeStorage} disabled={!canAffordStorage || isBusy || isDead}>
-                        Upgrade Storage (+{CAPACITY_PER_LEVEL} Capacity)
-                    </Button>
-                </CardContent>
-            </Card>
+            <UpgradeItem
+                title="Storage Expansion"
+                description="Increase your maximum inventory capacity for all items."
+                icon={<Database className="mr-2 h-5 w-5" />}
+                level={storageLevel}
+                currentEffect={`${currentCapacity} Capacity`}
+                nextEffect={`${currentCapacity + CAPACITY_PER_LEVEL} Capacity`}
+                cost={storageUpgradeCost}
+                onUpgrade={handleUpgradeStorage}
+                canAfford={canAffordStorage}
+                isBusy={isBusy}
+                isDead={isDead}
+            />
 
             {/* Energy */}
-            <Card className="bg-muted/50">
-                <CardHeader>
-                    <CardTitle className="flex items-center text-xl gap-2"><Battery /> Energy Core</CardTitle>
-                    <CardDescription>Increase your maximum energy reserves.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
-                        <span className="font-medium">Current Level:</span>
-                        <span className="font-mono text-lg font-semibold text-primary">{energyLevel}</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
-                        <span className="font-medium">Current Max Energy:</span>
-                        <span className="font-mono text-lg font-semibold text-primary">{currentEnergy}</span>
-                    </div>
-                    <div className="text-center pt-4">
-                        <p className="text-sm text-muted-foreground">Next Upgrade Cost:</p>
-                        <p className="text-2xl font-bold font-mono text-primary flex items-center justify-center gap-2">
-                            <Coins className="h-6 w-6 text-yellow-500" />
-                            {energyUpgradeCost.toLocaleString()}
-                        </p>
-                    </div>
-                    <Button className="w-full mt-4" onClick={handleUpgradeEnergy} disabled={!canAffordEnergy || isBusy || isDead}>
-                        Upgrade Energy (+{ENERGY_PER_LEVEL} Max Energy)
-                    </Button>
-                </CardContent>
-            </Card>
+            <UpgradeItem
+                title="Energy Core"
+                description="Increase your maximum energy reserves for actions."
+                icon={<Battery className="mr-2 h-5 w-5" />}
+                level={energyLevel}
+                currentEffect={`${currentEnergy} Max Energy`}
+                nextEffect={`${currentEnergy + ENERGY_PER_LEVEL} Max Energy`}
+                cost={energyUpgradeCost}
+                onUpgrade={handleUpgradeEnergy}
+                canAfford={canAffordEnergy}
+                isBusy={isBusy}
+                isDead={isDead}
+            />
 
-             {/* Health */}
-            <Card className="bg-muted/50">
-                <CardHeader>
-                    <CardTitle className="flex items-center text-xl gap-2"><Heart /> Exo-Weave Plating</CardTitle>
-                    <CardDescription>Increase your maximum health.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
-                        <span className="font-medium">Current Level:</span>
-                        <span className="font-mono text-lg font-semibold text-primary">{healthLevel}</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
-                        <span className="font-medium">Current Max Health:</span>
-                        <span className="font-mono text-lg font-semibold text-primary">{Math.min(MAX_HEALTH_CAP, currentHealthCap)}</span>
-                    </div>
-                    <div className="text-center pt-4">
-                        <p className="text-sm text-muted-foreground">Next Upgrade Cost:</p>
-                        <p className="text-2xl font-bold font-mono text-primary flex items-center justify-center gap-2">
-                            <Coins className="h-6 w-6 text-yellow-500" />
-                            {isHealthCapped ? "MAX" : healthUpgradeCost.toLocaleString()}
-                        </p>
-                    </div>
-                    <Button className="w-full mt-4" onClick={handleUpgradeHealth} disabled={!canAffordHealth || isBusy || isDead || isHealthCapped}>
-                        {isHealthCapped ? "Max Level Reached" : `Upgrade Health (+${STAT_PER_LEVEL} Max Health)`}
-                    </Button>
-                </CardContent>
-            </Card>
+            {/* Health */}
+            <UpgradeItem
+                title="Exo-Weave Plating"
+                description="Increase your maximum health capacity."
+                icon={<Heart className="mr-2 h-5 w-5" />}
+                level={healthLevel}
+                currentEffect={`${currentHealthCap} Max Health`}
+                nextEffect={`${currentHealthCap + STAT_PER_LEVEL} Max Health`}
+                cost={healthUpgradeCost}
+                onUpgrade={handleUpgradeHealth}
+                canAfford={canAffordHealth}
+                isCapped={isHealthCapped}
+                isBusy={isBusy}
+                isDead={isDead}
+            />
 
             {/* Hunger */}
-            <Card className="bg-muted/50">
-                <CardHeader>
-                    <CardTitle className="flex items-center text-xl gap-2"><Sandwich /> Stomach Lining</CardTitle>
-                    <CardDescription>Increase your maximum hunger capacity.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
-                        <span className="font-medium">Current Level:</span>
-                        <span className="font-mono text-lg font-semibold text-primary">{hungerLevel}</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
-                        <span className="font-medium">Current Max Hunger:</span>
-                        <span className="font-mono text-lg font-semibold text-primary">{Math.min(MAX_STAT_CAP, currentHungerCap)}</span>
-                    </div>
-                    <div className="text-center pt-4">
-                        <p className="text-sm text-muted-foreground">Next Upgrade Cost:</p>
-                        <p className="text-2xl font-bold font-mono text-primary flex items-center justify-center gap-2">
-                            <Coins className="h-6 w-6 text-yellow-500" />
-                            {isHungerCapped ? "MAX" : hungerUpgradeCost.toLocaleString()}
-                        </p>
-                    </div>
-                    <Button className="w-full mt-4" onClick={handleUpgradeHunger} disabled={!canAffordHunger || isBusy || isDead || isHungerCapped}>
-                        {isHungerCapped ? "Max Level Reached" : `Upgrade Hunger (+${STAT_PER_LEVEL} Max Hunger)`}
-                    </Button>
-                </CardContent>
-            </Card>
+            <UpgradeItem
+                title="Stomach Lining"
+                description="Increase your maximum hunger capacity."
+                icon={<Sandwich className="mr-2 h-5 w-5" />}
+                level={hungerLevel}
+                currentEffect={`${currentHungerCap} Max Hunger`}
+                nextEffect={`${currentHungerCap + STAT_PER_LEVEL} Max Hunger`}
+                cost={hungerUpgradeCost}
+                onUpgrade={handleUpgradeHunger}
+                canAfford={canAffordHunger}
+                isCapped={isHungerCapped}
+                isBusy={isBusy}
+                isDead={isDead}
+            />
 
             {/* Thirst */}
-            <Card className="bg-muted/50">
-                <CardHeader>
-                    <CardTitle className="flex items-center text-xl gap-2"><CupSoda /> Hydro-Recycling</CardTitle>
-                    <CardDescription>Increase your maximum thirst capacity.</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
-                        <span className="font-medium">Current Level:</span>
-                        <span className="font-mono text-lg font-semibold text-primary">{thirstLevel}</span>
-                    </div>
-                    <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
-                        <span className="font-medium">Current Max Thirst:</span>
-                        <span className="font-mono text-lg font-semibold text-primary">{Math.min(MAX_STAT_CAP, currentThirstCap)}</span>
-                    </div>
-                    <div className="text-center pt-4">
-                        <p className="text-sm text-muted-foreground">Next Upgrade Cost:</p>
-                        <p className="text-2xl font-bold font-mono text-primary flex items-center justify-center gap-2">
-                            <Coins className="h-6 w-6 text-yellow-500" />
-                            {isThirstCapped ? "MAX" : thirstUpgradeCost.toLocaleString()}
-                        </p>
-                    </div>
-                    <Button className="w-full mt-4" onClick={handleUpgradeThirst} disabled={!canAffordThirst || isBusy || isDead || isThirstCapped}>
-                        {isThirstCapped ? "Max Level Reached" : `Upgrade Thirst (+${STAT_PER_LEVEL} Max Thirst)`}
-                    </Button>
-                </CardContent>
-            </Card>
+            <UpgradeItem
+                title="Hydro-Recycling"
+                description="Increase your maximum thirst capacity."
+                icon={<CupSoda className="mr-2 h-5 w-5" />}
+                level={thirstLevel}
+                currentEffect={`${currentThirstCap} Max Thirst`}
+                nextEffect={`${currentThirstCap + STAT_PER_LEVEL} Max Thirst`}
+                cost={thirstUpgradeCost}
+                onUpgrade={handleUpgradeThirst}
+                canAfford={canAffordThirst}
+                isCapped={isThirstCapped}
+                isBusy={isBusy}
+                isDead={isDead}
+            />
         </div>
        </ScrollArea>
       </CardContent>
