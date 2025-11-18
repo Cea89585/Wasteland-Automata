@@ -61,19 +61,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'GAME_TICK': {
-      let newStats = { ...state.playerStats };
-      let newInventory = { ...state.inventory };
+      let currentState = { ...state };
       const logMessages: LogMessage[] = [];
-      const INVENTORY_CAP = getInventoryCap();
-      const MAX_ENERGY = getMaxEnergy();
-      const MAX_HEALTH = getMaxHealth();
       
-      let nextState = { ...state };
-      
-      // Drone return logic
-      if (nextState.droneIsActive && nextState.droneReturnTimestamp && Date.now() >= nextState.droneReturnTimestamp) {
-        const currentLocation = locations[nextState.currentLocation];
-        const droneBuff = 1 + (nextState.droneLevel * 0.1);
+      // Drone return logic is handled first
+      if (currentState.droneIsActive && currentState.droneReturnTimestamp && Date.now() >= currentState.droneReturnTimestamp) {
+        const currentLocation = locations[currentState.currentLocation];
+        const droneBuff = 1 + (currentState.droneLevel * 0.1);
         let totalFound: Partial<Record<Resource, number>> = {};
 
         for(let i = 0; i < 15; i++) {
@@ -89,8 +83,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         let resourcesFoundText = "Drone has returned.";
         let foundSomething = false;
         
-        let finalInventory = { ...nextState.inventory };
-        let finalStatistics = { ...nextState.statistics };
+        let finalInventory = { ...currentState.inventory };
+        let finalStatistics = { ...currentState.statistics };
 
         for (const [resource, amount] of Object.entries(totalFound)) {
           if (amount > 0) {
@@ -107,8 +101,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
         logMessages.push({ id: generateUniqueLogId(), text: resourcesFoundText, type: 'success', timestamp: Date.now() });
 
-        nextState = {
-            ...nextState,
+        currentState = {
+            ...currentState,
             inventory: finalInventory,
             statistics: finalStatistics,
             droneIsActive: false,
@@ -116,24 +110,30 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         };
       }
 
-
+      // Now continue with the rest of the tick logic, using the potentially updated state
+      let newStats = { ...currentState.playerStats };
+      let newInventory = { ...currentState.inventory };
+      const INVENTORY_CAP = getInventoryCap();
+      const MAX_ENERGY = getMaxEnergy();
+      const MAX_HEALTH = getMaxHealth();
+      
       // Universal passive systems (always on)
-      if(state.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP && (state.gameTick % 4 === 0)) {
+      if(currentState.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP && (currentState.gameTick % 4 === 0)) {
         newInventory.water = Math.min(INVENTORY_CAP, newInventory.water + 1);
       }
-      if(state.builtStructures.includes('hydroponicsBay') && newInventory.apple < INVENTORY_CAP && (state.gameTick % 4 === 0)) {
+      if(currentState.builtStructures.includes('hydroponicsBay') && newInventory.apple < INVENTORY_CAP && (currentState.gameTick % 4 === 0)) {
         newInventory.apple = Math.min(INVENTORY_CAP, newInventory.apple + 1);
       }
       
       if (newStats.health <=0 ) {
           return {
-            ...nextState,
-            log: [...logMessages, ...state.log]
+            ...currentState,
+            inventory: newInventory,
+            log: [...logMessages, ...currentState.log]
           }
       }
       
-
-      if (state.isResting || state.isIdle) {
+      if (currentState.isResting || currentState.isIdle) {
         if (newStats.health < MAX_HEALTH) {
             newStats.health = Math.min(MAX_HEALTH, newStats.health + 0.25);
         }
@@ -159,29 +159,30 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 0.25);
       }
 
-      if (state.playerStats.health > 0 && newStats.health <= 0) {
+      if (currentState.playerStats.health > 0 && newStats.health <= 0) {
         logMessages.push({
           id: generateUniqueLogId(),
           text: 'Your vision fades to black. The wasteland has claimed another soul.',
           timestamp: Date.now(),
           type: 'danger',
         });
-        const newStatistics = { ...state.statistics, deaths: state.statistics.deaths + 1 };
+        const newStatistics = { ...currentState.statistics, deaths: currentState.statistics.deaths + 1 };
         localStorage.setItem(STATS_KEY, JSON.stringify(newStatistics));
         return {
-          ...nextState,
+          ...currentState,
           playerStats: newStats,
+          inventory: newInventory,
           statistics: newStatistics,
-          log: [...logMessages, ...state.log],
+          log: [...logMessages, ...currentState.log],
         }
       }
 
       return {
-        ...nextState,
+        ...currentState,
         playerStats: newStats,
         inventory: newInventory,
-        gameTick: state.gameTick + 1,
-        log: [...logMessages, ...state.log],
+        gameTick: currentState.gameTick + 1,
+        log: [...logMessages, ...currentState.log],
       };
     }
 
