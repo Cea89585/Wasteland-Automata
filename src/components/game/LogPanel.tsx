@@ -50,26 +50,36 @@ const logTypeColors = {
 const LogEntry = ({ message }: { message: ReturnType<typeof useGame>['gameState']['log'][0] }) => {
     let icon = logTypeIcons[message.type];
     const [isExpanded, setIsExpanded] = useState(false);
+    const [isClamped, setIsClamped] = useState(false);
+    const textRef = useRef<HTMLParagraphElement>(null);
 
     if (message.type === 'craft' && message.item) {
         icon = allIcons[message.item] || logTypeIcons.craft;
     }
 
-    const hasMultipleLines = message.text.includes('\n');
+    useEffect(() => {
+        if (textRef.current) {
+            // Check if the text is overflowing its container
+            setIsClamped(textRef.current.scrollHeight > textRef.current.clientHeight);
+        }
+    }, [message.text]);
   
     return (
         <div className="flex items-start gap-3 text-sm animate-in fade-in-0 duration-500">
             <div className="pt-0.5">{icon}</div>
             <div className="flex-1">
-                <p className={cn(
-                    logTypeColors[message.type], 
-                    "whitespace-pre-wrap",
-                    !isExpanded && hasMultipleLines && "line-clamp-2"
-                )}>
+                <p
+                    ref={textRef}
+                    className={cn(
+                        logTypeColors[message.type], 
+                        "whitespace-pre-wrap",
+                        !isExpanded && "line-clamp-2"
+                    )}
+                >
                     {message.text}
                 </p>
                 
-                {hasMultipleLines && (
+                {isClamped && (
                     <button 
                         onClick={() => setIsExpanded(!isExpanded)} 
                         className="text-xs text-primary hover:underline mt-1 flex items-center"
@@ -90,17 +100,7 @@ const LogEntry = ({ message }: { message: ReturnType<typeof useGame>['gameState'
 
 export default function LogPanel() {
   const { gameState: { log }, dispatch } = useGame();
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (scrollAreaRef.current) {
-        const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
-        if (viewport) {
-            viewport.scrollTop = 0; // Scroll to the top
-        }
-    }
-  }, [log]);
-
+  
   return (
     <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between">
