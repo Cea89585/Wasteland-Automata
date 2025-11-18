@@ -55,8 +55,7 @@ const LogEntry = ({ message }: { message: ReturnType<typeof useGame>['gameState'
         icon = allIcons[message.item] || logTypeIcons.craft;
     }
 
-    // A simpler check: does the text contain a newline? If so, it's collapsible.
-    const isCollapsible = message.text.includes('\n');
+    const isCollapsible = message.text.includes('\n') || message.text.length > 100;
   
     return (
         <div className="flex items-start gap-3 text-sm animate-in fade-in-0 duration-500">
