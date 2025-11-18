@@ -19,6 +19,7 @@ import {
 import { ScrollArea } from '../ui/scroll-area';
 import { itemData } from '@/lib/game-data/items';
 import { allIcons } from './GameIcons';
+import HelpPanel from './HelpPanel';
 
 export default function SettingsPage() {
     const { gameState, dispatch } = useGame();
@@ -111,6 +112,8 @@ export default function SettingsPage() {
                     </CardContent>
                 </Card>
             </div>
+            
+            <HelpPanel />
 
             <Card className="border-destructive">
                 <CardHeader>

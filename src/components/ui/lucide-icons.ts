@@ -4,4 +4,5 @@ export {
     BarChart,
     Package,
     Settings,
+    BookOpen,
 } from 'lucide-react';
