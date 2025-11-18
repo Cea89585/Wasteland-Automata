@@ -15,6 +15,8 @@ let logIdCounter = 0;
 const reducer = (state: GameState, action: GameAction): GameState => {
   const getInventoryCap = () => 200 + (state.storageLevel || 0) * 50;
   const getMaxEnergy = () => 100 + (state.energyLevel || 0) * 5;
+  const getMaxHunger = () => 100 + (state.hungerLevel || 0) * 25;
+  const getMaxThirst = () => 100 + (state.thirstLevel || 0) * 25;
 
   const generateUniqueLogId = () => {
     // Combine timestamp with a counter to ensure uniqueness
@@ -303,7 +305,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'SELL_ITEM': {
       const { item, amount, price } = action.payload;
       const newInventory = { ...state.inventory };
-      const newStatistics = { ...state.statistics };
+      let newStatistics = { ...state.statistics };
 
       if (state.lockedItems.includes(item)) {
         return {
@@ -325,7 +327,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       
       const newTotalItemsGained = { ...newStatistics.totalItemsGained };
       newTotalItemsGained.silver = (newTotalItemsGained.silver || 0) + silverEarned;
-      newStatistics.totalItemsGained = newTotalItemsGained;
+      newStatistics = {...newStatistics, totalItemsGained: newTotalItemsGained };
 
 
       return {
@@ -338,7 +340,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'SELL_ALL_UNLOCKED': {
       const newInventory = { ...state.inventory };
-      const newStatistics = { ...state.statistics };
+      let newStatistics = { ...state.statistics };
       let totalSilverGained = 0;
       let itemsSold = 0;
 
@@ -364,7 +366,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
       const newTotalItemsGained = { ...newStatistics.totalItemsGained };
       newTotalItemsGained.silver = (newTotalItemsGained.silver || 0) + totalSilverGained;
-      newStatistics.totalItemsGained = newTotalItemsGained;
+      newStatistics = {...newStatistics, totalItemsGained: newTotalItemsGained };
+
 
       return {
         ...state,
@@ -422,10 +425,11 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'EAT': {
       if (state.inventory.apple <= 0) return state;
+      const MAX_HUNGER = getMaxHunger();
 
       const newInventory = { ...state.inventory, apple: state.inventory.apple - 1 };
       const newStats = { ...state.playerStats };
-      newStats.hunger = Math.min(100, newStats.hunger + 40);
+      newStats.hunger = Math.min(MAX_HUNGER, newStats.hunger + 40);
       newStats.health = Math.min(100, newStats.health + 5);
 
       return {
@@ -438,10 +442,11 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'DRINK': {
       if (state.inventory.water <= 0) return state;
+      const MAX_THIRST = getMaxThirst();
 
       const newInventory = { ...state.inventory, water: state.inventory.water - 1 };
       const newStats = { ...state.playerStats };
-      newStats.thirst = Math.min(100, newStats.thirst + 40);
+      newStats.thirst = Math.min(MAX_THIRST, newStats.thirst + 40);
 
       return {
         ...state,
@@ -455,10 +460,11 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         if (state.inventory.cookedApple <= 0) return state;
         
         const MAX_ENERGY = getMaxEnergy();
+        const MAX_HUNGER = getMaxHunger();
         const newInventory = { ...state.inventory, cookedApple: state.inventory.cookedApple - 1 };
         const newStats = { ...state.playerStats };
         newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 20);
-        newStats.hunger = Math.min(100, newStats.hunger + 10);
+        newStats.hunger = Math.min(MAX_HUNGER, newStats.hunger + 10);
   
         return {
           ...state,
@@ -625,6 +631,62 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
     }
 
+    case 'UPGRADE_HUNGER': {
+      const calculateCost = (level: number): number => {
+          if (level === 0) return 5000;
+          let cost = 5000;
+          for (let i = 1; i <= level; i++) {
+            cost = cost * 2 + 1000;
+          }
+          return cost;
+      };
+      const cost = calculateCost(state.hungerLevel);
+      if (state.inventory.silver < cost) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: "Not enough silver to upgrade stomach lining.", type: 'danger', timestamp: Date.now() }, ...state.log],
+        }
+      }
+      const newInventory = { ...state.inventory };
+      newInventory.silver -= cost;
+      const newHungerLevel = state.hungerLevel + 1;
+      const newMaxHunger = Math.min(500, 100 + newHungerLevel * 25);
+      return {
+        ...state,
+        inventory: newInventory,
+        hungerLevel: newHungerLevel,
+        log: [{ id: generateUniqueLogId(), text: `Stomach Lining upgraded to Level ${newHungerLevel}! New max hunger: ${newMaxHunger}.`, type: 'success', timestamp: Date.now() }, ...state.log],
+      }
+    }
+
+    case 'UPGRADE_THIRST': {
+      const calculateCost = (level: number): number => {
+          if (level === 0) return 5000;
+          let cost = 5000;
+          for (let i = 1; i <= level; i++) {
+            cost = cost * 2 + 1000;
+          }
+          return cost;
+      };
+      const cost = calculateCost(state.thirstLevel);
+      if (state.inventory.silver < cost) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: "Not enough silver to upgrade hydro-recycling.", type: 'danger', timestamp: Date.now() }, ...state.log],
+        }
+      }
+      const newInventory = { ...state.inventory };
+      newInventory.silver -= cost;
+      const newThirstLevel = state.thirstLevel + 1;
+      const newMaxThirst = Math.min(500, 100 + newThirstLevel * 25);
+      return {
+        ...state,
+        inventory: newInventory,
+        thirstLevel: newThirstLevel,
+        log: [{ id: generateUniqueLogId(), text: `Hydro-Recycling upgraded to Level ${newThirstLevel}! New max thirst: ${newMaxThirst}.`, type: 'success', timestamp: Date.now() }, ...state.log],
+      }
+    }
+
     default:
       return state;
   }
@@ -667,6 +729,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
       if (!migratedState.energyLevel) {
           migratedState.energyLevel = 0;
+      }
+      if (!migratedState.hungerLevel) {
+          migratedState.hungerLevel = 0;
+      }
+      if (!migratedState.thirstLevel) {
+          migratedState.thirstLevel = 0;
       }
       // IMPORTANT: Remove statistics from the main game state if it exists from an old save
       if ('statistics' in migratedState) {

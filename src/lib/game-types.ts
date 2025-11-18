@@ -81,6 +81,8 @@ export interface GameState {
   lockedItems: Resource[];
   storageLevel: number;
   energyLevel: number;
+  hungerLevel: number;
+  thirstLevel: number;
   isInitialized: boolean;
   gameTick: number;
   isResting: boolean;
@@ -114,4 +116,6 @@ export type GameAction =
   | { type: 'EQUIP'; payload: { item: Item, slot: EquipmentSlot } }
   | { type: 'UNEQUIP'; payload: { slot: EquipmentSlot } }
   | { type: 'UPGRADE_STORAGE' }
-  | { type: 'UPGRADE_ENERGY' };
+  | { type: 'UPGRADE_ENERGY' }
+  | { type: 'UPGRADE_HUNGER' }
+  | { type: 'UPGRADE_THIRST' };

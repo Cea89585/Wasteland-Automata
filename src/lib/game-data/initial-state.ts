@@ -73,6 +73,8 @@ export const initialState: Omit<GameState, 'statistics'> = {
   lockedItems: [],
   storageLevel: 0,
   energyLevel: 0,
+  hungerLevel: 0,
+  thirstLevel: 0,
   isInitialized: false,
   gameTick: 0,
   isResting: false,
