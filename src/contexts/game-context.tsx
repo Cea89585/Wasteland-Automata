@@ -136,8 +136,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         }
       } else {
         // Normal tick logic when not idle
-        newStats.thirst = Math.max(0, newStats.thirst - 0.5);
-        newStats.hunger = Math.max(0, newStats.hunger - 0.5);
+        newStats.thirst = Math.max(0, newStats.thirst - 0.25);
+        newStats.hunger = Math.max(0, newStats.hunger - 0.25);
 
         if (newStats.thirst === 0 || newStats.hunger === 0) {
           newStats.health = Math.max(0, newStats.health - 2);
