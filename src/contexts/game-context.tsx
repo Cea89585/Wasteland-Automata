@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useReducer, useEffect, type ReactNode, useState } from 'react';
-import type { GameState, GameAction, LogMessage, Resource, Item, Statistics, LocationId } from '@/lib/game-types';
+import type { GameState, GameAction, LogMessage, Resource, Item, Statistics, LocationId, Theme } from '@/lib/game-types';
 import { initialState, initialStatistics } from '@/lib/game-data/initial-state';
 import { recipes } from '@/lib/game-data/recipes';
 import { itemData } from '@/lib/game-data/items';
@@ -63,6 +63,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'GAME_TICK': {
       let currentState = { ...state };
       const logMessages: LogMessage[] = [];
+      let finalInventory = { ...currentState.inventory };
+      let finalStatistics = { ...currentState.statistics };
       
       // Drone return logic is handled first
       if (currentState.droneIsActive && currentState.droneReturnTimestamp && Date.now() >= currentState.droneReturnTimestamp) {
@@ -82,9 +84,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         
         let resourcesFoundText = "Drone has returned.";
         let foundSomething = false;
-        
-        let finalInventory = { ...currentState.inventory };
-        let finalStatistics = { ...currentState.statistics };
 
         for (const [resource, amount] of Object.entries(totalFound)) {
           if (amount > 0) {
@@ -893,6 +892,10 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       return state;
     }
 
+    case 'SET_THEME': {
+      return { ...state, theme: action.payload };
+    }
+
     default:
       return state;
   }
@@ -970,6 +973,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
       if (!migratedState.inventory.hydroponicsBay) {
         migratedState.inventory.hydroponicsBay = 0;
+      }
+      if (!migratedState.theme) {
+        migratedState.theme = 'dark';
       }
       
       // Handle active drone from a saved state

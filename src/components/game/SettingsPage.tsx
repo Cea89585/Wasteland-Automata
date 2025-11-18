@@ -4,7 +4,7 @@ import { useGame } from '@/hooks/use-game';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { RotateCcw, ArrowLeft, BarChart, Package, Compass, Search, Skull } from 'lucide-react';
+import { RotateCcw, ArrowLeft, BarChart, Package, Compass, Search, Skull, Sun, Moon, Laptop } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +20,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { itemData } from '@/lib/game-data/items';
 import { allIcons } from './GameIcons';
 import HelpPanel from './HelpPanel';
+import type { Theme } from '@/lib/game-types';
 
 export default function SettingsPage() {
     const { gameState, dispatch } = useGame();
@@ -28,7 +29,9 @@ export default function SettingsPage() {
         return null;
     }
     
-    const { statistics } = gameState;
+    const { statistics, theme } = gameState;
+    const setTheme = (newTheme: Theme) => dispatch({ type: 'SET_THEME', payload: newTheme });
+
 
     const totalItemsGained = Object.entries(statistics.totalItemsGained)
         .filter(([, quantity]) => quantity > 0)
@@ -50,6 +53,25 @@ export default function SettingsPage() {
                     </Link>
                 </div>
             </header>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Appearance</CardTitle>
+                    <CardDescription>Customize the look and feel of the game.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex items-center gap-2">
+                    <Button variant={theme === 'light' ? 'default' : 'outline'} onClick={() => setTheme('light')}>
+                        <Sun className="mr-2 h-4 w-4" /> Light
+                    </Button>
+                    <Button variant={theme === 'dark' ? 'default' : 'outline'} onClick={() => setTheme('dark')}>
+                        <Moon className="mr-2 h-4 w-4" /> Dark
+                    </Button>
+                    <Button variant={theme === 'system' ? 'default' : 'outline'} onClick={() => setTheme('system')}>
+                        <Laptop className="mr-2 h-4 w-4" /> System
+                    </Button>
+                </CardContent>
+            </Card>
+
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <Card>

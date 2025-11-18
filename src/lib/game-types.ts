@@ -75,6 +75,8 @@ export type Flag = 'mapCrafted';
 export type EquipmentSlot = 'hand' | 'body';
 export type Equipment = Partial<Record<EquipmentSlot, Item | null>>;
 
+export type Theme = 'light' | 'dark' | 'system';
+
 export interface GameState {
   playerStats: PlayerStats;
   inventory: Inventory;
@@ -101,6 +103,7 @@ export interface GameState {
   smeltingQueue: number;
   droneIsActive: boolean;
   droneReturnTimestamp: number | null;
+  theme: Theme;
 }
 
 export type GameAction =
@@ -138,4 +141,5 @@ export type GameAction =
   | { type: 'UPGRADE_DRONE' }
   | { type: 'TRAVEL'; payload: { locationId: LocationId } }
   | { type: 'SEND_DRONE' }
-  | { type: 'DRONE_RETURN'; payload: { resources: Partial<Record<Resource, number>> } };
+  | { type: 'DRONE_RETURN'; payload: { resources: Partial<Record<Resource, number>> } }
+  | { type: 'SET_THEME'; payload: Theme };

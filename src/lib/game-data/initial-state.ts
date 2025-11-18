@@ -88,4 +88,5 @@ export const initialState: Omit<GameState, 'statistics'> = {
   smeltingQueue: 0,
   droneIsActive: false,
   droneReturnTimestamp: null,
+  theme: 'dark',
 };

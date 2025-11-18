@@ -1,12 +1,10 @@
 // src/app/settings/page.tsx
 'use client';
 
-import { GameProvider } from '@/contexts/game-context';
 import SettingsPage from '@/components/game/SettingsPage';
 
 export default function Settings() {
   return (
-    <GameProvider>
       <main className="relative min-h-screen w-full overflow-x-hidden">
         <div 
           className="absolute inset-0 bg-background -z-10"
@@ -18,6 +16,5 @@ export default function Settings() {
           <SettingsPage />
         </div>
       </main>
-    </GameProvider>
   );
 }
