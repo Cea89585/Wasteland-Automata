@@ -21,6 +21,7 @@ const emptyInventory = {
   radio: 0,
   generator: 0,
   droneBay: 0,
+  hydroponicsBay: 0,
   miningRig: 0,
   cookedApple: 0,
   crudeMap: 0,

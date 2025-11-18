@@ -25,6 +25,7 @@ export const itemData: Record<Resource | Item, { name: string; description: stri
   radio: { name: Items.radio, description: 'Can pick up strange signals and story fragments.' },
   generator: { name: Items.generator, description: 'Provides power to your automated systems.' },
   droneBay: { name: Items.droneBay, description: 'Launches scavenger drones to automatically find resources.' },
+  hydroponicsBay: { name: Items.hydroponicsBay, description: 'An automated bay that grows edible plants.' },
   miningRig: { name: Items.miningRig, description: 'An automated rig that extracts resources from the earth.' },
   cookedApple: { name: Items.cookedApple, description: 'A cooked apple that restores some energy.', sellPrice: 8 },
   crudeMap: { name: Items.crudeMap, description: 'Unlocks the ability to travel to new locations.' },

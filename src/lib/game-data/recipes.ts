@@ -74,5 +74,13 @@ export const recipes: Recipe[] = [
     creates: 'droneBay',
     requirements: { scrap: 25, components: 10 },
     unlockedBy: ['workbench'],
+  },
+  {
+    id: 'recipe_hydroponicsBay',
+    name: 'Build Hydroponics Bay',
+    description: 'An automated bay that grows edible plants.',
+    creates: 'hydroponicsBay',
+    requirements: { scrap: 30, components: 15, water: 20 },
+    unlockedBy: ['workbench'],
   }
 ];

@@ -26,6 +26,7 @@ export const Items = {
   radio: 'Radio Tower',
   generator: 'Power Generator',
   droneBay: 'Drone Bay',
+  hydroponicsBay: 'Hydroponics Bay',
   miningRig: 'Mining Rig',
   cookedApple: 'Cooked Apple',
   crudeMap: 'Crude Map',

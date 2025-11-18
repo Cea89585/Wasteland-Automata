@@ -2,7 +2,7 @@
 'use client';
 import { useGame } from '@/hooks/use-game';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Home, Hammer, CheckCircle, Droplets, Power, Bot } from 'lucide-react';
+import { Home, Hammer, CheckCircle, Droplets, Power, Bot, Sprout } from 'lucide-react';
 import { Button } from '../ui/button';
 import { recipes } from '@/lib/game-data/recipes';
 import type { Resource } from '@/lib/game-types';
@@ -17,12 +17,14 @@ export default function BasePanel() {
   const waterPurifierRecipe = recipes.find(r => r.id === 'recipe_waterPurifier');
   const furnaceRecipe = recipes.find(r => r.id === 'recipe_furnace');
   const droneBayRecipe = recipes.find(r => r.id === 'recipe_droneBay');
+  const hydroponicsBayRecipe = recipes.find(r => r.id === 'recipe_hydroponicsBay');
 
 
   const isWorkbenchBuilt = gameState.builtStructures.includes('workbench');
   const isWaterPurifierBuilt = gameState.builtStructures.includes('waterPurifier');
   const isFurnaceBuilt = gameState.builtStructures.includes('furnace');
   const isDroneBayBuilt = gameState.builtStructures.includes('droneBay');
+  const isHydroponicsBayBuilt = gameState.builtStructures.includes('hydroponicsBay');
   
   const isBusy = gameState.isResting;
 
@@ -84,8 +86,6 @@ export default function BasePanel() {
                 <p className="text-sm text-muted-foreground">Advanced crafting is available.</p>
             </div>
         )}
-
-        <Separator />
         
         {/* Water Purifier Section */}
         {isWorkbenchBuilt && !isWaterPurifierBuilt && waterPurifierRecipe ? (
@@ -124,6 +124,43 @@ export default function BasePanel() {
             </div>
         ): null}
 
+        {/* Hydroponics Bay Section */}
+        {isWorkbenchBuilt && !isHydroponicsBayBuilt && hydroponicsBayRecipe ? (
+          <Card className="bg-muted/50 p-6 w-full text-center">
+            <CardTitle className="flex items-center justify-center text-xl mb-4">
+              <Sprout className="mr-2 h-6 w-6" /> Build a Hydroponics Bay
+            </CardTitle>
+            <CardDescription className="mb-4">
+              Passively grows a slow but steady supply of edible plants.
+            </CardDescription>
+            <div className="flex flex-col gap-2 text-sm my-4 items-start mx-auto max-w-xs">
+                <span className="font-semibold text-muted-foreground self-center">Requires:</span>
+                <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center">
+                    {Object.entries(hydroponicsBayRecipe.requirements).map(([resource, amount]) => (
+                    <span key={resource} className="flex items-center">
+                        {resourceIcons[resource as Resource]}
+                        {itemData[resource as Resource].name}: {amount}
+                    </span>
+                    ))}
+                </div>
+            </div>
+            <Button 
+                onClick={() => handleBuild('recipe_hydroponicsBay')} 
+                disabled={!canCraft('recipe_hydroponicsBay') || gameState.playerStats.health <= 0 || isBusy}
+                className="w-full sm:w-auto mt-4"
+              >
+                <Hammer className="mr-2 h-4 w-4" />
+                Build
+            </Button>
+          </Card>
+        ) : isHydroponicsBayBuilt ? (
+            <div className="flex flex-col items-center justify-center text-center p-6 rounded-lg bg-muted/50">
+                <CheckCircle className="h-12 w-12 text-green-500" />
+                <p className="mt-2 text-lg font-semibold">Hydroponics Bay built!</p>
+                <p className="text-sm text-muted-foreground">Passively growing apples.</p>
+            </div>
+        ): null}
+        
         <Separator />
 
         {/* Furnace Section */}

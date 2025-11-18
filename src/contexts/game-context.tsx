@@ -123,6 +123,10 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         newInventory.water = Math.min(INVENTORY_CAP, newInventory.water + 1);
         // We don't log this every tick to avoid spam
       }
+      if(state.builtStructures.includes('hydroponicsBay') && newInventory.apple < INVENTORY_CAP && (state.gameTick % 2 === 0)) {
+        newInventory.apple = Math.min(INVENTORY_CAP, newInventory.apple + 1);
+        // We don't log this every tick to avoid spam
+      }
 
       // Passive energy regeneration
       if(newStats.energy < MAX_ENERGY) {
@@ -901,6 +905,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
       if (!migratedState.droneReturnTimestamp) {
         migratedState.droneReturnTimestamp = null;
+      }
+      if (!migratedState.inventory.hydroponicsBay) {
+        migratedState.inventory.hydroponicsBay = 0;
       }
       
       // Handle active drone from a saved state

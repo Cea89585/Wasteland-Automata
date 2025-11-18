@@ -29,6 +29,7 @@ import {
   Coins,
   Heart,
   Map,
+  Sprout,
 } from 'lucide-react';
 import type { Resource, Item } from '@/lib/game-types';
 
@@ -61,6 +62,7 @@ export const itemIcons: Record<Item, React.ReactElement<LucideProps>> = {
   radio: <Radio {...iconProps} />,
   generator: <Power {...iconProps} />,
   droneBay: <Bot {...iconProps} />,
+  hydroponicsBay: <Sprout {...iconProps} />,
   miningRig: <Drill {...iconProps} />,
   cookedApple: <Zap {...iconProps} />,
   crudeMap: <Map {...iconProps} />,
