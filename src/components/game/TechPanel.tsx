@@ -3,7 +3,7 @@
 import { useGame } from '@/hooks/use-game';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Database, Coins, Battery, Sandwich, CupSoda } from 'lucide-react';
+import { Database, Coins, Battery, Sandwich, CupSoda, Heart } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 
 const BASE_STORAGE_COST = 10000;
@@ -17,11 +17,14 @@ const BASE_ENERGY = 100;
 const BASE_STAT_COST = 5000;
 const STAT_PER_LEVEL = 25;
 const BASE_STAT = 100;
+
 const MAX_STAT_CAP = 500;
+const MAX_HEALTH_CAP = 1000;
+
 
 export default function TechPanel() {
   const { gameState, dispatch } = useGame();
-  const { storageLevel, energyLevel, hungerLevel, thirstLevel, inventory, playerStats, isResting, smeltingQueue } = gameState;
+  const { storageLevel, energyLevel, hungerLevel, thirstLevel, healthLevel, inventory, playerStats, isResting, smeltingQueue } = gameState;
 
   const calculateCost = (level: number, baseCost: number, increment: number): number => {
     if (level === 0) return baseCost;
@@ -45,11 +48,17 @@ export default function TechPanel() {
   const thirstUpgradeCost = calculateCost(thirstLevel, BASE_STAT_COST, 1000);
   const currentThirstCap = BASE_STAT + thirstLevel * STAT_PER_LEVEL;
   const isThirstCapped = currentThirstCap >= MAX_STAT_CAP;
+  
+  const healthUpgradeCost = calculateCost(healthLevel, BASE_STAT_COST, 1000);
+  const currentHealthCap = BASE_STAT + healthLevel * STAT_PER_LEVEL;
+  const isHealthCapped = currentHealthCap >= MAX_HEALTH_CAP;
 
   const canAffordStorage = inventory.silver >= storageUpgradeCost;
   const canAffordEnergy = inventory.silver >= energyUpgradeCost;
   const canAffordHunger = inventory.silver >= hungerUpgradeCost;
   const canAffordThirst = inventory.silver >= thirstUpgradeCost;
+  const canAffordHealth = inventory.silver >= healthUpgradeCost;
+
   const isBusy = isResting || smeltingQueue > 0;
   const isDead = playerStats.health <= 0;
 
@@ -57,6 +66,7 @@ export default function TechPanel() {
   const handleUpgradeEnergy = () => dispatch({ type: 'UPGRADE_ENERGY' });
   const handleUpgradeHunger = () => dispatch({ type: 'UPGRADE_HUNGER' });
   const handleUpgradeThirst = () => dispatch({ type: 'UPGRADE_THIRST' });
+  const handleUpgradeHealth = () => dispatch({ type: 'UPGRADE_HEALTH' });
 
   return (
     <Card>
@@ -119,6 +129,34 @@ export default function TechPanel() {
                     </div>
                     <Button className="w-full mt-4" onClick={handleUpgradeEnergy} disabled={!canAffordEnergy || isBusy || isDead}>
                         Upgrade Energy (+{ENERGY_PER_LEVEL} Max Energy)
+                    </Button>
+                </CardContent>
+            </Card>
+
+             {/* Health */}
+            <Card className="bg-muted/50">
+                <CardHeader>
+                    <CardTitle className="flex items-center text-xl gap-2"><Heart /> Exo-Weave Plating</CardTitle>
+                    <CardDescription>Increase your maximum health.</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
+                        <span className="font-medium">Current Level:</span>
+                        <span className="font-mono text-lg font-semibold text-primary">{healthLevel}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 rounded-md bg-background/50">
+                        <span className="font-medium">Current Max Health:</span>
+                        <span className="font-mono text-lg font-semibold text-primary">{Math.min(MAX_HEALTH_CAP, currentHealthCap)}</span>
+                    </div>
+                    <div className="text-center pt-4">
+                        <p className="text-sm text-muted-foreground">Next Upgrade Cost:</p>
+                        <p className="text-2xl font-bold font-mono text-primary flex items-center justify-center gap-2">
+                            <Coins className="h-6 w-6 text-yellow-500" />
+                            {isHealthCapped ? "MAX" : healthUpgradeCost.toLocaleString()}
+                        </p>
+                    </div>
+                    <Button className="w-full mt-4" onClick={handleUpgradeHealth} disabled={!canAffordHealth || isBusy || isDead || isHealthCapped}>
+                        {isHealthCapped ? "Max Level Reached" : `Upgrade Health (+${STAT_PER_LEVEL} Max Health)`}
                     </Button>
                 </CardContent>
             </Card>

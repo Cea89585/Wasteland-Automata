@@ -83,6 +83,7 @@ export interface GameState {
   energyLevel: number;
   hungerLevel: number;
   thirstLevel: number;
+  healthLevel: number;
   isInitialized: boolean;
   gameTick: number;
   isResting: boolean;
@@ -118,4 +119,5 @@ export type GameAction =
   | { type: 'UPGRADE_STORAGE' }
   | { type: 'UPGRADE_ENERGY' }
   | { type: 'UPGRADE_HUNGER' }
-  | { type: 'UPGRADE_THIRST' };
+  | { type: 'UPGRADE_THIRST' }
+  | { type: 'UPGRADE_HEALTH' };

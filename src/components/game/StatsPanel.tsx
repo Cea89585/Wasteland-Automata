@@ -9,7 +9,7 @@ import { Zap } from 'lucide-react';
 
 export default function StatsPanel() {
   const { gameState, dispatch } = useGame();
-  const { playerStats, energyLevel, hungerLevel, thirstLevel } = gameState;
+  const { playerStats, energyLevel, hungerLevel, thirstLevel, healthLevel } = gameState;
 
   const handleRefillEnergy = () => {
     dispatch({ type: 'REGEN_ENERGY', payload: { amount: 1000 } }); // Give a large amount to ensure full refill
@@ -18,9 +18,10 @@ export default function StatsPanel() {
   const maxEnergy = 100 + (energyLevel * 5);
   const maxHunger = Math.min(500, 100 + (hungerLevel * 25));
   const maxThirst = Math.min(500, 100 + (thirstLevel * 25));
+  const maxHealth = Math.min(1000, 100 + (healthLevel * 25));
 
   const stats = [
-    { name: 'health' as const, label: 'Health', value: playerStats.health, max: 100 },
+    { name: 'health' as const, label: 'Health', value: playerStats.health, max: maxHealth },
     { name: 'hunger' as const, label: 'Hunger', value: playerStats.hunger, max: maxHunger },
     { name: 'thirst' as const, label: 'Thirst', value: playerStats.thirst, max: maxThirst },
   ];

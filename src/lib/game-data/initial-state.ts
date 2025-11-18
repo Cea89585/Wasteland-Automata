@@ -75,6 +75,7 @@ export const initialState: Omit<GameState, 'statistics'> = {
   energyLevel: 0,
   hungerLevel: 0,
   thirstLevel: 0,
+  healthLevel: 0,
   isInitialized: false,
   gameTick: 0,
   isResting: false,

@@ -27,6 +27,7 @@ import {
   Grape, // Changed from Beef
   Signal,
   Coins,
+  Heart,
 } from 'lucide-react';
 import type { Resource, Item } from '@/lib/game-types';
 
@@ -64,7 +65,7 @@ export const itemIcons: Record<Item, React.ReactElement<LucideProps>> = {
 };
 
 export const statIcons = {
-    health: <HeartPulse {...iconProps} />,
+    health: <Heart {...iconProps} />,
     hunger: <Sandwich {...iconProps} />,
     thirst: <CupSoda {...iconProps} />,
     energy: <Battery {...iconProps} />,

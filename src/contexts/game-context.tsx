@@ -17,6 +17,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
   const getMaxEnergy = () => 100 + (state.energyLevel || 0) * 5;
   const getMaxHunger = () => 100 + (state.hungerLevel || 0) * 25;
   const getMaxThirst = () => 100 + (state.thirstLevel || 0) * 25;
+  const getMaxHealth = () => 100 + (state.healthLevel || 0) * 25;
 
   const generateUniqueLogId = () => {
     // Combine timestamp with a counter to ensure uniqueness
@@ -61,6 +62,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const logMessages: LogMessage[] = [];
       const INVENTORY_CAP = getInventoryCap();
       const MAX_ENERGY = getMaxEnergy();
+      const MAX_HEALTH = getMaxHealth();
       
       if (state.isResting || state.smeltingQueue > 0 || newStats.health <= 0) return state;
       
@@ -84,8 +86,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         // No health regen if starving or dehydrated
       } else {
         // Slow health regeneration if well-fed and hydrated
-        if (newStats.health < 100) {
-            newStats.health = Math.min(100, newStats.health + 0.5);
+        if (newStats.health < MAX_HEALTH) {
+            newStats.health = Math.min(MAX_HEALTH, newStats.health + 0.5);
         }
       }
 
@@ -426,11 +428,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'EAT': {
       if (state.inventory.apple <= 0) return state;
       const MAX_HUNGER = getMaxHunger();
+      const MAX_HEALTH = getMaxHealth();
 
       const newInventory = { ...state.inventory, apple: state.inventory.apple - 1 };
       const newStats = { ...state.playerStats };
       newStats.hunger = Math.min(MAX_HUNGER, newStats.hunger + 40);
-      newStats.health = Math.min(100, newStats.health + 5);
+      newStats.health = Math.min(MAX_HEALTH, newStats.health + 5);
 
       return {
         ...state,
@@ -686,6 +689,34 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         log: [{ id: generateUniqueLogId(), text: `Hydro-Recycling upgraded to Level ${newThirstLevel}! New max thirst: ${newMaxThirst}.`, type: 'success', timestamp: Date.now() }, ...state.log],
       }
     }
+    
+    case 'UPGRADE_HEALTH': {
+      const calculateCost = (level: number): number => {
+          if (level === 0) return 5000;
+          let cost = 5000;
+          for (let i = 1; i <= level; i++) {
+            cost = cost * 2 + 1000;
+          }
+          return cost;
+      };
+      const cost = calculateCost(state.healthLevel);
+      if (state.inventory.silver < cost) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: "Not enough silver to upgrade health.", type: 'danger', timestamp: Date.now() }, ...state.log],
+        }
+      }
+      const newInventory = { ...state.inventory };
+      newInventory.silver -= cost;
+      const newHealthLevel = state.healthLevel + 1;
+      const newMaxHealth = Math.min(1000, 100 + newHealthLevel * 25);
+      return {
+        ...state,
+        inventory: newInventory,
+        healthLevel: newHealthLevel,
+        log: [{ id: generateUniqueLogId(), text: `Exo-Weave Plating upgraded to Level ${newHealthLevel}! New max health: ${newMaxHealth}.`, type: 'success', timestamp: Date.now() }, ...state.log],
+      }
+    }
 
     default:
       return state;
@@ -735,6 +766,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
       if (!migratedState.thirstLevel) {
           migratedState.thirstLevel = 0;
+      }
+      if (!migratedState.healthLevel) {
+          migratedState.healthLevel = 0;
       }
       // IMPORTANT: Remove statistics from the main game state if it exists from an old save
       if ('statistics' in migratedState) {
