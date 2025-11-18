@@ -28,6 +28,7 @@ import {
   Signal,
   Coins,
   Heart,
+  Map,
 } from 'lucide-react';
 import type { Resource, Item } from '@/lib/game-types';
 

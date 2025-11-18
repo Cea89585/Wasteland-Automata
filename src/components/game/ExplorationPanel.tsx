@@ -6,11 +6,21 @@ import { useGame } from '@/hooks/use-game';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { locations } from '@/lib/game-data/locations';
-import { Loader2, Compass, Search, Bed } from 'lucide-react';
+import { Loader2, Compass, Search, Bed, Map } from 'lucide-react';
 import { itemData } from '@/lib/game-data/items';
 import { Progress } from '../ui/progress';
 import { positiveEncounters, negativeEncounters } from '@/lib/game-data/encounters';
 import type { FixedEncounter } from '@/lib/game-data/encounters';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog"
+import type { LocationId } from '@/lib/game-types';
 
 export default function ExplorationPanel() {
   const { gameState, dispatch } = useGame();
@@ -165,6 +175,10 @@ export default function ExplorationPanel() {
     setRestingProgress(0);
     dispatch({ type: 'ADD_LOG', payload: { text: "You find a relatively safe spot to rest your eyes for a moment...", type: 'info' } });
   };
+
+  const handleTravel = (locationId: LocationId) => {
+    dispatch({ type: 'TRAVEL', payload: { locationId } });
+  }
   
   const isBusy = isExploring || isScavenging || gameState.isResting || gameState.smeltingQueue > 0;
   
@@ -175,7 +189,7 @@ export default function ExplorationPanel() {
         <CardDescription>{currentLocation.description}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             <Button onClick={handleExplore} disabled={isBusy || gameState.playerStats.health <= 0} className="flex-1">
               {isExploring ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -200,6 +214,35 @@ export default function ExplorationPanel() {
               )}
               {gameState.isResting ? 'Resting...' : 'Rest'}
             </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" disabled={isBusy || gameState.playerStats.health <= 0} className="flex-1">
+                    <Map className="mr-2 h-4 w-4" /> Travel
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Travel to a new location</DialogTitle>
+                </DialogHeader>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
+                  {Object.values(locations).map(location => (
+                    <DialogClose asChild key={location.id}>
+                        <Button 
+                            variant={currentLocation.id === location.id ? 'default' : 'secondary'}
+                            onClick={() => handleTravel(location.id)}
+                            disabled={currentLocation.id === location.id}
+                            className="h-auto"
+                        >
+                            <div className="flex flex-col text-left p-2">
+                                <span className="font-bold">{location.name}</span>
+                                <span className="text-xs font-normal">{location.description}</span>
+                            </div>
+                        </Button>
+                    </DialogClose>
+                  ))}
+                </div>
+              </DialogContent>
+            </Dialog>
         </div>
 
         {gameState.isResting && (

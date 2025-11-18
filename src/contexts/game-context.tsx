@@ -6,6 +6,7 @@ import type { GameState, GameAction, LogMessage, Resource, Item, Statistics } fr
 import { initialState, initialStatistics } from '@/lib/game-data/initial-state';
 import { recipes } from '@/lib/game-data/recipes';
 import { itemData } from '@/lib/game-data/items';
+import { locations } from '@/lib/game-data/locations';
 
 const SAVE_KEY = 'wastelandAutomata_save';
 const STATS_KEY = 'wastelandAutomata_stats';
@@ -718,6 +719,18 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
     }
 
+    case 'TRAVEL': {
+      const { locationId } = action.payload;
+      const newLocation = locations[locationId];
+      if (!newLocation) return state;
+
+      return {
+        ...state,
+        currentLocation: locationId,
+        log: [{ id: generateUniqueLogId(), text: `You travel to the ${newLocation.name}.`, type: 'info', timestamp: Date.now() }, ...state.log],
+      };
+    }
+
     default:
       return state;
   }
@@ -790,7 +803,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
         
         // Save game state without statistics
         const savableState = { ...stateToSave };
-        savableState.log = [...savableState.log].reverse();
+        if (savableState.log.length > 50) {
+          savableState.log = savableState.log.slice(0, 50);
+        }
         localStorage.setItem(SAVE_KEY, JSON.stringify(savableState));
 
         // Save statistics separately

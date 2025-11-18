@@ -120,4 +120,5 @@ export type GameAction =
   | { type: 'UPGRADE_ENERGY' }
   | { type: 'UPGRADE_HUNGER' }
   | { type: 'UPGRADE_THIRST' }
-  | { type: 'UPGRADE_HEALTH' };
+  | { type: 'UPGRADE_HEALTH' }
+  | { type: 'TRAVEL'; payload: { locationId: LocationId } };

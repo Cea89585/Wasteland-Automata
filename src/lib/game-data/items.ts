@@ -10,9 +10,9 @@ export const itemData: Record<Resource | Item, { name: string; description: stri
   water: { name: Resources.water, description: 'Purified water, safe to drink.', sellPrice: 4 },
   components: { name: Resources.components, description: 'Advanced electronic parts. Key to automation.', sellPrice: 20 },
   uranium: { name: Resources.uranium, description: 'A rare, radioactive element needed for high-tier power.', sellPrice: 100 },
-  lemon: { name: Resources.lemon, description: 'A sour, yellow fruit.' },
-  banana: { name: Resources.banana, description: 'A yellow fruit.' },
-  peach: { name: Resources.peach, description: 'A fuzzy fruit.' },
+  lemon: { name: Resources.lemon, description: 'A sour, yellow fruit.', sellPrice: 5 },
+  banana: { name: Resources.banana, description: 'A yellow fruit.', sellPrice: 5 },
+  peach: { name: Resources.peach, description: 'A fuzzy fruit.', sellPrice: 5 },
   silver: { name: Resources.silver, description: 'An old-world currency, still valued by traders.' },
 
 
