@@ -33,7 +33,11 @@ export function useInactivityTimer({ onIdle, onActive, timeout }: UseInactivityT
     const startTime = Date.now();
     progressIntervalRef.current = setInterval(() => {
         const elapsed = Date.now() - startTime;
-        setIdleProgress((elapsed / timeout) * 100);
+        const progress = (elapsed / timeout) * 100;
+        setIdleProgress(progress);
+        if (progress >= 100) {
+            if(progressIntervalRef.current) clearInterval(progressIntervalRef.current);
+        }
     }, 100);
 
   }, [isIdle, onActive, onIdle, timeout]);
