@@ -63,6 +63,7 @@ export const itemIcons: Record<Item, React.ReactElement<LucideProps>> = {
   droneBay: <Bot {...iconProps} />,
   miningRig: <Drill {...iconProps} />,
   cookedApple: <Zap {...iconProps} />,
+  crudeMap: <Map {...iconProps} />,
 };
 
 export const statIcons = {

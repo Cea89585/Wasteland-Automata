@@ -35,6 +35,14 @@ export const recipes: Recipe[] = [
     requirements: { wood: 20, stone: 10, scrap: 5 },
     unlockedBy: [], // No longer unlocked at start
   },
+    {
+    id: 'recipe_crudeMap',
+    name: 'Craft Crude Map',
+    description: 'Piece together scraps of information to map the surrounding area, unlocking travel.',
+    creates: 'crudeMap',
+    requirements: { wood: 50, stone: 50, components: 10, silver: 10 },
+    unlockedBy: ['workbench'],
+  },
   {
     id: 'recipe_cookedApple',
     name: 'Cooked Apple',

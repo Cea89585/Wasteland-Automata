@@ -23,6 +23,7 @@ const emptyInventory = {
   droneBay: 0,
   miningRig: 0,
   cookedApple: 0,
+  crudeMap: 0,
 };
 
 export const initialStatistics: Statistics = {
@@ -69,6 +70,7 @@ export const initialState: Omit<GameState, 'statistics'> = {
   currentLocation: 'outskirts',
   unlockedRecipes: ['recipe_stoneAxe'],
   builtStructures: [],
+  unlockedFlags: [],
   unlockedTech: [],
   lockedItems: [],
   storageLevel: 0,

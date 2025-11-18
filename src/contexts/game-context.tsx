@@ -254,8 +254,42 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'CRAFT': {
       const recipe = recipes.find((r) => r.id === action.payload.recipeId);
       if (!recipe) return state;
-      const INVENTORY_CAP = getInventoryCap();
+      
+      // Handle one-time flag crafts
+      if (recipe.id === 'recipe_crudeMap') {
+        if (state.unlockedFlags.includes('mapCrafted')) return state; // Already crafted
 
+        let canCraftMap = true;
+        for (const [resource, requiredAmount] of Object.entries(recipe.requirements)) {
+            if (state.inventory[resource as keyof typeof state.inventory] < requiredAmount) {
+                canCraftMap = false;
+                break;
+            }
+        }
+        if (!canCraftMap) {
+             return {
+              ...state,
+              log: [{ id: generateUniqueLogId(), text: "Not enough resources to craft this.", type: 'danger', timestamp: Date.now() }, ...state.log],
+            };
+        }
+
+        const newInventory = { ...state.inventory };
+        for (const [resource, requiredAmount] of Object.entries(recipe.requirements)) {
+            newInventory[resource as keyof typeof newInventory] -= requiredAmount;
+        }
+
+        const newUnlockedFlags = [...state.unlockedFlags, 'mapCrafted'];
+        const logMessageText = `You piece together a crude map, revealing the wider wasteland.`;
+        return {
+          ...state,
+          inventory: newInventory,
+          unlockedFlags: newUnlockedFlags,
+          log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
+        };
+      }
+
+      // Handle normal item crafts
+      const INVENTORY_CAP = getInventoryCap();
       let newInventory = { ...state.inventory };
       let canCraft = true;
 
@@ -767,6 +801,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
       if (!migratedState.lockedItems) {
         migratedState.lockedItems = [];
+      }
+      if (!migratedState.unlockedFlags) {
+        migratedState.unlockedFlags = [];
       }
       if (!migratedState.storageLevel) {
           migratedState.storageLevel = 0;

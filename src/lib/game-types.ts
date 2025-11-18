@@ -28,6 +28,7 @@ export const Items = {
   droneBay: 'Drone Bay',
   miningRig: 'Mining Rig',
   cookedApple: 'Cooked Apple',
+  crudeMap: 'Crude Map',
 } as const;
 export type Item = keyof typeof Items;
 
@@ -64,6 +65,8 @@ export type LocationId =
   | 'industrial';
 
 export type TechId = 'basicTools' | 'shelter' | 'power' | 'automation';
+export type Flag = 'mapCrafted';
+
 
 export type EquipmentSlot = 'hand' | 'body';
 export type Equipment = Partial<Record<EquipmentSlot, Item | null>>;
@@ -77,6 +80,7 @@ export interface GameState {
   currentLocation: LocationId;
   unlockedRecipes: string[];
   builtStructures: string[];
+  unlockedFlags: Flag[];
   unlockedTech: TechId[];
   lockedItems: Resource[];
   storageLevel: number;
