@@ -9,24 +9,27 @@ interface UseInactivityTimerProps {
 }
 
 export function useInactivityTimer({ onIdle, onActive, timeout }: UseInactivityTimerProps) {
-  const [isIdle, setIsIdle] = useState(false);
   const [idleProgress, setIdleProgress] = useState(0);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const onIdleRef = useRef(onIdle);
+  const onActiveRef = useRef(onActive);
+
+  // Keep refs updated with the latest callbacks
+  useEffect(() => {
+    onIdleRef.current = onIdle;
+    onActiveRef.current = onActive;
+  }, [onIdle, onActive]);
 
   const resetTimer = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
     if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
 
     setIdleProgress(0);
-    if (isIdle) {
-      onActive();
-      setIsIdle(false);
-    }
+    onActiveRef.current();
     
     timerRef.current = setTimeout(() => {
-      onIdle();
-      setIsIdle(true);
+      onIdleRef.current();
       if (progressIntervalRef.current) clearInterval(progressIntervalRef.current);
     }, timeout);
     
@@ -40,10 +43,10 @@ export function useInactivityTimer({ onIdle, onActive, timeout }: UseInactivityT
         }
     }, 100);
 
-  }, [isIdle, onActive, onIdle, timeout]);
+  }, [timeout]);
 
   useEffect(() => {
-    const events = ['mousemove', 'keydown', 'mousedown', 'touchstart'];
+    const events = ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll'];
     
     const handleActivity = () => {
       resetTimer();
@@ -60,5 +63,5 @@ export function useInactivityTimer({ onIdle, onActive, timeout }: UseInactivityT
     };
   }, [resetTimer]);
 
-  return { isIdle, idleProgress };
+  return { idleProgress, resetTimer };
 }

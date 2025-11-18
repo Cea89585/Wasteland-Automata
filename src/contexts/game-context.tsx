@@ -112,7 +112,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
 
 
-      if (state.isResting || state.smeltingQueue > 0 || newStats.health <= 0) {
+      if (state.isResting || newStats.health <= 0) {
           return {
             ...nextState,
             log: [...logMessages, ...state.log]
@@ -120,7 +120,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       };
 
       // Idle state logic
-      if (state.isIdle) {
+      if (state.isIdle && !state.droneIsActive && state.smeltingQueue <= 0) {
          if (newStats.health < MAX_HEALTH) {
             newStats.health = Math.min(MAX_HEALTH, newStats.health + 0.25);
         }
@@ -262,6 +262,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'SET_IDLE': {
       if (state.isIdle === action.payload) return state;
+
+      // Prevent going idle if there are background tasks
+      if (action.payload && (state.droneIsActive || state.smeltingQueue > 0)) {
+        return state;
+      }
+      
       const logText = action.payload
         ? "You find a moment of peace. Your body begins to recover."
         : "You stir, the brief respite over.";
@@ -878,7 +884,7 @@ export const GameContext = createContext<{
 export function GameProvider({ children }: { children: ReactNode }) {
   const [gameState, dispatch] = useReducer(reducer, { ...initialState, statistics: initialStatistics, isInitialized: false });
 
-  const { idleProgress } = useInactivityTimer({
+  const { idleProgress, resetTimer } = useInactivityTimer({
     onIdle: () => dispatch({ type: 'SET_IDLE', payload: true }),
     onActive: () => dispatch({ type: 'SET_IDLE', payload: false }),
     timeout: 30000,
@@ -992,6 +998,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(tickInterval);
   }, [gameState.isInitialized, gameState.playerStats.health]);
   
+  useEffect(() => {
+    if (gameState.isInitialized) {
+      // Whenever these background tasks change, reset the inactivity timer
+      if (gameState.droneIsActive || gameState.smeltingQueue > 0) {
+        resetTimer();
+      }
+    }
+  }, [gameState.isInitialized, gameState.droneIsActive, gameState.smeltingQueue, resetTimer]);
+
 
   return (
     <GameContext.Provider value={{ gameState, dispatch, idleProgress }}>
