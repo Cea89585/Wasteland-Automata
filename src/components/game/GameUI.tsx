@@ -123,7 +123,7 @@ export default function GameUI() {
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
              {isMobile ? (
               <ScrollArea className="w-full whitespace-nowrap">
-                <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
+                <TabsList className="inline-flex">
                   {tabs.map((tab) => (
                     <TabsTrigger key={tab.value} value={tab.value} disabled={isBusy} className="flex items-center gap-2 text-xs h-9">
                       {tab.icon}
