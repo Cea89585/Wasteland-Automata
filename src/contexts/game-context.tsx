@@ -127,7 +127,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       } else {
         // Normal tick logic when not idle
         // Passive systems
-        if(state.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP) {
+        if(state.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP && (state.gameTick % 4 === 0)) {
           newInventory.water = Math.min(INVENTORY_CAP, newInventory.water + 1);
         }
         if(state.builtStructures.includes('hydroponicsBay') && newInventory.apple < INVENTORY_CAP && (state.gameTick % 2 === 0)) {
