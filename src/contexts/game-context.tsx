@@ -1,3 +1,4 @@
+
 // src/contexts/game-context.tsx
 'use client';
 
@@ -134,23 +135,18 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
       
       if (currentState.isResting || currentState.isIdle) {
+        // Health regenerates while resting or idle
         if (newStats.health < MAX_HEALTH) {
             newStats.health = Math.min(MAX_HEALTH, newStats.health + 0.25);
         }
       } else {
-        // Normal tick logic when not idle
+        // Normal tick logic when not resting/idle
         newStats.thirst = Math.max(0, newStats.thirst - 0.25);
         newStats.hunger = Math.max(0, newStats.hunger - 0.25);
 
         if (newStats.thirst === 0 || newStats.hunger === 0) {
+          // If starving or dehydrated, lose health
           newStats.health = Math.max(0, newStats.health - 2);
-        } else if (newStats.thirst < 20 || newStats.hunger < 20) {
-          // No health regen if starving or dehydrated
-        } else {
-          // Slow health regeneration if well-fed and hydrated
-          if (newStats.health < MAX_HEALTH) {
-              newStats.health = Math.min(MAX_HEALTH, newStats.health + 0.5);
-          }
         }
       }
 
