@@ -235,12 +235,8 @@ export default function ExplorationPanel() {
                             variant={currentLocation.id === location.id ? 'default' : 'secondary'}
                             onClick={() => handleTravel(location.id)}
                             disabled={currentLocation.id === location.id}
-                            className="h-auto"
                         >
-                            <div className="flex flex-col text-left p-2">
-                                <span className="font-bold">{location.name}</span>
-                                <span className="text-xs font-normal">{location.description}</span>
-                            </div>
+                            {location.name}
                         </Button>
                     </DialogClose>
                   ))}
