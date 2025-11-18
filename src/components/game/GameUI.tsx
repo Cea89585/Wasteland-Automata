@@ -104,7 +104,7 @@ export default function GameUI() {
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div className={cn("lg:col-span-3 lg:order-1", isMobile ? "order-2" : "order-1")}>
+        <div className={cn("lg:col-span-3 lg:order-1", isMobile ? "order-1" : "order-1")}>
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
              {isMobile ? (
               <Select value={activeTab} onValueChange={handleTabChange} disabled={isBusy}>
@@ -142,7 +142,7 @@ export default function GameUI() {
             <TabsContent value="tech" className="mt-4"><TechPanel /></TabsContent>
           </Tabs>
         </div>
-        <div className={cn("lg:col-span-2 flex flex-col gap-4", isMobile ? "order-1" : "order-2")}>
+        <div className={cn("lg:col-span-2 flex flex-col gap-4", isMobile ? "order-2" : "order-2")}>
           <LogPanel />
           <div className="hidden lg:block">
             <SilverCounter />
