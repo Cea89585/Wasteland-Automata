@@ -151,7 +151,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
       // Universal logic (happens whether idle or not)
       if(newStats.energy < MAX_ENERGY) {
-        newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 1);
+        newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 0.25);
       }
 
       if (state.playerStats.health > 0 && newStats.health <= 0) {
