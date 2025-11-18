@@ -1,3 +1,4 @@
+
 // src/components/game/LogPanel.tsx
 'use client';
 import { useGame } from '@/hooks/use-game';
@@ -24,6 +25,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from '../ui/button';
 import { allIcons } from './GameIcons';
@@ -151,7 +153,7 @@ export default function LogPanel() {
           </DialogContent>
         </Dialog>
       </CardHeader>
-      <CardContent className="flex-grow overflow-y-auto">
+      <CardContent>
         <div className="flex flex-col gap-3 pr-4">
           {log.slice(0, 15).map((message) => (
             <LogEntry key={message.id} message={message} />
