@@ -4,15 +4,14 @@ import { useGame } from '@/hooks/use-game';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { useEffect, useRef } from 'react';
-import { Info, AlertTriangle, ShieldCheck, Hammer, Clock, BookOpen, Trash2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Info, AlertTriangle, ShieldCheck, Hammer, Clock, BookOpen, Trash2, ChevronDown } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog"
@@ -49,23 +48,44 @@ const logTypeColors = {
 
 const LogEntry = ({ message }: { message: ReturnType<typeof useGame>['gameState']['log'][0] }) => {
     let icon = logTypeIcons[message.type];
+    const [isExpanded, setIsExpanded] = useState(false);
 
     if (message.type === 'craft' && message.item) {
         icon = allIcons[message.item] || logTypeIcons.craft;
     }
+
+    const hasMultipleLines = message.text.includes('\n');
   
-  return (
-  <div className="flex items-start gap-3 text-sm animate-in fade-in-0 duration-500">
-    <div className="pt-0.5">{icon}</div>
-    <div className="flex-1">
-      <p className={cn(logTypeColors[message.type], "whitespace-pre-wrap")}>{message.text}</p>
-      <div className="text-xs text-muted-foreground/50 flex items-center pt-1">
-        <Clock className="h-3 w-3 mr-1" />
-        {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
-      </div>
-    </div>
-  </div>
-)};
+    return (
+        <div className="flex items-start gap-3 text-sm animate-in fade-in-0 duration-500">
+            <div className="pt-0.5">{icon}</div>
+            <div className="flex-1">
+                <p className={cn(
+                    logTypeColors[message.type], 
+                    "whitespace-pre-wrap",
+                    !isExpanded && hasMultipleLines && "line-clamp-2"
+                )}>
+                    {message.text}
+                </p>
+                
+                {hasMultipleLines && (
+                    <button 
+                        onClick={() => setIsExpanded(!isExpanded)} 
+                        className="text-xs text-primary hover:underline mt-1 flex items-center"
+                    >
+                        {isExpanded ? 'Show less' : 'Show more'}
+                        <ChevronDown className={cn("h-4 w-4 transition-transform", isExpanded && "rotate-180")} />
+                    </button>
+                )}
+
+                <div className="text-xs text-muted-foreground/50 flex items-center pt-1">
+                    <Clock className="h-3 w-3 mr-1" />
+                    {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
+                </div>
+            </div>
+        </div>
+    );
+};
 
 export default function LogPanel() {
   const { gameState: { log }, dispatch } = useGame();
@@ -97,9 +117,9 @@ export default function LogPanel() {
             </DialogHeader>
             <ScrollArea className="h-[60vh] mt-4">
               <div className="flex flex-col gap-3 pr-4">
-                {log.map((message) => (
+                {[...log].reverse().map((message) => (
                   <LogEntry key={message.id} message={message} />
-                )).reverse()}
+                ))}
               </div>
             </ScrollArea>
              <DialogFooter className="mt-4">
@@ -133,13 +153,11 @@ export default function LogPanel() {
         </Dialog>
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden">
-        <ScrollArea className="h-full" ref={scrollAreaRef}>
-          <div className="flex flex-col gap-3 pr-4">
-            {log.slice(0, 50).map((message) => (
-              <LogEntry key={message.id} message={message} />
-            ))}
-          </div>
-        </ScrollArea>
+        <div className="flex flex-col gap-3 pr-4">
+          {log.slice(0, 15).map((message) => (
+            <LogEntry key={message.id} message={message} />
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
