@@ -27,8 +27,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   Select,
   SelectContent,
@@ -80,8 +80,27 @@ export default function GameUI() {
                 </h1>
                 <IdleTimer />
             </div>
-            <div className="flex flex-col gap-4">
-                <Link href="/settings" className="self-end">
+            <div className="flex items-center gap-2">
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                        <AlertTriangle className="h-5 w-5 text-destructive" />
+                        <span className="sr-only">Warning</span>
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2"><AlertTriangle className="text-destructive" /> Important Warning</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            If your health reaches 0%, you will die and your progress for this run will be permanently reset.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogAction>Acknowledge</AlertDialogAction>
+                      </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                <Link href="/settings">
                     <Button variant="ghost" size="icon">
                         <Settings className="h-5 w-5" />
                         <span className="sr-only">Settings</span>
@@ -89,13 +108,7 @@ export default function GameUI() {
                 </Link>
             </div>
         </div>
-        <div className="flex flex-col gap-4 w-full">
-            <Alert variant="destructive" className="border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                    If your health reaches 0%, you will die and your progress will be reset.
-                </AlertDescription>
-            </Alert>
+        <div className="flex flex-col gap-2 w-full">
             <StatsPanel />
             <div className={cn("block lg:hidden")}>
                 <SilverCounter />
