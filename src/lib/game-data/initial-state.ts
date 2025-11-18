@@ -71,6 +71,7 @@ export const initialState: Omit<GameState, 'statistics'> = {
   builtStructures: [],
   unlockedTech: [],
   lockedItems: [],
+  storageLevel: 0,
   isInitialized: false,
   gameTick: 0,
   isResting: false,

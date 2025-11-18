@@ -9,17 +9,19 @@ import { itemData } from '@/lib/game-data/items';
 
 const SAVE_KEY = 'wastelandAutomata_save';
 const STATS_KEY = 'wastelandAutomata_stats';
-const INVENTORY_CAP = 200;
 
 let logIdCounter = 0;
 
 const reducer = (state: GameState, action: GameAction): GameState => {
+  const getInventoryCap = () => 200 + (state.storageLevel || 0) * 50;
+
   const generateUniqueLogId = () => {
     // Combine timestamp with a counter to ensure uniqueness
     return Date.now() + logIdCounter++;
   };
 
   const addResource = (inventory: GameState['inventory'], statistics: GameState['statistics'], resource: Resource | Item, amount: number) => {
+    const INVENTORY_CAP = getInventoryCap();
     const newInventory = { ...inventory };
     newInventory[resource] = Math.min(INVENTORY_CAP, newInventory[resource] + amount);
     
@@ -54,6 +56,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let newStats = { ...state.playerStats };
       let newInventory = { ...state.inventory };
       const logMessages: LogMessage[] = [];
+      const INVENTORY_CAP = getInventoryCap();
       
       if (state.isResting || state.smeltingQueue > 0 || newStats.health <= 0) return state;
       
@@ -244,6 +247,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'CRAFT': {
       const recipe = recipes.find((r) => r.id === action.payload.recipeId);
       if (!recipe) return state;
+      const INVENTORY_CAP = getInventoryCap();
 
       let newInventory = { ...state.inventory };
       let canCraft = true;
@@ -555,6 +559,37 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         };
     }
 
+    case 'UPGRADE_STORAGE': {
+      const calculateCost = (level: number): number => {
+        if (level === 0) return 10000;
+        let cost = 10000;
+        for (let i = 1; i <= level; i++) {
+          cost = cost * 2 + 10000;
+        }
+        return cost;
+      };
+      
+      const cost = calculateCost(state.storageLevel);
+      if (state.inventory.silver < cost) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: "Not enough silver to upgrade storage.", type: 'danger', timestamp: Date.now() }, ...state.log],
+        }
+      }
+
+      const newInventory = { ...state.inventory };
+      newInventory.silver -= cost;
+      const newStorageLevel = state.storageLevel + 1;
+      const newCapacity = 200 + newStorageLevel * 50;
+      
+      return {
+        ...state,
+        inventory: newInventory,
+        storageLevel: newStorageLevel,
+        log: [{ id: generateUniqueLogId(), text: `Storage upgraded to Level ${newStorageLevel}! New capacity: ${newCapacity}.`, type: 'success', timestamp: Date.now() }, ...state.log],
+      }
+    }
+
     default:
       return state;
   }
@@ -566,7 +601,7 @@ export const GameContext = createContext<{
 } | undefined>(undefined);
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [gameState, dispatch] = useReducer(reducer, initialState);
+  const [gameState, dispatch] = useReducer(reducer, { ...initialState, statistics: initialStatistics, isInitialized: false });
 
   useEffect(() => {
     try {
@@ -591,6 +626,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
       if (!migratedState.lockedItems) {
         migratedState.lockedItems = [];
+      }
+      if (!migratedState.storageLevel) {
+          migratedState.storageLevel = 0;
       }
       // IMPORTANT: Remove statistics from the main game state if it exists from an old save
       if ('statistics' in migratedState) {
