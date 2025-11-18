@@ -57,22 +57,6 @@ export default function ExplorationPanel() {
     }
   }, [restingProgress, finishResting]);
 
-  useEffect(() => {
-    if (gameState.droneIsActive && gameState.droneReturnTimestamp && Date.now() >= gameState.droneReturnTimestamp) {
-        // Simulate 5 exploration actions
-        let totalFound: Partial<Record<Resource, number>> = {};
-        for(let i = 0; i < 5; i++) {
-          currentLocation.resources.forEach((res) => {
-              if (Math.random() < res.chance) {
-                  let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
-                  totalFound[res.resource] = (totalFound[res.resource] || 0) + amount;
-              }
-          });
-        }
-        dispatch({ type: 'DRONE_RETURN', payload: { resources: totalFound } });
-    }
-  }, [gameState.droneIsActive, gameState.droneReturnTimestamp, currentLocation.resources, dispatch]);
-
   const handleFixedEncounter = () => {
     let encounter: FixedEncounter;
     if (Math.random() < 0.5) { // 50% chance for a positive encounter

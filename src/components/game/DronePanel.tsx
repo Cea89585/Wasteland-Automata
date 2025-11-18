@@ -9,20 +9,20 @@ import { Progress } from '../ui/progress';
 import { resourceIcons } from './GameIcons';
 import { itemData } from '@/lib/game-data/items';
 
-const MISSION_DURATION = 5; // seconds
+const MISSION_DURATION = 30; // seconds
 
 export default function DronePanel() {
   const { gameState, dispatch } = useGame();
   const [progress, setProgress] = useState(0);
 
-  const missionRequirements = { apple: 2, water: 2 };
+  const missionRequirements = { apple: 10, water: 10 };
   const canSend = gameState.inventory.apple >= missionRequirements.apple && gameState.inventory.water >= missionRequirements.water;
   const isBusy = gameState.isResting || gameState.smeltingQueue > 0;
 
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined;
-    if (gameState.droneIsActive) {
-      const startTime = gameState.droneReturnTimestamp! - (MISSION_DURATION * 1000);
+    if (gameState.droneIsActive && gameState.droneReturnTimestamp) {
+      const startTime = gameState.droneReturnTimestamp - (MISSION_DURATION * 1000);
       interval = setInterval(() => {
         const elapsed = Date.now() - startTime;
         const currentProgress = Math.min(100, (elapsed / (MISSION_DURATION * 1000)) * 100);
@@ -86,7 +86,7 @@ export default function DronePanel() {
                         className="w-full sm:w-auto"
                     >
                         <Bot className="mr-2 h-4 w-4" />
-                        Send Drone (5s Mission)
+                        Send Drone ({MISSION_DURATION}s Mission)
                     </Button>
                 </div>
             )}

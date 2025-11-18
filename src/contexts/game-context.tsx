@@ -65,7 +65,58 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const MAX_ENERGY = getMaxEnergy();
       const MAX_HEALTH = getMaxHealth();
       
-      if (state.isResting || state.smeltingQueue > 0 || newStats.health <= 0) return state;
+      let nextState = { ...state };
+      
+      // Drone return logic
+      if (nextState.droneIsActive && nextState.droneReturnTimestamp && Date.now() >= nextState.droneReturnTimestamp) {
+        const currentLocation = locations[nextState.currentLocation];
+        let totalFound: Partial<Record<Resource, number>> = {};
+        for(let i = 0; i < 15; i++) { // Increased from 5 to 15
+          currentLocation.resources.forEach((res) => {
+              if (Math.random() < res.chance) {
+                  let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
+                  totalFound[res.resource] = (totalFound[res.resource] || 0) + amount;
+              }
+          });
+        }
+        
+        let resourcesFoundText = "Drone has returned.";
+        let foundSomething = false;
+        
+        let finalInventory = { ...nextState.inventory };
+        let finalStatistics = { ...nextState.statistics };
+
+        for (const [resource, amount] of Object.entries(totalFound)) {
+          if (amount > 0) {
+            const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(finalInventory, finalStatistics, resource as Resource, amount);
+            finalInventory = updatedInventory;
+            finalStatistics = updatedStatistics;
+            resourcesFoundText += ` It collected ${amount} ${itemData[resource as Resource].name}.`;
+            foundSomething = true;
+          }
+        }
+        if (!foundSomething) {
+          resourcesFoundText += " It found nothing of value.";
+        }
+
+        logMessages.push({ id: generateUniqueLogId(), text: resourcesFoundText, type: 'success', timestamp: Date.now() });
+
+        nextState = {
+            ...nextState,
+            inventory: finalInventory,
+            statistics: finalStatistics,
+            droneIsActive: false,
+            droneReturnTimestamp: null,
+        };
+      }
+
+
+      if (state.isResting || state.smeltingQueue > 0 || newStats.health <= 0) {
+          return {
+            ...nextState,
+            log: [...logMessages, ...state.log]
+          }
+      };
       
       // Passive systems
       if(state.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP) {
@@ -102,7 +153,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         const newStatistics = { ...state.statistics, deaths: state.statistics.deaths + 1 };
         localStorage.setItem(STATS_KEY, JSON.stringify(newStatistics));
         return {
-          ...state,
+          ...nextState,
           playerStats: newStats,
           statistics: newStatistics,
           log: [...logMessages, ...state.log],
@@ -110,7 +161,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
 
       return {
-        ...state,
+        ...nextState,
         playerStats: newStats,
         inventory: newInventory,
         gameTick: state.gameTick + 1,
@@ -766,52 +817,28 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'SEND_DRONE': {
-      if (state.inventory.apple < 2 || state.inventory.water < 2) {
+      if (state.inventory.apple < 10 || state.inventory.water < 10) {
         return {
           ...state,
           log: [{ id: generateUniqueLogId(), text: "Not enough apples and water to fuel the drone.", type: 'danger', timestamp: Date.now() }],
         };
       }
       const newInventory = { ...state.inventory };
-      newInventory.apple -= 2;
-      newInventory.water -= 2;
+      newInventory.apple -= 10;
+      newInventory.water -= 10;
       return {
         ...state,
         inventory: newInventory,
         droneIsActive: true,
-        droneReturnTimestamp: Date.now() + 5000, // 5 seconds
-        log: [{ id: generateUniqueLogId(), text: "Scavenger drone launched. It will return in 5 seconds.", type: 'info', timestamp: Date.now() }],
+        droneReturnTimestamp: Date.now() + 30000, // 30 seconds
+        log: [{ id: generateUniqueLogId(), text: "Scavenger drone launched. It will return in 30 seconds.", type: 'info', timestamp: Date.now() }],
       };
     }
 
     case 'DRONE_RETURN': {
-      const { resources } = action.payload;
-      let newInventory = { ...state.inventory };
-      let newStatistics = { ...state.statistics };
-      let resourcesFoundText = "Drone has returned.";
-      let foundSomething = false;
-
-      for (const [resource, amount] of Object.entries(resources)) {
-        if (amount > 0) {
-          const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(newInventory, newStatistics, resource as Resource, amount);
-          newInventory = updatedInventory;
-          newStatistics = updatedStatistics;
-          resourcesFoundText += ` It collected ${amount} ${itemData[resource as Resource].name}.`;
-          foundSomething = true;
-        }
-      }
-      if (!foundSomething) {
-        resourcesFoundText += " It found nothing of value.";
-      }
-
-      return {
-        ...state,
-        inventory: newInventory,
-        statistics: newStatistics,
-        droneIsActive: false,
-        droneReturnTimestamp: null,
-        log: [{ id: generateUniqueLogId(), text: resourcesFoundText, type: 'success', timestamp: Date.now() }],
-      };
+      // This case is now handled inside GAME_TICK to prevent race conditions.
+      // Kept here to avoid breaking changes if it were ever dispatched manually, though it shouldn't be.
+      return state;
     }
 
     default:
@@ -875,6 +902,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!migratedState.droneReturnTimestamp) {
         migratedState.droneReturnTimestamp = null;
       }
+      
+      // Handle active drone from a saved state
+      if (migratedState.droneIsActive && migratedState.droneReturnTimestamp) {
+          if (Date.now() >= migratedState.droneReturnTimestamp) {
+              // If the drone should have returned already, process it immediately on load.
+              // This is a simplified approach. The more robust logic is now in the game tick.
+              migratedState.droneIsActive = false;
+              migratedState.droneReturnTimestamp = null;
+          }
+      }
+
 
       // IMPORTANT: Remove statistics from the main game state if it exists from an old save
       if ('statistics' in migratedState) {
@@ -915,7 +953,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     const tickInterval = setInterval(() => {
       dispatch({ type: 'GAME_TICK' });
-    }, 15000); // Game tick every 15 seconds
+    }, 2000); // Game tick every 2 seconds
 
     return () => clearInterval(tickInterval);
   }, [gameState.isInitialized, gameState.playerStats.health]);
