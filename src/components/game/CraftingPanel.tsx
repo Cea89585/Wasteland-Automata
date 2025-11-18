@@ -55,37 +55,40 @@ export default function CraftingPanel() {
         ) : (
           <ScrollArea className="h-[300px]">
             <div className="space-y-2 pr-4">
-            {availableRecipes.map(recipe => (
-              <Card key={recipe.id} className="bg-muted/50">
-                <CardContent className="p-4 flex items-center justify-between gap-4">
-                  <div className="flex-grow">
-                      <div className="flex items-center font-semibold text-base mb-2">
-                        {allIcons[recipe.creates]} {recipe.name}
-                      </div>
-                      <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-                        <span>Requires:</span>
-                        <div className="flex flex-wrap gap-x-3 gap-y-1">
-                          {Object.entries(recipe.requirements).map(([resource, amount]) => (
-                            <span key={resource} className="flex items-center">
-                              {resourceIcons[resource as Resource]}
-                              {itemData[resource as Resource].name}: {amount}
-                            </span>
-                          ))}
+            {availableRecipes.map(recipe => {
+              const isCraftable = canCraft(recipe.id);
+              return (
+                <Card key={recipe.id} className="bg-muted/50">
+                  <CardContent className="p-4 flex items-center justify-between gap-4">
+                    <div className="flex-grow">
+                        <div className="flex items-center font-semibold text-base mb-2">
+                          {allIcons[recipe.creates]} {recipe.name}
                         </div>
-                      </div>
-                  </div>
-                  <Button 
-                    size="icon"
-                    variant="outline"
-                    onClick={() => dispatch({ type: 'CRAFT', payload: { recipeId: recipe.id }})} 
-                    disabled={!canCraft(recipe.id) || gameState.playerStats.health <= 0 || isBusy}
-                    aria-label={`Craft ${recipe.name}`}
-                  >
-                    <Hammer className="h-4 w-4" />
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
+                        <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                          <span>Requires:</span>
+                          <div className="flex flex-wrap gap-x-3 gap-y-1">
+                            {Object.entries(recipe.requirements).map(([resource, amount]) => (
+                              <span key={resource} className="flex items-center">
+                                {resourceIcons[resource as Resource]}
+                                {itemData[resource as Resource].name}: {amount}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                    </div>
+                    <Button 
+                      size="icon"
+                      variant={isCraftable ? 'default' : 'outline'}
+                      onClick={() => dispatch({ type: 'CRAFT', payload: { recipeId: recipe.id }})} 
+                      disabled={!isCraftable || gameState.playerStats.health <= 0 || isBusy}
+                      aria-label={`Craft ${recipe.name}`}
+                    >
+                      <Hammer className="h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              )
+            })}
             </div>
           </ScrollArea>
         )}

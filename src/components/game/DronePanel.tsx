@@ -48,15 +48,15 @@ export default function DronePanel() {
   return (
     <Card className="bg-muted/50">
         <CardHeader>
-            <CardTitle className="flex items-center text-xl mb-2">
+            <CardTitle className="flex items-center text-xl">
                 <Bot className="mr-2 h-6 w-6" /> Scavenger Drone
             </CardTitle>
             <CardDescription>
-                Automate resource collection by sending a drone on exploration missions.
+                Send a drone on a {MISSION_DURATION}s mission to collect resources.
             </CardDescription>
         </CardHeader>
         <CardContent>
-            <div className="flex flex-col gap-2 text-sm my-4 items-start mx-auto max-w-xs">
+            <div className="flex flex-col gap-2 text-sm my-2 items-start mx-auto">
                 <span className="font-semibold text-muted-foreground self-center">Mission Cost:</span>
                 <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center w-full">
                     <span className="flex items-center">
@@ -83,10 +83,11 @@ export default function DronePanel() {
                     <Button
                         onClick={handleSendDrone}
                         disabled={!canSend || isBusy || gameState.playerStats.health <= 0}
-                        className="w-full sm:w-auto"
+                        className="w-full"
+                        variant={canSend ? 'default' : 'outline'}
                     >
                         <Bot className="mr-2 h-4 w-4" />
-                        Send Drone ({MISSION_DURATION}s Mission)
+                        Send Drone
                     </Button>
                 </div>
             )}

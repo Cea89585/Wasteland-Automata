@@ -68,36 +68,35 @@ export default function FurnacePanel() {
         <CardDescription>Smelt raw materials into advanced components.</CardDescription>
       </CardHeader>
       <CardContent>
-        <Card className="bg-muted/50 p-6 w-full text-center">
-            <CardTitle className="flex items-center justify-center text-xl mb-4">
-              <Cpu className="mr-2 h-6 w-6" /> Smelt Components
-            </CardTitle>
-            <CardDescription className="mb-4">
-              Turn scrap and wood into valuable electronic components.
-            </CardDescription>
-
-            <div className="flex flex-col gap-2 text-sm my-4 items-start mx-auto max-w-xs">
-                <span className="font-semibold text-muted-foreground self-center">Requires per batch:</span>
-                <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center">
-                    <span className="flex items-center">
-                        {resourceIcons['scrap']}
-                        {itemData['scrap'].name}: {smeltRequirements.scrap}
-                    </span>
-                    <span className="flex items-center">
-                        {resourceIcons['wood']}
-                        {itemData['wood'].name}: {smeltRequirements.wood}
-                    </span>
-                </div>
-                 <span className="font-semibold text-muted-foreground self-center mt-2">Creates:</span>
-                 <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center w-full">
-                    <span className="flex items-center">
-                        {resourceIcons['components']}
-                        {itemData['components'].name}: 1
-                    </span>
-                </div>
+        <Card className="bg-muted/50 p-4 w-full">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-grow">
+                  <div className="flex items-center font-semibold text-base mb-2">
+                    <Cpu className="mr-2 h-5 w-5" /> Smelt Components
+                  </div>
+                  <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                    <div className="flex flex-wrap gap-x-3 gap-y-1">
+                        <span>Requires:</span>
+                        <span className="flex items-center">
+                            {resourceIcons['scrap']}
+                            {itemData['scrap'].name}: {smeltRequirements.scrap}
+                        </span>
+                        <span className="flex items-center">
+                            {resourceIcons['wood']}
+                            {itemData['wood'].name}: {smeltRequirements.wood}
+                        </span>
+                    </div>
+                     <div className="flex flex-wrap gap-x-4 gap-y-2">
+                        <span>Creates:</span>
+                        <span className="flex items-center">
+                            {resourceIcons['components']}
+                            {itemData['components'].name}: 1
+                        </span>
+                    </div>
+                  </div>
+              </div>
             </div>
-
-            {gameState.smeltingQueue > 0 ? (
+             {gameState.smeltingQueue > 0 ? (
                 <div className="flex flex-col gap-2 mt-4">
                     <p className="text-sm text-muted-foreground text-center flex items-center justify-center">
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
@@ -111,7 +110,8 @@ export default function FurnacePanel() {
                       <Button 
                           onClick={handleSmelt} 
                           disabled={!canSmelt || isBusy || gameState.playerStats.health <= 0}
-                          className="w-full sm:w-auto"
+                          className="flex-1"
+                          variant={canSmelt ? 'default' : 'outline'}
                       >
                           <Power className="mr-2 h-4 w-4" />
                           Smelt
@@ -121,7 +121,7 @@ export default function FurnacePanel() {
                           <Button 
                               onClick={handleSmeltAll} 
                               disabled={maxSmeltable < 2 || isBusy || gameState.playerStats.health <= 0}
-                              className="w-full sm:w-auto"
+                              className="flex-1"
                               variant="secondary"
                           >
                               <PackageCheck className="mr-2 h-4 w-4" />
