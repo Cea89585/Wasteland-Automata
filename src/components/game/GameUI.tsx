@@ -112,18 +112,18 @@ export default function GameUI() {
         </div>
         <div className="flex flex-col gap-2 w-full">
             <StatsPanel />
-            <div className={cn("block")}>
+            <div className={cn("block sm:hidden")}>
                 <SilverCounter />
             </div>
         </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div className={cn("lg:col-span-3 lg:order-1", isMobile ? "order-1" : "order-1")}>
+        <div className={cn("lg:col-span-3 lg:order-1", isMobile ? "order-1" : "order-2")}>
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
              {isMobile ? (
               <ScrollArea className="w-full whitespace-nowrap">
-                <TabsList className="inline-flex">
+                <TabsList>
                   {tabs.map((tab) => (
                     <TabsTrigger key={tab.value} value={tab.value} disabled={isBusy} className="flex items-center gap-2 text-xs h-9">
                       {tab.icon}
@@ -153,7 +153,10 @@ export default function GameUI() {
             <TabsContent value="tech" className="mt-4"><TechPanel /></TabsContent>
           </Tabs>
         </div>
-        <div className={cn("lg:col-span-2 flex flex-col gap-4", isMobile ? "order-2" : "order-2")}>
+        <div className={cn("lg:col-span-2 flex flex-col gap-4", isMobile ? "order-2" : "order-1")}>
+          <div className={cn("hidden sm:block")}>
+            <SilverCounter />
+          </div>
           <LogPanel />
         </div>
       </div>
