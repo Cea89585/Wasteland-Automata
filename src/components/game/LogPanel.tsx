@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogFooter,
   DialogClose,
+  DialogTrigger,
 } from "@/components/ui/dialog"
 import {
   AlertDialog,
@@ -115,13 +116,15 @@ export default function LogPanel() {
             <DialogHeader>
               <DialogTitle>Full Event Log</DialogTitle>
             </DialogHeader>
-            <ScrollArea className="h-[60vh] mt-4">
-              <div className="flex flex-col gap-3 pr-4">
-                {[...log].reverse().map((message) => (
-                  <LogEntry key={message.id} message={message} />
-                ))}
-              </div>
-            </ScrollArea>
+            <div className="mt-4 h-[60vh] -mx-6 px-6">
+                <ScrollArea className="h-full">
+                <div className="flex flex-col gap-3 pr-4">
+                    {[...log].reverse().map((message) => (
+                    <LogEntry key={message.id} message={message} />
+                    ))}
+                </div>
+                </ScrollArea>
+            </div>
              <DialogFooter className="mt-4">
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
