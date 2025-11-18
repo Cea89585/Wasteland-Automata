@@ -119,6 +119,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           }
       };
 
+      // Universal passive systems (always on)
+      if(state.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP && (state.gameTick % 4 === 0)) {
+        newInventory.water = Math.min(INVENTORY_CAP, newInventory.water + 1);
+      }
+      if(state.builtStructures.includes('hydroponicsBay') && newInventory.apple < INVENTORY_CAP && (state.gameTick % 4 === 0)) {
+        newInventory.apple = Math.min(INVENTORY_CAP, newInventory.apple + 1);
+      }
+
       // Idle state logic
       if (state.isIdle && !state.droneIsActive && state.smeltingQueue <= 0) {
          if (newStats.health < MAX_HEALTH) {
@@ -126,14 +134,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         }
       } else {
         // Normal tick logic when not idle
-        // Passive systems
-        if(state.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP && (state.gameTick % 4 === 0)) {
-          newInventory.water = Math.min(INVENTORY_CAP, newInventory.water + 1);
-        }
-        if(state.builtStructures.includes('hydroponicsBay') && newInventory.apple < INVENTORY_CAP && (state.gameTick % 4 === 0)) {
-          newInventory.apple = Math.min(INVENTORY_CAP, newInventory.apple + 1);
-        }
-
         newStats.thirst = Math.max(0, newStats.thirst - 0.5);
         newStats.hunger = Math.max(0, newStats.hunger - 0.5);
 
