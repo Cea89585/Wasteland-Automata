@@ -7,7 +7,7 @@ import { useGame } from '@/hooks/use-game';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { locations } from '@/lib/game-data/locations';
-import { Loader2, Compass, Search, Bed, Map, Apple } from 'lucide-react';
+import { Loader2, Compass, Search, Bed, Map, Zap } from 'lucide-react';
 import { itemData } from '@/lib/game-data/items';
 import { Progress } from '../ui/progress';
 import { encounters } from '@/lib/game-data/encounters';
@@ -216,9 +216,9 @@ export default function ExplorationPanel() {
     dispatch({ type: 'ADD_LOG', payload: { text: "You find a relatively safe spot to rest your eyes for a moment...", type: 'info' } });
   };
   
-  const handleEat = () => {
-    if (inventory.apple > 0) {
-      dispatch({ type: 'EAT' });
+  const handleEatCookedApple = () => {
+    if (inventory.cookedApple > 0) {
+      dispatch({ type: 'EAT_COOKED_APPLE' });
     }
   };
 
@@ -235,16 +235,16 @@ export default function ExplorationPanel() {
       <CardHeader className="relative">
         <CardTitle>Explore: {currentLocation.name}</CardTitle>
         <CardDescription>{currentLocation.description}</CardDescription>
-         {inventory.apple > 0 && (
+         {inventory.cookedApple > 0 && (
             <Button 
                 size="icon" 
-                variant={inventory.apple > 0 ? "default" : "outline"}
-                onClick={handleEat} 
-                disabled={isDead || inventory.apple === 0 || isBusy} 
-                aria-label={`Eat apple (${inventory.apple})`}
+                variant={inventory.cookedApple > 0 ? "default" : "outline"}
+                onClick={handleEatCookedApple} 
+                disabled={isDead || inventory.cookedApple === 0 || isBusy} 
+                aria-label={`Eat cooked apple (${inventory.cookedApple})`}
                 className={cn("absolute top-4 right-4 h-8 w-8 sm:h-10 sm:w-10")}
             >
-                <Apple className="h-4 w-4" />
+                <Zap className="h-4 w-4" />
             </Button>
         )}
       </CardHeader>
@@ -318,3 +318,5 @@ export default function ExplorationPanel() {
     </Card>
   );
 }
+
+    
