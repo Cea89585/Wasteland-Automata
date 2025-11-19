@@ -1,12 +1,12 @@
 // src/ai/genkit.ts
 
 import {genkit, Plugin} from 'genkit';
-import {googleAI, GoogleAIVertexPredictResponse} from '@genkit-ai/google-genai';
+import {googleAI} from '@genkit-ai/google-genai';
 
 let googleAiPlugin: Plugin<[any] | []> | undefined;
 
 if (process.env.GEMINI_API_KEY) {
-  googleAiPlugin = googleAI();
+  googleAiPlugin = googleAI({apiVersion: 'v1'});
 }
 
 const plugins: Plugin<any>[] = googleAiPlugin ? [googleAiPlugin] : [];
