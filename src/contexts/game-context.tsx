@@ -116,7 +116,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let newInventory = { ...currentState.inventory };
       const INVENTORY_CAP = getInventoryCap();
       const MAX_ENERGY = getMaxEnergy();
-      const MAX_HEALTH = getMaxHealth();
       
       // Universal passive systems (always on)
       if(currentState.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP && (currentState.gameTick % 4 === 0)) {
@@ -136,6 +135,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       
       if (currentState.isResting || currentState.isIdle) {
         // Health regenerates while resting or idle
+        const MAX_HEALTH = getMaxHealth();
         if (newStats.health < MAX_HEALTH) {
             newStats.health = Math.min(MAX_HEALTH, newStats.health + 0.25);
         }
@@ -605,11 +605,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (state.inventory.apple <= 0) return state;
       const MAX_HUNGER = getMaxHunger();
       const MAX_HEALTH = getMaxHealth();
+      const MAX_ENERGY = getMaxEnergy();
 
       const newInventory = { ...state.inventory, apple: state.inventory.apple - 1 };
       const newStats = { ...state.playerStats };
       newStats.hunger = Math.min(MAX_HUNGER, newStats.hunger + 40);
       newStats.health = Math.min(MAX_HEALTH, newStats.health + 5);
+      newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 5);
 
       return {
         ...state,

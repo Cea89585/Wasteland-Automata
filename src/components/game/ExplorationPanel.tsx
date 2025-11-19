@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog"
 import type { LocationId } from '@/lib/game-types';
 import DronePanel from './DronePanel';
+import { cn } from '@/lib/utils';
 
 export default function ExplorationPanel() {
   const { gameState, dispatch } = useGame();
@@ -199,7 +200,7 @@ export default function ExplorationPanel() {
                 onClick={handleEat} 
                 disabled={isDead || inventory.apple === 0 || isBusy} 
                 aria-label={`Eat apple (${inventory.apple})`}
-                className="absolute top-4 right-4"
+                className={cn("absolute top-4 right-4 h-8 w-8 sm:h-10 sm:w-10")}
             >
                 <Apple className="h-4 w-4" />
             </Button>
