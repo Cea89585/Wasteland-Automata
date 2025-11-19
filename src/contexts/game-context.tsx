@@ -842,7 +842,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const newStats = { ...state.playerStats };
       newStats.hunger = Math.min(MAX_HUNGER, newStats.hunger + 40);
       newStats.health = Math.min(MAX_HEALTH, newStats.health + 5);
-      newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 20);
+      newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 1);
 
       return {
         ...state,
