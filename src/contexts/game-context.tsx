@@ -380,6 +380,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             newInventory[penaltyType] = currentAmount - amountLost;
             logText += ` You lost ${amountLost} ${itemData[penaltyType].name}.`;
           } else {
+            // This case should not be reached if exploration panel filters correctly
             return state;
           }
         }

@@ -19,7 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import type { LocationId } from '@/lib/game-types';
+import type { LocationId, Resource } from '@/lib/game-types';
 import DronePanel from './DronePanel';
 import { cn } from '@/lib/utils';
 
@@ -61,13 +61,25 @@ export default function ExplorationPanel() {
   }, [restingProgress, finishResting]);
 
   const handleFixedEncounter = () => {
-    let encounter: FixedEncounter;
     if (Math.random() < 0.5) { // 50% chance for a positive encounter
-      encounter = positiveEncounters[Math.floor(Math.random() * positiveEncounters.length)];
-    } else {
-      encounter = negativeEncounters[Math.floor(Math.random() * negativeEncounters.length)];
+        const encounter = positiveEncounters[Math.floor(Math.random() * positiveEncounters.length)];
+        dispatch({ type: 'TRIGGER_ENCOUNTER', payload: encounter });
+    } else { // 50% chance for a negative encounter
+        // Filter for negative encounters where the player actually has the item to lose
+        const validNegativeEncounters = negativeEncounters.filter(enc => {
+            if (enc.penalty.type === 'health' || enc.penalty.type === 'stoneAxe') return true;
+            return inventory[enc.penalty.type as Resource] > 0;
+        });
+
+        if (validNegativeEncounters.length > 0) {
+            const encounter = validNegativeEncounters[Math.floor(Math.random() * validNegativeEncounters.length)];
+            dispatch({ type: 'TRIGGER_ENCOUNTER', payload: encounter });
+        } else {
+             // Fallback if no valid negative encounter can be triggered
+            const flavor = currentLocation.flavorText[Math.floor(Math.random() * currentLocation.flavorText.length)];
+            dispatch({ type: 'ADD_LOG', payload: { text: `You explore the area... ${flavor}`, type: 'info' } });
+        }
     }
-    dispatch({ type: 'TRIGGER_ENCOUNTER', payload: encounter });
   };
 
 
