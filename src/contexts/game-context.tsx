@@ -206,10 +206,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
     
     case 'RESET_GAME': {
-      localStorage.removeItem(SAVE_KEY);
-      localStorage.removeItem(STATS_KEY);
+      localStorage.clear();
       window.location.reload();
-      return state;
+      return initialState;
     }
 
     case 'SET_CHARACTER_NAME': {
