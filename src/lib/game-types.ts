@@ -151,5 +151,4 @@ export type GameAction =
   | { type: 'UPGRADE_DRONE' }
   | { type: 'TRAVEL'; payload: { locationId: LocationId } }
   | { type: 'SEND_DRONE' }
-  | { type: 'SET_THEME'; payload: Theme }
-  | { type: 'CHEAT_ADD_SILVER'; payload: { amount: number } };
+  | { type: 'SET_THEME'; payload: Theme };
