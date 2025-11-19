@@ -195,7 +195,7 @@ export default function ExplorationPanel() {
          {inventory.apple > 0 && (
             <Button 
                 size="icon" 
-                variant="outline" 
+                variant={inventory.apple > 0 ? "default" : "outline"}
                 onClick={handleEat} 
                 disabled={isDead || inventory.apple === 0 || isBusy} 
                 aria-label={`Eat apple (${inventory.apple})`}
