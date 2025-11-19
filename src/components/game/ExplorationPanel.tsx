@@ -189,9 +189,21 @@ export default function ExplorationPanel() {
   
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="relative">
         <CardTitle>Explore: {currentLocation.name}</CardTitle>
         <CardDescription>{currentLocation.description}</CardDescription>
+         {inventory.apple > 0 && (
+            <Button 
+                size="icon" 
+                variant="outline" 
+                onClick={handleEat} 
+                disabled={isDead || inventory.apple === 0 || isBusy} 
+                aria-label={`Eat apple (${inventory.apple})`}
+                className="absolute top-4 right-4"
+            >
+                <Apple className="h-4 w-4" />
+            </Button>
+        )}
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {gameState.builtStructures.includes('droneBay') && <DronePanel />}
@@ -250,11 +262,6 @@ export default function ExplorationPanel() {
                 </div>
                 </DialogContent>
             </Dialog>
-            )}
-            {inventory.apple > 0 && (
-                <Button size="icon" variant="outline" onClick={handleEat} disabled={isDead || inventory.apple === 0 || isBusy} aria-label={`Eat apple (${inventory.apple})`}>
-                    <Apple className="h-4 w-4" />
-                </Button>
             )}
         </div>
 
