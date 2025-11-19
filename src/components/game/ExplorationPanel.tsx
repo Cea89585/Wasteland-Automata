@@ -22,6 +22,8 @@ import type { LocationId } from '@/lib/game-types';
 import DronePanel from './DronePanel';
 import { cn } from '@/lib/utils';
 
+const REST_DURATION_SECONDS = 10;
+
 export default function ExplorationPanel() {
   const { gameState, dispatch } = useGame();
   const [isExploring, setIsExploring] = useState(false);
@@ -43,7 +45,7 @@ export default function ExplorationPanel() {
     let interval: NodeJS.Timeout | undefined;
     if (gameState.isResting) {
       interval = setInterval(() => {
-        setRestingProgress(prev => prev + (100 / 37));
+        setRestingProgress(prev => prev + (100 / REST_DURATION_SECONDS));
       }, 1000);
     }
     return () => {
