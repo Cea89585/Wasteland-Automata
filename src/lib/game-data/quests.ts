@@ -107,5 +107,54 @@ export const quests: Quest[] = [
         ],
         completionMessage: 'Anya takes the twigs, her eyes alight with scientific curiosity. "Incredible! The cellular structure is unlike anything I\'ve seen. This is a major breakthrough. Your efforts have been invaluable. Please, take this for your troubles."',
         dependsOn: 'quest_silas_3',
+    },
+    {
+        id: 'quest_anya_map_1',
+        title: 'Structural Analysis',
+        npc: 'Anya, the Botanist',
+        description: '"I\'m building a new analysis station, but my supplies are low. The raw materials in this area are poor. Could you spare some basic construction materials? I need a solid foundation for my work."',
+        requirements: [
+            { type: 'item', item: 'wood', amount: 150 },
+            { type: 'item', item: 'stone', amount: 150 },
+        ],
+        rewards: [
+            { type: 'silver', amount: 500 },
+        ],
+        completionMessage: '"Perfect! This is exactly what I needed to get started," she says, already arranging the materials. "This will provide a stable base for my sensitive equipment. Thank you."',
+        dependsOn: 'quest_anya_1',
+        unlocks: 'quest_anya_map_2',
+    },
+    {
+        id: 'quest_anya_map_2',
+        title: 'Advanced Samples',
+        npc: 'Anya, the Botanist',
+        description: '"My station is built, but now I need more complex samples and parts. The local fruit has... unique properties. And I need advanced materials to reinforce my scanner. Bring me what I need, and I may have something very valuable for you."',
+        requirements: [
+            { type: 'item', item: 'banana', amount: 10 },
+            { type: 'item', item: 'peach', amount: 10 },
+            { type: 'item', item: 'components', amount: 10 },
+            { type: 'item', item: 'ironPlates', amount: 5 },
+        ],
+        rewards: [
+            { type: 'item', item: 'components', amount: 5 },
+            { type: 'item', item: 'cookedApple', amount: 10 },
+        ],
+        completionMessage: '"Excellent. These samples are perfect, and the iron plates will shield my gear from any... unexpected energy signatures. My research is leading me to believe there are other, stranger places out there. I\'m close to a breakthrough."',
+        dependsOn: 'quest_anya_map_1',
+        unlocks: 'quest_anya_map_3',
+    },
+    {
+        id: 'quest_anya_map_3',
+        title: 'The Cartographer\'s Fee',
+        npc: 'Anya, the Botanist',
+        description: '"I\'ve done it! I\'ve cross-referenced my data with old-world satellite trajectories and found something: a route to a new area. But my informant, the one who gave me the satellite data, requires payment. A \'cartographer\'s fee,\' he calls it. Bring me 2000 Silver, and the map is yours."',
+        requirements: [
+            { type: 'item', item: 'silver', amount: 2000 },
+        ],
+        rewards: [
+            { type: 'item', item: 'crudeMap', amount: 1 },
+        ],
+        completionMessage: '"Here is the fee... and here is the map. A new path is open to you. Who knows what you\'ll find out there. Good luck, and thank you. You\'ve funded some very important research today."',
+        dependsOn: 'quest_anya_map_2',
     }
 ];
