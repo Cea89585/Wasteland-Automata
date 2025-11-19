@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useGame } from '@/hooks/use-game';
 import { useBreakpoint } from '@/hooks/use-breakpoint';
 import LoadingScreen from './LoadingScreen';
+import WelcomeScreen from './WelcomeScreen';
 import StatsPanel from './StatsPanel';
 import LogPanel from './LogPanel';
 import SilverCounter from './SilverCounter';
@@ -50,6 +51,10 @@ export default function GameUI() {
 
   if (!gameState.isInitialized) {
     return <LoadingScreen />;
+  }
+
+  if (gameState.characterName === 'Survivor') {
+    return <WelcomeScreen />;
   }
 
   const isGameOver = gameState.playerStats.health <= 0;

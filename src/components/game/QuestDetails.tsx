@@ -18,7 +18,7 @@ interface QuestDetailsProps {
 
 export default function QuestDetails({ quest: questProp, onBack }: QuestDetailsProps) {
     const { gameState, dispatch } = useGame();
-    const { inventory, completedQuests, playerStats, isResting, smeltingQueue, builtStructures } = gameState;
+    const { inventory, completedQuests, playerStats, isResting, smeltingQueue, builtStructures, characterName } = gameState;
     const isBusy = isResting || smeltingQueue > 0;
     const isDead = playerStats.health <= 0;
 
@@ -48,6 +48,8 @@ export default function QuestDetails({ quest: questProp, onBack }: QuestDetailsP
     }
 
     const quest = questProp;
+    const personalizedDescription = quest.description.replace('{{characterName}}', characterName);
+
 
     return (
         <div className="space-y-4">
@@ -60,7 +62,7 @@ export default function QuestDetails({ quest: questProp, onBack }: QuestDetailsP
                     <CardDescription>From: {quest.npc}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <p className="text-sm text-muted-foreground italic">"{quest.description}"</p>
+                    <p className="text-sm text-muted-foreground italic">"{personalizedDescription}"</p>
                     
                     <div className="space-y-2">
                         <h4 className="font-semibold">Requirements:</h4>

@@ -1,3 +1,4 @@
+
 // src/lib/game-data/quests.ts
 import type { Resource, Item } from '../game-types';
 
@@ -37,7 +38,7 @@ export const quests: Quest[] = [
         id: 'quest_silas_1',
         title: 'A Glimmer of Trust',
         npc: 'Silas, the Watcher',
-        description: 'A grizzled man named Silas watches you from the shadows of a collapsed building. "Another scavenger," he mutters. "The wasteland chews up your kind. If you want to prove you\'re different, bring me some supplies. An apple and a bottle of water. Let\'s see if you can even manage that."',
+        description: 'A grizzled man named Silas watches you from the shadows of a collapsed building. "Another scavenger," he mutters. "The wasteland chews up your kind. If you want to prove you\'re different, {{characterName}}, bring me some supplies. An apple and a bottle of water. Let\'s see if you can even manage that."',
         requirements: [
             { type: 'item', item: 'water', amount: 1 },
             { type: 'item', item: 'apple', amount: 1 }
@@ -78,6 +79,37 @@ export const quests: Quest[] = [
         ],
         completionMessage: 'He takes the component, turning it over in his hand. "See? From useless junk to the heart of a machine. This is how we rebuild. You\'re starting to think long-term. Keep this up. Here\'s some more scrap, put it to good use."',
         dependsOn: 'quest_silas_2',
+    },
+    {
+        id: 'quest_kael_1',
+        title: 'The Engineer\'s Proposal',
+        npc: 'Kael, the Engineer',
+        description: 'A man with oil-stained hands and sharp, focused eyes approaches you, carrying a complex-looking device. "The name\'s Kael. You\'re {{characterName}}, right? I\'ve seen your work. I\'m building a long-range comms array, but I\'m short on materials. You look capable. Bring me some refined iron ingots and we\'ll talk business."',
+        requirements: [
+            { type: 'item', item: 'ironIngot', amount: 10 },
+        ],
+        rewards: [
+            { type: 'silver', amount: 200 },
+        ],
+        completionMessage: 'Kael takes the ingots, weighing them in his hand. "Good quality. This will work for the primary supports. It seems your reputation is well-earned. I have another, more lucrative, proposal for you if you\'re interested."',
+        dependsOn: 'quest_silas_3',
+        unlocks: 'quest_kael_2'
+    },
+    {
+        id: 'quest_kael_2',
+        title: 'Array Reinforcement',
+        npc: 'Kael, the Engineer',
+        description: '"The frame is solid, but the delicate parts need shielding," Kael says, pointing at a schematic. "I need reinforced iron plates to protect the core systems from wasteland interference. This is the real challenge, {{characterName}}. It requires more material and more finesse. Can you handle it?"',
+        requirements: [
+            { type: 'item', item: 'ironPlates', amount: 10 },
+            { type: 'item', item: 'components', amount: 20 },
+        ],
+        rewards: [
+            { type: 'item', item: 'metalDetector', amount: 1 },
+            { type: 'silver', amount: 500 },
+        ],
+        completionMessage: 'Kael expertly fits the plates onto his device. "Perfect. The signal will be clean. You\'ve done well. This old metal detector is surplus to my needs; it should serve you better. We\'re close to finishing this project."',
+        dependsOn: 'quest_kael_1',
     },
     {
         id: 'quest_elara_1',

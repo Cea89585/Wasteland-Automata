@@ -1,3 +1,4 @@
+
 // src/components/game/CharacterPanel.tsx
 'use client';
 import { useGame } from '@/hooks/use-game';
@@ -6,87 +7,10 @@ import { itemData } from '@/lib/game-data/items';
 import { allIcons } from './GameIcons';
 import type { EquipmentSlot, Item } from '@/lib/game-types';
 import { Button } from '../ui/button';
-import { Shirt, Hand, PersonStanding, Map, Edit, Save, RefreshCw, Star, ArrowUpCircle } from 'lucide-react';
+import { Shirt, Hand, PersonStanding, Map, Edit, ArrowUpCircle, Star } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { locations } from '@/lib/game-data/locations';
-import { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
-import { firstNames, surnames } from '@/lib/game-data/names';
-import filter from 'naughty-words';
 import { Progress } from '../ui/progress';
-
-
-const NameEditor = () => {
-    const { gameState, dispatch } = useGame();
-    const { characterName } = gameState;
-    const [name, setName] = useState(characterName);
-    const [isEditing, setIsEditing] = useState(false);
-    const { toast } = useToast();
-
-    useEffect(() => {
-        setName(characterName);
-    }, [characterName]);
-
-    const handleSave = () => {
-        if (name.trim().length < 3 || name.trim().length > 25) {
-            toast({ variant: 'destructive', title: 'Invalid Name', description: 'Name must be between 3 and 25 characters.' });
-            return;
-        }
-
-        if (!/^[a-zA-Z\s]+$/.test(name)) {
-            toast({ variant: 'destructive', title: 'Invalid Name', description: 'Name can only contain letters and spaces.' });
-            return;
-        }
-        
-        const sanitizedName = name.replace(/\s+/g, '').toLowerCase();
-        const isProfane = filter.en.some((word: string) => sanitizedName.includes(word.toLowerCase()));
-
-        if (isProfane) {
-            toast({ variant: 'destructive', title: 'Name Not Allowed', description: 'Please choose a more appropriate name.' });
-            return;
-        }
-
-        dispatch({ type: 'SET_CHARACTER_NAME', payload: name.trim() });
-        setIsEditing(false);
-        toast({ title: 'Name Updated', description: `You are now known as ${name.trim()}.` });
-    };
-
-    const handleRandomize = () => {
-        const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-        const randomSurname = surnames[Math.floor(Math.random() * surnames.length)];
-        setName(`${randomFirstName} ${randomSurname}`);
-    };
-
-    if (isEditing) {
-        return (
-            <div className="flex flex-col items-center gap-2">
-                <div className="flex items-center gap-2 w-full">
-                    <Input value={name} onChange={(e) => setName(e.target.value)} />
-                    <Button size="icon" onClick={handleRandomize}>
-                        <RefreshCw />
-                    </Button>
-                </div>
-                <div className="flex items-center gap-2">
-                    <Button onClick={handleSave} disabled={name.trim() === characterName}>
-                        <Save className="mr-2" />
-                        Save
-                    </Button>
-                    <Button variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
-                </div>
-            </div>
-        )
-    }
-
-    return (
-        <div className="flex items-center gap-2">
-            <h2 className="text-2xl font-bold text-primary">{characterName}</h2>
-            <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)}>
-                <Edit />
-            </Button>
-        </div>
-    )
-}
 
 const slotIcons: Record<EquipmentSlot, React.ReactElement> = {
     hand: <Hand className="h-6 w-6 text-muted-foreground" />,
@@ -100,7 +24,7 @@ const slotNames: Record<EquipmentSlot, string> = {
 
 export default function CharacterPanel() {
   const { gameState, dispatch } = useGame();
-  const { equipment, level, xp, xpToNextLevel, upgradePoints } = gameState;
+  const { equipment, level, xp, xpToNextLevel, upgradePoints, characterName } = gameState;
 
   const handleUnequip = (slot: EquipmentSlot) => {
     dispatch({ type: 'UNEQUIP', payload: { slot } });
@@ -121,7 +45,12 @@ export default function CharacterPanel() {
       <CardContent className="space-y-6">
         <div className="flex flex-col items-center justify-center gap-4">
             <PersonStanding className="h-24 w-24 text-primary/50" />
-            <NameEditor />
+            <div className="flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-primary">{characterName}</h2>
+                <Button variant="ghost" size="icon" disabled>
+                    <Edit />
+                </Button>
+            </div>
         </div>
         <Separator />
         <Card className="bg-muted/50 p-4">
