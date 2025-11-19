@@ -47,9 +47,6 @@ export default function CharacterPanel() {
             <PersonStanding className="h-24 w-24 text-primary/50" />
             <div className="flex items-center gap-2">
                 <h2 className="text-2xl font-bold text-primary">{characterName}</h2>
-                <Button variant="ghost" size="icon" disabled>
-                    <Edit />
-                </Button>
             </div>
         </div>
         <Separator />
