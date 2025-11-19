@@ -17,6 +17,7 @@ export const itemData: Record<Resource | Item, { name: string; description: stri
   mutatedTwigs: { name: Resources.mutatedTwigs, description: 'Flexible, oddly colored twigs from the mutated forest. They hum with a faint energy.', sellPrice: 8 },
   ironIngot: { name: Resources.ironIngot, description: 'A bar of refined iron, ready for advanced crafting.', sellPrice: 30 },
   biomass: { name: Resources.biomass, description: 'Dense, energy-rich organic matter.', sellPrice: 250 },
+  charcoal: { name: Resources.charcoal, description: 'A block of concentrated carbon. A decent fuel source.', sellPrice: 5 },
 
 
   // Crafted Items

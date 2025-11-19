@@ -82,6 +82,12 @@ const runOfflineSimulation = (state: GameState): GameState => {
           simulatedState.ironIngotSmeltingQueue -= 1;
         }
     }
+    if (simulatedState.charcoalSmeltingQueue > 0 && currentTick % SMELT_DURATION_TICKS === 0) {
+        if (simulatedState.inventory.charcoal < INVENTORY_CAP) {
+          simulatedState.inventory.charcoal = Math.min(INVENTORY_CAP, simulatedState.inventory.charcoal + 1);
+          simulatedState.charcoalSmeltingQueue -= 1;
+        }
+    }
 
     // Drone simulation
     if (simulatedState.droneIsActive && simulatedState.droneReturnTimestamp && now >= simulatedState.droneReturnTimestamp) {
@@ -410,7 +416,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'SET_IDLE': {
       if (state.isIdle === action.payload) return state;
 
-      if (action.payload && (state.droneIsActive || state.smeltingQueue > 0 || state.ironIngotSmeltingQueue > 0)) {
+      if (action.payload && (state.droneIsActive || state.smeltingQueue > 0 || state.ironIngotSmeltingQueue > 0 || state.charcoalSmeltingQueue > 0)) {
         return state;
       }
       
@@ -966,48 +972,35 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         };
     }
 
-    case 'START_SMELTING_ALL': {
+    case 'START_SMELting_all': {
         const { type, amount } = action.payload;
         if (amount <= 0) return state;
 
         const newInventory = { ...state.inventory };
-        let totalScrapNeeded = 0;
-        let totalWoodNeeded = 0;
-        let newQueue = 0;
         let logText = '';
 
         if (type === 'components') {
-            totalScrapNeeded = 10 * amount;
-            totalWoodNeeded = 4 * amount;
-            if (newInventory.scrap < totalScrapNeeded || newInventory.wood < totalWoodNeeded) {
-                return state;
-            }
+            const totalScrapNeeded = 10 * amount;
+            const totalWoodNeeded = 4 * amount;
+            if (newInventory.scrap < totalScrapNeeded || newInventory.wood < totalWoodNeeded) return state;
             newInventory.scrap -= totalScrapNeeded;
             newInventory.wood -= totalWoodNeeded;
-            newQueue = state.smeltingQueue + amount;
             logText = `Queued ${amount} components for smelting.`;
-            return {
-                ...state,
-                inventory: newInventory,
-                smeltingQueue: newQueue,
-                log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log],
-            }
+            return { ...state, inventory: newInventory, smeltingQueue: state.smeltingQueue + amount, log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log] }
         } else if (type === 'iron') {
-            totalScrapNeeded = 20 * amount;
-            totalWoodNeeded = 10 * amount;
-            if (newInventory.scrap < totalScrapNeeded || newInventory.wood < totalWoodNeeded) {
-                return state;
-            }
+            const totalScrapNeeded = 20 * amount;
+            const totalWoodNeeded = 10 * amount;
+            if (newInventory.scrap < totalScrapNeeded || newInventory.wood < totalWoodNeeded) return state;
             newInventory.scrap -= totalScrapNeeded;
             newInventory.wood -= totalWoodNeeded;
-            newQueue = state.ironIngotSmeltingQueue + amount;
             logText = `Queued ${amount} iron ingots for smelting.`;
-            return {
-                ...state,
-                inventory: newInventory,
-                ironIngotSmeltingQueue: newQueue,
-                log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log],
-            }
+            return { ...state, inventory: newInventory, ironIngotSmeltingQueue: state.ironIngotSmeltingQueue + amount, log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log] }
+        } else if (type === 'charcoal') {
+            const totalWoodNeeded = 5 * amount;
+            if (newInventory.wood < totalWoodNeeded) return state;
+            newInventory.wood -= totalWoodNeeded;
+            logText = `Queued ${amount} charcoal for smelting.`;
+            return { ...state, inventory: newInventory, charcoalSmeltingQueue: state.charcoalSmeltingQueue + amount, log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log] }
         }
         return state;
     }
@@ -1056,6 +1049,49 @@ const reducer = (state: GameState, action: GameAction): GameState => {
               log: [{ id: generateUniqueLogId(), text: logMessage, type: 'craft', item: 'ironIngot', timestamp: Date.now() }, ...state.log],
           };
       }
+
+      case 'START_SMELTING_CHARCOAL': {
+        const newInventory = { ...state.inventory };
+        const totalWoodNeeded = 5;
+  
+        if (newInventory.wood < totalWoodNeeded) {
+          return {
+            ...state,
+            log: [{ id: generateUniqueLogId(), text: "Not enough wood to make charcoal.", type: 'danger', timestamp: Date.now() }, ...state.log],
+          };
+        }
+        
+        newInventory.wood -= totalWoodNeeded;
+  
+        return { 
+          ...state, 
+          inventory: newInventory,
+          charcoalSmeltingQueue: state.charcoalSmeltingQueue + 1,
+          log: [{ id: generateUniqueLogId(), text: `The furnace begins to smolder...`, type: 'info', timestamp: Date.now() }, ...state.log],
+        };
+      }
+
+      case 'FINISH_SMELTING_CHARCOAL': {
+        if (state.charcoalSmeltingQueue <= 0) return state;
+        const INVENTORY_CAP = getInventoryCap();
+
+        let { newInventory, newStatistics } = addResource(state.inventory, state.statistics, 'charcoal', 1, INVENTORY_CAP);
+
+        const newSmeltingQueue = state.charcoalSmeltingQueue - 1;
+        
+        let logMessage = `You retrieve a block of charcoal.\n${itemData['charcoal'].description}`;
+        if (newSmeltingQueue === 0) {
+          logMessage += "\nThe charcoal queue is empty.";
+        }
+
+        return {
+            ...state,
+            inventory: newInventory,
+            statistics: newStatistics,
+            charcoalSmeltingQueue: newSmeltingQueue,
+            log: [{ id: generateUniqueLogId(), text: logMessage, type: 'craft', item: 'charcoal', timestamp: Date.now() }, ...state.log],
+        };
+    }
 
     case 'UPGRADE_STORAGE': {
       const calculateCost = (level: number): number => {
@@ -1276,6 +1312,10 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             newInventory.biomass -= 1;
             powerToAdd = 250;
             logText = `You feed biomass into the generator. (+${powerToAdd} Power)`;
+        } else if (fuelType === 'charcoal' && newInventory.charcoal > 0) {
+            newInventory.charcoal -= 1;
+            powerToAdd = 50;
+            logText = `You add charcoal to the generator. (+${powerToAdd} Power)`;
         } else {
             return { ...state, log: [{ id: generateUniqueLogId(), text: `No ${fuelType} to add.`, type: 'danger', timestamp: Date.now() }, ...state.log] };
         }
@@ -1357,8 +1397,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!migratedState.inventory.ironIngot) migratedState.inventory.ironIngot = 0;
       if (!migratedState.inventory.ironPlates) migratedState.inventory.ironPlates = 0;
       if (!migratedState.inventory.biomass) migratedState.inventory.biomass = 0;
+      if (!migratedState.inventory.charcoal) migratedState.inventory.charcoal = 0;
       if (!migratedState.inventory.biomassCompressor) migratedState.inventory.biomassCompressor = 0;
       if (!migratedState.ironIngotSmeltingQueue) migratedState.ironIngotSmeltingQueue = 0;
+      if (!migratedState.charcoalSmeltingQueue) migratedState.charcoalSmeltingQueue = 0;
       if (!migratedState.power) migratedState.power = 0;
       if (!migratedState.droneMissionQueue) migratedState.droneMissionQueue = 0;
       if (!migratedState.theme) migratedState.theme = 'dark';
@@ -1428,11 +1470,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   
   useEffect(() => {
     if (gameState.isInitialized) {
-      if (gameState.droneIsActive || gameState.smeltingQueue > 0 || gameState.ironIngotSmeltingQueue > 0) {
+      if (gameState.droneIsActive || gameState.smeltingQueue > 0 || gameState.ironIngotSmeltingQueue > 0 || gameState.charcoalSmeltingQueue > 0) {
         resetTimer();
       }
     }
-  }, [gameState.isInitialized, gameState.droneIsActive, gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, resetTimer]);
+  }, [gameState.isInitialized, gameState.droneIsActive, gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, resetTimer]);
 
 
   return (

@@ -20,8 +20,9 @@ const FuelSection = () => {
 
     const canAddWood = inventory.wood > 0;
     const canAddBiomass = inventory.biomass > 0;
+    const canAddCharcoal = inventory.charcoal > 0;
     
-    const handleAddFuel = (fuelType: 'wood' | 'biomass') => {
+    const handleAddFuel = (fuelType: 'wood' | 'biomass' | 'charcoal') => {
         dispatch({ type: 'ADD_FUEL', payload: { fuelType } });
     }
 
@@ -42,7 +43,7 @@ const FuelSection = () => {
                     </div>
                     <Progress value={powerPercentage} />
                 </div>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2">
                     <TooltipProvider>
                         <Tooltip>
                             <TooltipTrigger asChild>
@@ -52,6 +53,16 @@ const FuelSection = () => {
                             </TooltipTrigger>
                             <TooltipContent>
                                 <p>Adds 10 Power</p>
+                            </TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="outline" onClick={() => handleAddFuel('charcoal')} disabled={!canAddCharcoal}>
+                                    <Fuel className="mr-2"/> Add Charcoal
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Adds 50 Power</p>
                             </TooltipContent>
                         </Tooltip>
                          <Tooltip>

@@ -18,6 +18,7 @@ export const Resources = {
   mutatedTwigs: 'Mutated Twigs',
   ironIngot: 'Iron Ingot',
   biomass: 'Biomass',
+  charcoal: 'Charcoal',
 } as const;
 export type Resource = keyof typeof Resources;
 
@@ -114,6 +115,7 @@ export interface GameState {
   isIdle: boolean;
   smeltingQueue: number;
   ironIngotSmeltingQueue: number;
+  charcoalSmeltingQueue: number;
   droneIsActive: boolean;
   droneReturnTimestamp: number | null;
   droneMissionQueue: number;
@@ -151,9 +153,11 @@ export type GameAction =
   | { type: 'FINISH_RESTING' }
   | { type: 'START_SMELTING' }
   | { type: 'FINISH_SMELTING' }
-  | { type: 'START_SMELTING_ALL'; payload: { type: 'components' | 'iron'; amount: number } }
+  | { type: 'START_SMELTING_ALL'; payload: { type: 'components' | 'iron' | 'charcoal'; amount: number } }
   | { type: 'START_SMELTING_IRON' }
   | { type: 'FINISH_SMELTING_IRON' }
+  | { type: 'START_SMELTING_CHARCOAL' }
+  | { type: 'FINISH_SMELTING_CHARCOAL' }
   | { type: 'EQUIP'; payload: { item: Item, slot: EquipmentSlot } }
   | { type: 'UNEQUIP'; payload: { slot: EquipmentSlot } }
   | { type: 'UPGRADE_STORAGE' }
@@ -164,6 +168,6 @@ export type GameAction =
   | { type: 'UPGRADE_DRONE' }
   | { type: 'TRAVEL'; payload: { locationId: LocationId } }
   | { type: 'QUEUE_DRONE_MISSIONS', payload: { amount: number } }
-  | { type: 'ADD_FUEL', payload: { fuelType: 'wood' | 'biomass' } }
+  | { type: 'ADD_FUEL', payload: { fuelType: 'wood' | 'biomass' | 'charcoal' } }
   | { type: 'SET_THEME'; payload: Theme }
   | { type: 'CHEAT_ADD_SILVER' };
