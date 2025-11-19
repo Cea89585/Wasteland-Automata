@@ -90,4 +90,5 @@ export const initialState: Omit<GameState, 'statistics'> = {
   droneIsActive: false,
   droneReturnTimestamp: null,
   theme: 'dark',
+  lastSavedTimestamp: Date.now(),
 };

@@ -106,6 +106,7 @@ export interface GameState {
   droneIsActive: boolean;
   droneReturnTimestamp: number | null;
   theme: Theme;
+  lastSavedTimestamp?: number;
 }
 
 export type GameAction =

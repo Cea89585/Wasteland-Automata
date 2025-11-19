@@ -15,8 +15,148 @@ import { quests } from '@/lib/game-data/quests';
 
 const SAVE_KEY = 'wastelandAutomata_save';
 const STATS_KEY = 'wastelandAutomata_stats';
+const TICK_RATE_MS = 2000;
 
 let logIdCounter = 0;
+
+const runOfflineSimulation = (state: GameState): GameState => {
+  if (!state.lastSavedTimestamp) {
+    return state; // No timestamp to compare against
+  }
+
+  const now = Date.now();
+  const timeElapsedMs = now - state.lastSavedTimestamp;
+  const missedTicks = Math.floor(timeElapsedMs / TICK_RATE_MS);
+
+  if (missedTicks <= 0) {
+    return state;
+  }
+  
+  let simulatedState = { ...state };
+  
+  const getInventoryCap = (s: GameState) => 200 + (s.storageLevel || 0) * 50;
+  const getMaxEnergy = (s: GameState) => 100 + (s.energyLevel || 0) * 5;
+  const getMaxHealth = (s: GameState) => Math.min(1000, 100 + (s.healthLevel || 0) * 25);
+
+  for (let i = 0; i < missedTicks; i++) {
+    // Apply idle logic for each missed tick.
+    const INVENTORY_CAP = getInventoryCap(simulatedState);
+    const MAX_ENERGY = getMaxEnergy(simulatedState);
+    const MAX_HEALTH = getMaxHealth(simulatedState);
+
+    // Health and Energy regen
+    if (simulatedState.playerStats.health < MAX_HEALTH) {
+      simulatedState.playerStats.health = Math.min(MAX_HEALTH, simulatedState.playerStats.health + 0.25);
+    }
+    if (simulatedState.playerStats.energy < MAX_ENERGY) {
+      simulatedState.playerStats.energy = Math.min(MAX_ENERGY, simulatedState.playerStats.energy + 0.25);
+    }
+
+    // Passive resource generation (every 2 ticks = 4 seconds)
+    if ((simulatedState.gameTick + i) % 4 === 0) {
+      if (simulatedState.builtStructures.includes('waterPurifier') && simulatedState.inventory.water < INVENTORY_CAP) {
+        simulatedState.inventory.water = Math.min(INVENTORY_CAP, simulatedState.inventory.water + 1);
+      }
+      if (simulatedState.builtStructures.includes('hydroponicsBay') && simulatedState.inventory.apple < INVENTORY_CAP) {
+        simulatedState.inventory.apple = Math.min(INVENTORY_CAP, simulatedState.inventory.apple + 1);
+      }
+    }
+    
+    // Furnace simulation (1 item every 5 ticks = 10 seconds)
+    const SMELT_DURATION_TICKS = 10 / (TICK_RATE_MS / 1000);
+    if (simulatedState.smeltingQueue > 0 && (simulatedState.gameTick + i) % SMELT_DURATION_TICKS === 0) {
+      if (simulatedState.inventory.components < INVENTORY_CAP) {
+        simulatedState.inventory.components = Math.min(INVENTORY_CAP, simulatedState.inventory.components + 1);
+        simulatedState.smeltingQueue -= 1;
+      }
+    }
+  }
+  
+  // After the loop, check the drone's final status
+  if (simulatedState.droneIsActive && simulatedState.droneReturnTimestamp && now >= simulatedState.droneReturnTimestamp) {
+      // Drone mission completed while offline.
+      const { droneState, logMessage } = processDroneReturn(simulatedState);
+      simulatedState = droneState;
+      if (logMessage) {
+         simulatedState.log.unshift({ id: generateUniqueLogId(), text: logMessage.text, type: logMessage.type, timestamp: now });
+      }
+  }
+
+  simulatedState.gameTick += missedTicks;
+  
+  // Add a log entry about offline progress
+  const timeAway = new Date(timeElapsedMs).toISOString().substr(11, 8); // HH:mm:ss format
+  simulatedState.log.unshift({
+    id: generateUniqueLogId(),
+    text: `Welcome back. While you were away for ${timeAway}, your base continued to operate.`,
+    type: 'info',
+    timestamp: now
+  });
+
+  return simulatedState;
+};
+
+const addResource = (inventory: GameState['inventory'], statistics: GameState['statistics'], resource: Resource | Item, amount: number, cap: number) => {
+    const newInventory = { ...inventory };
+    newInventory[resource] = Math.min(cap, newInventory[resource] + amount);
+    
+    const newStatistics = { ...statistics };
+    const newTotalItemsGained = { ...newStatistics.totalItemsGained };
+    newTotalItemsGained[resource] = (newTotalItemsGained[resource] || 0) + amount;
+    newStatistics.totalItemsGained = newTotalItemsGained;
+
+    return { newInventory, newStatistics };
+};
+
+const processDroneReturn = (state: GameState): { droneState: GameState, logMessage: { text: string, type: 'success' } | null } => {
+    const currentLocation = locations[state.currentLocation];
+    const droneBuff = 1 + (state.droneLevel * 0.1);
+    let totalFound: Partial<Record<Resource, number>> = {};
+    let finalInventory = { ...state.inventory };
+    let finalStatistics = { ...state.statistics };
+    const INVENTORY_CAP = 200 + (state.storageLevel || 0) * 50;
+
+    for (let i = 0; i < 15; i++) {
+        currentLocation.resources.forEach((res) => {
+            if (Math.random() < res.chance) {
+                let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
+                amount = Math.ceil(amount * droneBuff);
+                totalFound[res.resource] = (totalFound[res.resource] || 0) + amount;
+            }
+        });
+    }
+
+    let resourcesFoundText = "Drone has returned.";
+    let foundSomething = false;
+
+    for (const [resource, amount] of Object.entries(totalFound)) {
+        if (amount > 0) {
+            const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(finalInventory, finalStatistics, resource as Resource, amount, INVENTORY_CAP);
+            finalInventory = updatedInventory;
+            finalStatistics = updatedStatistics;
+            resourcesFoundText += ` It collected ${amount} ${itemData[resource as Resource].name}.`;
+            foundSomething = true;
+        }
+    }
+    if (!foundSomething) {
+        resourcesFoundText += " It found nothing of value.";
+    }
+
+    const droneState = {
+        ...state,
+        inventory: finalInventory,
+        statistics: finalStatistics,
+        droneIsActive: false,
+        droneReturnTimestamp: null,
+    };
+    
+    return { droneState, logMessage: { text: resourcesFoundText, type: 'success' }};
+};
+
+const generateUniqueLogId = () => {
+    // Combine timestamp with a counter to ensure uniqueness
+    return Date.now() + logIdCounter++;
+};
 
 const reducer = (state: GameState, action: GameAction): GameState => {
   const getInventoryCap = () => 200 + (state.storageLevel || 0) * 50;
@@ -25,23 +165,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
   const getMaxThirst = () => Math.min(500, 100 + (state.thirstLevel || 0) * 25);
   const getMaxHealth = () => Math.min(1000, 100 + (state.healthLevel || 0) * 25);
 
-  const generateUniqueLogId = () => {
-    // Combine timestamp with a counter to ensure uniqueness
-    return Date.now() + logIdCounter++;
-  };
-
-  const addResource = (inventory: GameState['inventory'], statistics: GameState['statistics'], resource: Resource | Item, amount: number) => {
-    const INVENTORY_CAP = getInventoryCap();
-    const newInventory = { ...inventory };
-    newInventory[resource] = Math.min(INVENTORY_CAP, newInventory[resource] + amount);
-    
-    const newStatistics = { ...statistics };
-    const newTotalItemsGained = { ...newStatistics.totalItemsGained };
-    newTotalItemsGained[resource] = (newTotalItemsGained[resource] || 0) + amount;
-    newStatistics.totalItemsGained = newTotalItemsGained;
-
-    return { newInventory, newStatistics };
-  };
 
   switch (action.type) {
     case 'INITIALIZE': {
@@ -66,49 +189,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let currentState = { ...state };
       const logMessages: LogMessage[] = [];
       let finalInventory = { ...currentState.inventory };
-      let finalStatistics = { ...currentState.statistics };
       
-      // Drone return logic is handled first
+      // Drone return logic
       if (currentState.droneIsActive && currentState.droneReturnTimestamp && Date.now() >= currentState.droneReturnTimestamp) {
-        const currentLocation = locations[currentState.currentLocation];
-        const droneBuff = 1 + (currentState.droneLevel * 0.1);
-        let totalFound: Partial<Record<Resource, number>> = {};
-
-        for(let i = 0; i < 15; i++) {
-          currentLocation.resources.forEach((res) => {
-              if (Math.random() < res.chance) {
-                  let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
-                  amount = Math.ceil(amount * droneBuff);
-                  totalFound[res.resource] = (totalFound[res.resource] || 0) + amount;
-              }
-          });
-        }
-        
-        let resourcesFoundText = "Drone has returned.";
-        let foundSomething = false;
-
-        for (const [resource, amount] of Object.entries(totalFound)) {
-          if (amount > 0) {
-            const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(finalInventory, finalStatistics, resource as Resource, amount);
-            finalInventory = updatedInventory;
-            finalStatistics = updatedStatistics;
-            resourcesFoundText += ` It collected ${amount} ${itemData[resource as Resource].name}.`;
-            foundSomething = true;
+          const { droneState, logMessage } = processDroneReturn(currentState);
+          currentState = droneState;
+          if (logMessage) {
+            logMessages.push({ id: generateUniqueLogId(), ...logMessage, timestamp: Date.now() });
           }
-        }
-        if (!foundSomething) {
-          resourcesFoundText += " It found nothing of value.";
-        }
-
-        logMessages.push({ id: generateUniqueLogId(), text: resourcesFoundText, type: 'success', timestamp: Date.now() });
-
-        currentState = {
-            ...currentState,
-            inventory: finalInventory,
-            statistics: finalStatistics,
-            droneIsActive: false,
-            droneReturnTimestamp: null,
-        };
       }
 
       // Now continue with the rest of the tick logic, using the potentially updated state
@@ -147,12 +235,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         if (newStats.thirst === 0 || newStats.hunger === 0) {
           // If starving or dehydrated, lose health
           newStats.health = Math.max(0, newStats.health - 2);
-        } else if (newStats.hunger > (getMaxHunger() * 0.7) && newStats.thirst > (getMaxThirst() * 0.7)) {
-            // Health regen only if well-fed and hydrated
-            // REMOVED - const MAX_HEALTH = getMaxHealth();
-            // REMOVED - if (newStats.health < MAX_HEALTH) {
-            // REMOVED -    newStats.health = Math.min(MAX_HEALTH, newStats.health + 0.1);
-            // REMOVED - }
         }
       }
 
@@ -195,10 +277,11 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let newEquipment = { ...state.equipment };
       let newStatistics = { ...state.statistics };
       let logText = encounter.message;
+      const INVENTORY_CAP = getInventoryCap();
     
       if (encounter.type === 'positive' && encounter.reward) {
         const { item, amount } = encounter.reward;
-        const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(newInventory, newStatistics, item, amount);
+        const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(newInventory, newStatistics, item, amount, INVENTORY_CAP);
         newInventory = updatedInventory;
         newStatistics = updatedStatistics;
         logText += ` You found ${amount} ${itemData[item].name}.`;
@@ -288,13 +371,15 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'GATHER': {
       const { resource, amount } = action.payload;
-      const { newInventory, newStatistics } = addResource(state.inventory, state.statistics, resource, amount);
+      const INVENTORY_CAP = getInventoryCap();
+      const { newInventory, newStatistics } = addResource(state.inventory, state.statistics, resource, amount, INVENTORY_CAP);
       return { ...state, inventory: newInventory, statistics: newStatistics };
     }
 
     case 'BUILD_STRUCTURE': {
       const recipe = recipes.find((r) => r.id === action.payload.recipeId);
       if (!recipe) return state;
+      const INVENTORY_CAP = getInventoryCap();
 
       const newInventory = { ...state.inventory };
       let canBuild = true;
@@ -327,7 +412,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       
       const itemDetails = itemData[recipe.creates];
       const logMessageText = `You built a ${itemDetails.name}.\n${itemDetails.description}`;
-      const { newStatistics } = addResource(state.inventory, state.statistics, recipe.creates, 1);
+      const { newStatistics } = addResource(state.inventory, state.statistics, recipe.creates, 1, INVENTORY_CAP);
 
       return {
         ...state,
@@ -345,6 +430,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       
       const newInventory = { ...state.inventory };
       let canCraft = true;
+      const INVENTORY_CAP = getInventoryCap();
 
       for (const [resource, requiredAmount] of Object.entries(recipe.requirements)) {
         if (newInventory[resource as keyof typeof newInventory] < requiredAmount) {
@@ -389,7 +475,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
 
       // Handle normal item crafts
-      const INVENTORY_CAP = getInventoryCap();
       if(newInventory[recipe.creates] >= INVENTORY_CAP) {
         return {
           ...state,
@@ -397,7 +482,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         };
       }
       
-      const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, 1);
+      const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, 1, INVENTORY_CAP);
       
       const newUnlockedRecipes = [...state.unlockedRecipes];
       recipes.forEach(r => {
@@ -421,6 +506,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'COMPLETE_QUEST': {
       const { questId } = action.payload;
       const quest = quests.find(q => q.id === questId);
+      const INVENTORY_CAP = getInventoryCap();
 
       if (!quest || state.completedQuests.includes(questId)) {
         return state; // Quest not found or already completed
@@ -460,7 +546,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       // Grant rewards
       for (const reward of quest.rewards) {
         if (reward.type === 'item') {
-           const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(newInventory, newStatistics, reward.item, reward.amount);
+           const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(newInventory, newStatistics, reward.item, reward.amount, INVENTORY_CAP);
             newInventory = updatedInventory;
             newStatistics = updatedStatistics;
             rewardLog += `${reward.amount} ${itemData[reward.item].name}`;
@@ -741,8 +827,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'FINISH_SMELTING': {
         if (state.smeltingQueue <= 0) return state;
+        const INVENTORY_CAP = getInventoryCap();
 
-        let { newInventory, newStatistics } = addResource(state.inventory, state.statistics, 'components', 1);
+        let { newInventory, newStatistics } = addResource(state.inventory, state.statistics, 'components', 1, INVENTORY_CAP);
 
         const newSmeltingQueue = state.smeltingQueue - 1;
         
@@ -1002,11 +1089,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       let loadedStats = savedStats ? JSON.parse(savedStats) : initialStatistics;
 
       // Ensure new properties exist on old save files
-      const migratedState = { ...initialState, ...loadedState };
+      let migratedState = { ...initialState, ...loadedState };
       const migratedStats = { ...initialStatistics, ...loadedStats };
       
       migratedState.isResting = false;
-      migratedState.smeltingQueue = 0;
+      // smeltingQueue is preserved from save
       migratedState.isIdle = false; // Initialize idle state
       
       if (!migratedState.builtStructures) {
@@ -1042,31 +1129,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!migratedState.droneLevel) {
         migratedState.droneLevel = 0;
       }
-      if (!migratedState.droneIsActive) {
-        migratedState.droneIsActive = false;
-      }
-      if (!migratedState.droneReturnTimestamp) {
-        migratedState.droneReturnTimestamp = null;
-      }
-      if (!migratedState.inventory.hydroponicsBay) {
-        migratedState.inventory.hydroponicsBay = 0;
-      }
-       if (!migratedState.completedQuests) {
+      if (!migratedState.completedQuests) {
         migratedState.completedQuests = [];
       }
       if (!migratedState.theme) {
         migratedState.theme = 'dark';
       }
-      
-      // Handle active drone from a saved state
-      if (migratedState.droneIsActive && migratedState.droneReturnTimestamp) {
-          if (Date.now() >= migratedState.droneReturnTimestamp) {
-              // If the drone should have returned already, process it immediately on load.
-              // This is a simplified approach. The more robust logic is now in the game tick.
-              migratedState.droneIsActive = false;
-              migratedState.droneReturnTimestamp = null;
-          }
+      if (!('lastSavedTimestamp' in migratedState)) {
+        migratedState.lastSavedTimestamp = Date.now();
       }
+
+      // Run offline simulation
+      migratedState = runOfflineSimulation(migratedState);
 
 
       // IMPORTANT: Remove statistics from the main game state if it exists from an old save
@@ -1089,6 +1163,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
         
         // Save game state without statistics
         const savableState = { ...stateToSave };
+        savableState.lastSavedTimestamp = Date.now(); // Update timestamp on every save
         if (savableState.log.length > 50) {
           savableState.log = savableState.log.slice(0, 50);
         }
@@ -1108,7 +1183,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     const tickInterval = setInterval(() => {
       dispatch({ type: 'GAME_TICK' });
-    }, 2000); // Game tick every 2 seconds
+    }, TICK_RATE_MS); // Game tick every 2 seconds
 
     return () => clearInterval(tickInterval);
   }, [gameState.isInitialized, gameState.playerStats.health]);
