@@ -26,6 +26,7 @@ const emptyInventory = {
   miningRig: 0,
   cookedApple: 0,
   crudeMap: 0,
+  ironIngot: 0,
 };
 
 export const initialStatistics: Statistics = {
@@ -88,6 +89,7 @@ export const initialState: Omit<GameState, 'statistics'> = {
   isResting: false,
   isIdle: false,
   smeltingQueue: 0,
+  ironIngotSmeltingQueue: 0,
   droneIsActive: false,
   droneReturnTimestamp: null,
   theme: 'dark',

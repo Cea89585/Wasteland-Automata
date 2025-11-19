@@ -69,6 +69,13 @@ const runOfflineSimulation = (state: GameState): GameState => {
         simulatedState.smeltingQueue -= 1;
       }
     }
+
+    if (simulatedState.ironIngotSmeltingQueue > 0 && (simulatedState.gameTick + i) % SMELT_DURATION_TICKS === 0) {
+        if (simulatedState.inventory.ironIngot < INVENTORY_CAP) {
+          simulatedState.inventory.ironIngot = Math.min(INVENTORY_CAP, simulatedState.inventory.ironIngot + 1);
+          simulatedState.ironIngotSmeltingQueue -= 1;
+        }
+      }
   }
   
   // After the loop, check the drone's final status
@@ -353,7 +360,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (state.isIdle === action.payload) return state;
 
       // Prevent going idle if there are background tasks
-      if (action.payload && (state.droneIsActive || state.smeltingQueue > 0)) {
+      if (action.payload && (state.droneIsActive || state.smeltingQueue > 0 || state.ironIngotSmeltingQueue > 0)) {
         return state;
       }
       
@@ -862,7 +869,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         
         let logMessage = `The furnace cools. You retrieve 1 Component.\n${itemData['components'].description}`;
         if (newSmeltingQueue === 0) {
-          logMessage += "\nThe queue is empty.";
+          logMessage += "\nThe component queue is empty.";
         }
 
         return {
@@ -873,6 +880,52 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             log: [{ id: generateUniqueLogId(), text: logMessage, type: 'craft', item: 'components', timestamp: Date.now() }, ...state.log],
         };
     }
+
+    case 'START_SMELTING_IRON': {
+        const { amount } = action.payload;
+        const newInventory = { ...state.inventory };
+        const totalScrapNeeded = 20 * amount;
+        const totalWoodNeeded = 10 * amount;
+  
+        if (newInventory.scrap < totalScrapNeeded || newInventory.wood < totalWoodNeeded) {
+          return {
+            ...state,
+            log: [{ id: generateUniqueLogId(), text: "Not enough resources to smelt iron ingots.", type: 'danger', timestamp: Date.now() }, ...state.log],
+          };
+        }
+        
+        newInventory.scrap -= totalScrapNeeded;
+        newInventory.wood -= totalWoodNeeded;
+  
+        return { 
+          ...state, 
+          inventory: newInventory,
+          ironIngotSmeltingQueue: state.ironIngotSmeltingQueue + amount,
+          log: [{ id: generateUniqueLogId(), text: `The furnace burns hotter... Queued ${amount} iron ingot batch(es).`, type: 'info', timestamp: Date.now() }, ...state.log],
+        };
+      }
+  
+      case 'FINISH_SMELTING_IRON': {
+          if (state.ironIngotSmeltingQueue <= 0) return state;
+          const INVENTORY_CAP = getInventoryCap();
+  
+          let { newInventory, newStatistics } = addResource(state.inventory, state.statistics, 'ironIngot', 1, INVENTORY_CAP);
+  
+          const newSmeltingQueue = state.ironIngotSmeltingQueue - 1;
+          
+          let logMessage = `You pull a glowing Iron Ingot from the furnace.\n${itemData['ironIngot'].description}`;
+          if (newSmeltingQueue === 0) {
+            logMessage += "\nThe iron ingot queue is empty.";
+          }
+  
+          return {
+              ...state,
+              inventory: newInventory,
+              statistics: newStatistics,
+              ironIngotSmeltingQueue: newSmeltingQueue,
+              log: [{ id: generateUniqueLogId(), text: logMessage, type: 'craft', item: 'ironIngot', timestamp: Date.now() }, ...state.log],
+          };
+      }
 
     case 'UPGRADE_STORAGE': {
       const calculateCost = (level: number): number => {
@@ -1164,6 +1217,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!migratedState.inventory.mutatedTwigs) {
         migratedState.inventory.mutatedTwigs = 0;
       }
+      if (!migratedState.inventory.ironIngot) {
+        migratedState.inventory.ironIngot = 0;
+      }
+      if (!migratedState.ironIngotSmeltingQueue) {
+        migratedState.ironIngotSmeltingQueue = 0;
+      }
       if (!migratedState.theme) {
         migratedState.theme = 'dark';
       }
@@ -1223,11 +1282,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (gameState.isInitialized) {
       // Whenever these background tasks change, reset the inactivity timer
-      if (gameState.droneIsActive || gameState.smeltingQueue > 0) {
+      if (gameState.droneIsActive || gameState.smeltingQueue > 0 || gameState.ironIngotSmeltingQueue > 0) {
         resetTimer();
       }
     }
-  }, [gameState.isInitialized, gameState.droneIsActive, gameState.smeltingQueue, resetTimer]);
+  }, [gameState.isInitialized, gameState.droneIsActive, gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, resetTimer]);
 
 
   return (

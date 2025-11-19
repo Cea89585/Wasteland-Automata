@@ -30,4 +30,5 @@ export const itemData: Record<Resource | Item, { name: string; description: stri
   miningRig: { name: Items.miningRig, description: 'An automated rig that extracts resources from the earth.' },
   cookedApple: { name: Items.cookedApple, description: 'A cooked apple that restores some energy.', sellPrice: 8 },
   crudeMap: { name: Items.crudeMap, description: 'Unlocks the ability to travel to new locations.' },
+  ironIngot: { name: Items.ironIngot, description: 'A bar of refined iron, ready for advanced crafting.', sellPrice: 30 },
 };

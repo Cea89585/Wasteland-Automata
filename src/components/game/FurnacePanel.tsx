@@ -4,62 +4,108 @@ import { useState, useEffect, useMemo } from 'react';
 import { useGame } from '@/hooks/use-game';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Power, Loader2, Cpu, PackageCheck } from 'lucide-react';
+import { Power, Loader2, Cpu, PackageCheck, Layers } from 'lucide-react';
 import { Progress } from '../ui/progress';
 import { resourceIcons } from './GameIcons';
 import { itemData } from '@/lib/game-data/items';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import { Separator } from '../ui/separator';
 
 const SMELT_DURATION = 10; // seconds
 
 export default function FurnacePanel() {
   const { gameState, dispatch } = useGame();
-  const [progress, setProgress] = useState(0);
+  const [componentProgress, setComponentProgress] = useState(0);
+  const [ironProgress, setIronProgress] = useState(0);
 
-  const smeltRequirements = { scrap: 10, wood: 4 };
-
-  const maxSmeltable = useMemo(() => {
+  // Component requirements
+  const componentSmeltRequirements = { scrap: 10, wood: 4 };
+  const maxComponentSmeltable = useMemo(() => {
     const { scrap, wood } = gameState.inventory;
-    return Math.floor(Math.min(scrap / smeltRequirements.scrap, wood / smeltRequirements.wood));
+    return Math.floor(Math.min(scrap / componentSmeltRequirements.scrap, wood / componentSmeltRequirements.wood));
   }, [gameState.inventory]);
+  const canSmeltComponent = maxComponentSmeltable >= 1;
+  
+  // Iron Ingot requirements
+  const ironSmeltRequirements = { scrap: 20, wood: 10 };
+  const maxIronSmeltable = useMemo(() => {
+    const { scrap, wood } = gameState.inventory;
+    return Math.floor(Math.min(scrap / ironSmeltRequirements.scrap, wood / ironSmeltRequirements.wood));
+  }, [gameState.inventory]);
+  const canSmeltIron = maxIronSmeltable >= 1;
 
-  const canSmelt = maxSmeltable >= 1;
   const isBusy = gameState.isResting;
 
+  // Component smelting progress
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined;
-    if (gameState.smeltingQueue > 0 && progress < 100) {
+    if (gameState.smeltingQueue > 0 && componentProgress < 100) {
       interval = setInterval(() => {
-        setProgress(prev => Math.min(100, prev + (100 / SMELT_DURATION)));
+        setComponentProgress(prev => Math.min(100, prev + (100 / SMELT_DURATION)));
       }, 1000);
     }
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [gameState.smeltingQueue, progress]);
+  }, [gameState.smeltingQueue, componentProgress]);
 
   useEffect(() => {
-    if (progress >= 100 && gameState.smeltingQueue > 0) {
+    if (componentProgress >= 100 && gameState.smeltingQueue > 0) {
       dispatch({ type: 'FINISH_SMELTING' });
-      setProgress(0); // Reset for the next item in the queue
+      setComponentProgress(0); // Reset for the next item in the queue
     }
-  }, [progress, gameState.smeltingQueue, dispatch]);
+  }, [componentProgress, gameState.smeltingQueue, dispatch]);
 
-  const handleSmelt = () => {
-    if (!canSmelt) {
-      dispatch({ type: 'ADD_LOG', payload: { text: "Not enough resources to smelt components.", type: 'danger' } });
-      return;
+  // Iron Ingot smelting progress
+  useEffect(() => {
+    let interval: NodeJS.Timeout | undefined;
+    if (gameState.ironIngotSmeltingQueue > 0 && ironProgress < 100) {
+      interval = setInterval(() => {
+        setIronProgress(prev => Math.min(100, prev + (100 / SMELT_DURATION)));
+      }, 1000);
     }
-    dispatch({ type: 'START_SMELTING', payload: { amount: 1 } });
-    setProgress(0);
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [gameState.ironIngotSmeltingQueue, ironProgress]);
+
+  useEffect(() => {
+    if (ironProgress >= 100 && gameState.ironIngotSmeltingQueue > 0) {
+      dispatch({ type: 'FINISH_SMELTING_IRON' });
+      setIronProgress(0); // Reset for the next item in the queue
+    }
+  }, [ironProgress, gameState.ironIngotSmeltingQueue, dispatch]);
+
+  // Handler for components
+  const handleSmeltComponent = () => {
+    if (canSmeltComponent) {
+      dispatch({ type: 'START_SMELTING', payload: { amount: 1 } });
+      setComponentProgress(0);
+    }
   };
 
-  const handleSmeltAll = () => {
-    if (maxSmeltable > 0) {
-      dispatch({ type: 'START_SMELTING', payload: { amount: maxSmeltable } });
-      setProgress(0);
+  const handleSmeltAllComponents = () => {
+    if (maxComponentSmeltable > 0) {
+      dispatch({ type: 'START_SMELTING', payload: { amount: maxComponentSmeltable } });
+      setComponentProgress(0);
     }
   };
+
+  // Handler for iron
+  const handleSmeltIron = () => {
+    if (canSmeltIron) {
+      dispatch({ type: 'START_SMELTING_IRON', payload: { amount: 1 } });
+      setIronProgress(0);
+    }
+  };
+
+  const handleSmeltAllIron = () => {
+    if (maxIronSmeltable > 0) {
+      dispatch({ type: 'START_SMELTING_IRON', payload: { amount: maxIronSmeltable } });
+      setIronProgress(0);
+    }
+  };
+
 
   return (
     <Card>
@@ -67,8 +113,8 @@ export default function FurnacePanel() {
         <CardTitle>Furnace</CardTitle>
         <CardDescription>Smelt raw materials into advanced components.</CardDescription>
       </CardHeader>
-      <CardContent>
-        <Card className="bg-muted/50 p-4 w-full">
+      <CardContent className="space-y-4">
+          <Card className="bg-muted/50 p-4 w-full">
             <div className="flex items-center justify-between gap-4">
               <div className="flex-grow">
                   <div className="flex items-center font-semibold text-base mb-2">
@@ -79,11 +125,11 @@ export default function FurnacePanel() {
                         <span>Requires:</span>
                         <span className="flex items-center">
                             {resourceIcons['scrap']}
-                            {itemData['scrap'].name}: {smeltRequirements.scrap}
+                            {itemData['scrap'].name}: {componentSmeltRequirements.scrap}
                         </span>
                         <span className="flex items-center">
                             {resourceIcons['wood']}
-                            {itemData['wood'].name}: {smeltRequirements.wood}
+                            {itemData['wood'].name}: {componentSmeltRequirements.wood}
                         </span>
                     </div>
                      <div className="flex flex-wrap gap-x-4 gap-y-2">
@@ -102,16 +148,16 @@ export default function FurnacePanel() {
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
                         Smelting... ({gameState.smeltingQueue} {gameState.smeltingQueue > 1 ? 'batches' : 'batch'} left)
                     </p>
-                    <Progress value={progress} className="w-full" />
+                    <Progress value={componentProgress} className="w-full" />
                 </div>
             ) : (
                 <TooltipProvider>
                   <div className="flex justify-center items-center gap-2 mt-4">
                       <Button 
-                          onClick={handleSmelt} 
-                          disabled={!canSmelt || isBusy || gameState.playerStats.health <= 0}
+                          onClick={handleSmeltComponent} 
+                          disabled={!canSmeltComponent || isBusy || gameState.playerStats.health <= 0}
                           className="flex-1"
-                          variant={canSmelt ? 'default' : 'outline'}
+                          variant={canSmeltComponent ? 'default' : 'outline'}
                       >
                           <Power className="mr-2 h-4 w-4" />
                           Smelt
@@ -119,17 +165,88 @@ export default function FurnacePanel() {
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button 
-                              onClick={handleSmeltAll} 
-                              disabled={maxSmeltable < 2 || isBusy || gameState.playerStats.health <= 0}
+                              onClick={handleSmeltAllComponents} 
+                              disabled={maxComponentSmeltable < 2 || isBusy || gameState.playerStats.health <= 0}
                               className="flex-1"
                               variant="secondary"
                           >
                               <PackageCheck className="mr-2 h-4 w-4" />
-                              Smelt All ({maxSmeltable})
+                              Smelt All ({maxComponentSmeltable})
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          {maxSmeltable < 2 ? <p>You need enough resources for at least 2 batches.</p> : <p>Queue all possible smelting jobs.</p>}
+                          {maxComponentSmeltable < 2 ? <p>You need enough resources for at least 2 batches.</p> : <p>Queue all possible smelting jobs.</p>}
+                        </TooltipContent>
+                      </Tooltip>
+                  </div>
+                </TooltipProvider>
+            )}
+          </Card>
+
+        <Separator />
+
+         <Card className="bg-muted/50 p-4 w-full">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex-grow">
+                  <div className="flex items-center font-semibold text-base mb-2">
+                    <Layers className="mr-2 h-5 w-5" /> Smelt Iron Ingot
+                  </div>
+                  <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                    <div className="flex flex-wrap gap-x-3 gap-y-1">
+                        <span>Requires:</span>
+                        <span className="flex items-center">
+                            {resourceIcons['scrap']}
+                            {itemData['scrap'].name}: {ironSmeltRequirements.scrap}
+                        </span>
+                        <span className="flex items-center">
+                            {resourceIcons['wood']}
+                            {itemData['wood'].name}: {ironSmeltRequirements.wood}
+                        </span>
+                    </div>
+                     <div className="flex flex-wrap gap-x-4 gap-y-2">
+                        <span>Creates:</span>
+                        <span className="flex items-center">
+                            {resourceIcons['ironIngot']}
+                            {itemData['ironIngot'].name}: 1
+                        </span>
+                    </div>
+                  </div>
+              </div>
+            </div>
+             {gameState.ironIngotSmeltingQueue > 0 ? (
+                <div className="flex flex-col gap-2 mt-4">
+                    <p className="text-sm text-muted-foreground text-center flex items-center justify-center">
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                        Smelting... ({gameState.ironIngotSmeltingQueue} {gameState.ironIngotSmeltingQueue > 1 ? 'batches' : 'batch'} left)
+                    </p>
+                    <Progress value={ironProgress} className="w-full" />
+                </div>
+            ) : (
+                <TooltipProvider>
+                  <div className="flex justify-center items-center gap-2 mt-4">
+                      <Button 
+                          onClick={handleSmeltIron} 
+                          disabled={!canSmeltIron || isBusy || gameState.playerStats.health <= 0}
+                          className="flex-1"
+                          variant={canSmeltIron ? 'default' : 'outline'}
+                      >
+                          <Power className="mr-2 h-4 w-4" />
+                          Smelt
+                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                              onClick={handleSmeltAllIron} 
+                              disabled={maxIronSmeltable < 2 || isBusy || gameState.playerStats.health <= 0}
+                              className="flex-1"
+                              variant="secondary"
+                          >
+                              <PackageCheck className="mr-2 h-4 w-4" />
+                              Smelt All ({maxIronSmeltable})
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {maxIronSmeltable < 2 ? <p>You need enough resources for at least 2 batches.</p> : <p>Queue all possible smelting jobs.</p>}
                         </TooltipContent>
                       </Tooltip>
                   </div>

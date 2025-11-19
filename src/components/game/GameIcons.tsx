@@ -31,6 +31,7 @@ import {
   Map,
   Sprout,
   Leaf,
+  Layers,
 } from 'lucide-react';
 import type { Resource, Item } from '@/lib/game-types';
 
@@ -68,6 +69,7 @@ export const itemIcons: Record<Item, React.ReactElement<LucideProps>> = {
   miningRig: <Drill {...iconProps} />,
   cookedApple: <Zap {...iconProps} />,
   crudeMap: <Map {...iconProps} />,
+  ironIngot: <Layers {...iconProps} />,
 };
 
 export const statIcons = {

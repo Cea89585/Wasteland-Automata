@@ -32,6 +32,7 @@ export const Items = {
   miningRig: 'Mining Rig',
   cookedApple: 'Cooked Apple',
   crudeMap: 'Crude Map',
+  ironIngot: 'Iron Ingot',
 } as const;
 export type Item = keyof typeof Items;
 
@@ -104,6 +105,7 @@ export interface GameState {
   isResting: boolean;
   isIdle: boolean;
   smeltingQueue: number;
+  ironIngotSmeltingQueue: number;
   droneIsActive: boolean;
   droneReturnTimestamp: number | null;
   theme: Theme;
@@ -136,6 +138,8 @@ export type GameAction =
   | { type: 'FINISH_RESTING' }
   | { type: 'START_SMELTING'; payload: { amount: number } }
   | { type: 'FINISH_SMELTING' }
+  | { type: 'START_SMELTING_IRON'; payload: { amount: number } }
+  | { type: 'FINISH_SMELTING_IRON' }
   | { type: 'EQUIP'; payload: { item: Item, slot: EquipmentSlot } }
   | { type: 'UNEQUIP'; payload: { slot: EquipmentSlot } }
   | { type: 'UPGRADE_STORAGE' }
