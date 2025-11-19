@@ -27,6 +27,8 @@ export default function ExplorationPanel() {
   const [isExploring, setIsExploring] = useState(false);
   const [isScavenging, setIsScavenging] = useState(false);
   const [restingProgress, setRestingProgress] = useState(0);
+  const [isTravelDialogOpen, setIsTravelDialogOpen] = useState(false);
+
 
   const currentLocation = locations[gameState.currentLocation];
   const { equipment, unlockedLocations, inventory } = gameState;
@@ -183,6 +185,7 @@ export default function ExplorationPanel() {
 
   const handleTravel = (locationId: LocationId) => {
     dispatch({ type: 'TRAVEL', payload: { locationId } });
+    setIsTravelDialogOpen(false);
   }
   
   const isBusy = isExploring || isScavenging || gameState.isResting || gameState.smeltingQueue > 0 || gameState.droneIsActive;
@@ -236,7 +239,7 @@ export default function ExplorationPanel() {
         </div>
         <div className="flex items-center gap-2">
             {unlockedLocations.length > 1 && (
-            <Dialog>
+            <Dialog open={isTravelDialogOpen} onOpenChange={setIsTravelDialogOpen}>
                 <DialogTrigger asChild>
                 <Button variant="outline" disabled={isBusy || isDead} className="w-full">
                     <Map className="mr-2 h-4 w-4" /> Travel
