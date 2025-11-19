@@ -429,7 +429,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       
       const logText = action.payload
         ? "You find a moment of peace. Your body begins to recover."
-        : "You stir, the brief respite over.";
+        : "You stir, the brief respite is over.";
       return {
         ...state,
         isIdle: action.payload,
