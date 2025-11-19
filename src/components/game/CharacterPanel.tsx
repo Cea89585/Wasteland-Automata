@@ -33,17 +33,23 @@ const NameEditor = () => {
             return;
         }
 
-        // Basic check for naughty words
-        const isProfane = filter.en.some(word => name.toLowerCase().includes(word));
+        // Allow only letters and spaces
+        if (!/^[a-zA-Z\s]+$/.test(name)) {
+            toast({ variant: 'destructive', title: 'Invalid Name', description: 'Name can only contain letters and spaces.' });
+            return;
+        }
+
+        // Basic check for naughty words, now case-insensitive
+        const isProfane = filter.en.some(word => name.toLowerCase().includes(word.toLowerCase()));
 
         if (isProfane) {
             toast({ variant: 'destructive', title: 'Name Not Allowed', description: 'Please choose a more appropriate name.' });
             return;
         }
 
-        dispatch({ type: 'SET_CHARACTER_NAME', payload: name });
+        dispatch({ type: 'SET_CHARACTER_NAME', payload: name.trim() });
         setIsEditing(false);
-        toast({ title: 'Name Updated', description: `You are now known as ${name}.` });
+        toast({ title: 'Name Updated', description: `You are now known as ${name.trim()}.` });
     };
 
     const handleRandomize = () => {
