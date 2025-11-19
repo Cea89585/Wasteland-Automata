@@ -145,5 +145,4 @@ export type GameAction =
   | { type: 'UPGRADE_DRONE' }
   | { type: 'TRAVEL'; payload: { locationId: LocationId } }
   | { type: 'SEND_DRONE' }
-  | { type: 'DRONE_RETURN'; payload: { resources: Partial<Record<Resource, number>> } }
   | { type: 'SET_THEME'; payload: Theme };

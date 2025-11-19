@@ -24,11 +24,19 @@ export default function DronePanel() {
     let interval: NodeJS.Timeout | undefined;
     if (gameState.droneIsActive && gameState.droneReturnTimestamp) {
       const startTime = gameState.droneReturnTimestamp - (MISSION_DURATION * 1000);
-      interval = setInterval(() => {
+      
+      const updateProgress = () => {
         const elapsed = Date.now() - startTime;
         const currentProgress = Math.min(100, (elapsed / (MISSION_DURATION * 1000)) * 100);
         setProgress(currentProgress);
-      }, 500);
+        if (currentProgress >= 100) {
+            if(interval) clearInterval(interval);
+        }
+      };
+
+      updateProgress();
+      interval = setInterval(updateProgress, 500);
+
     } else {
         setProgress(0);
     }

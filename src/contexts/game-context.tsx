@@ -39,7 +39,7 @@ const runOfflineSimulation = (state: GameState): GameState => {
   const getMaxHealth = (s: GameState) => Math.min(1000, 100 + (s.healthLevel || 0) * 25);
 
   for (let i = 0; i < missedTicks; i++) {
-    // Apply idle logic for each missed tick.
+    // Treat every offline tick as an "idle" tick
     const INVENTORY_CAP = getInventoryCap(simulatedState);
     const MAX_ENERGY = getMaxEnergy(simulatedState);
     const MAX_HEALTH = getMaxHealth(simulatedState);
@@ -53,7 +53,7 @@ const runOfflineSimulation = (state: GameState): GameState => {
     }
 
     // Passive resource generation (every 2 ticks = 4 seconds)
-    if ((simulatedState.gameTick + i) % 4 === 0) {
+    if ((simulatedState.gameTick + i) % 2 === 0) { // Check every other tick
       if (simulatedState.builtStructures.includes('waterPurifier') && simulatedState.inventory.water < INVENTORY_CAP) {
         simulatedState.inventory.water = Math.min(INVENTORY_CAP, simulatedState.inventory.water + 1);
       }
@@ -188,7 +188,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'GAME_TICK': {
       let currentState = { ...state };
       const logMessages: LogMessage[] = [];
-      let finalInventory = { ...currentState.inventory };
       
       // Drone return logic
       if (currentState.droneIsActive && currentState.droneReturnTimestamp && Date.now() >= currentState.droneReturnTimestamp) {
@@ -206,10 +205,10 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const MAX_ENERGY = getMaxEnergy();
       
       // Universal passive systems (always on)
-      if(currentState.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP && (currentState.gameTick % 4 === 0)) {
+      if(currentState.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP && (currentState.gameTick % 2 === 0)) {
         newInventory.water = Math.min(INVENTORY_CAP, newInventory.water + 1);
       }
-      if(currentState.builtStructures.includes('hydroponicsBay') && newInventory.apple < INVENTORY_CAP && (currentState.gameTick % 4 === 0)) {
+      if(currentState.builtStructures.includes('hydroponicsBay') && newInventory.apple < INVENTORY_CAP && (currentState.gameTick % 2 === 0)) {
         newInventory.apple = Math.min(INVENTORY_CAP, newInventory.apple + 1);
       }
       
@@ -1048,12 +1047,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         droneReturnTimestamp: Date.now() + 30000, // 30 seconds
         log: [{ id: generateUniqueLogId(), text: "Scavenger drone launched. It will return in 30 seconds.", type: 'info', timestamp: Date.now() }, ...state.log],
       };
-    }
-
-    case 'DRONE_RETURN': {
-      // This case is now handled inside GAME_TICK to prevent race conditions.
-      // Kept here to avoid breaking changes if it were ever dispatched manually, though it shouldn't be.
-      return state;
     }
 
     case 'SET_THEME': {
