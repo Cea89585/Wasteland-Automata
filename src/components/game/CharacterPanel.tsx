@@ -13,6 +13,7 @@ import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { firstNames, surnames } from '@/lib/game-data/names';
+import { validateCharacterName } from '@/ai/flows/character-flow';
 
 
 const NameEditor = () => {
@@ -20,6 +21,7 @@ const NameEditor = () => {
     const { characterName } = gameState;
     const [name, setName] = useState(characterName);
     const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -31,12 +33,25 @@ const NameEditor = () => {
             toast({ variant: 'destructive', title: 'Invalid Name', description: 'Name must be between 3 and 25 characters.' });
             return;
         }
-        dispatch({ type: 'SET_CHARACTER_NAME', payload: name });
-        setIsEditing(false);
-        toast({ title: 'Name Updated', description: `You are now known as ${name}.` });
+        setIsSaving(true);
+        try {
+            const { isAllowed } = await validateCharacterName({ name });
+            if (isAllowed) {
+                dispatch({ type: 'SET_CHARACTER_NAME', payload: name });
+                setIsEditing(false);
+                toast({ title: 'Name Updated', description: `You are now known as ${name}.` });
+            } else {
+                toast({ variant: 'destructive', title: 'Name Not Allowed', description: 'Please choose a more appropriate name.' });
+            }
+        } catch (error) {
+            console.error(error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not validate name. Please try again.' });
+        } finally {
+            setIsSaving(false);
+        }
     };
 
-    const handleRandomize = async () => {
+    const handleRandomize = () => {
         const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];
         const randomSurname = surnames[Math.floor(Math.random() * surnames.length)];
         setName(`${randomFirstName} ${randomSurname}`);
@@ -46,17 +61,17 @@ const NameEditor = () => {
         return (
             <div className="flex flex-col items-center gap-2">
                 <div className="flex items-center gap-2 w-full">
-                    <Input value={name} onChange={(e) => setName(e.target.value)} />
-                    <Button size="icon" onClick={handleRandomize}>
+                    <Input value={name} onChange={(e) => setName(e.target.value)} disabled={isSaving} />
+                    <Button size="icon" onClick={handleRandomize} disabled={isSaving}>
                         <RefreshCw />
                     </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button onClick={handleSave} disabled={name === characterName}>
-                        <Save className="mr-2" />
-                        Save
+                    <Button onClick={handleSave} disabled={name === characterName || isSaving}>
+                        {isSaving ? <Loader2 className="mr-2 animate-spin" /> : <Save className="mr-2" />}
+                        {isSaving ? 'Validating...' : 'Save'}
                     </Button>
-                    <Button variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
+                    <Button variant="ghost" onClick={() => setIsEditing(false)} disabled={isSaving}>Cancel</Button>
                 </div>
             </div>
         )
