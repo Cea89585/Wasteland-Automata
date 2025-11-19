@@ -55,6 +55,7 @@ export const resourceIcons: Record<Resource, React.ReactElement<LucideProps>> = 
   peach: <Grape {...iconProps} />,
   silver: <Coins {...iconProps} className="text-yellow-500" />,
   mutatedTwigs: <Leaf {...iconProps} />,
+  ironIngot: <Layers {...iconProps} />,
 };
 
 export const itemIcons: Record<Item, React.ReactElement<LucideProps>> = {
@@ -70,7 +71,6 @@ export const itemIcons: Record<Item, React.ReactElement<LucideProps>> = {
   miningRig: <Drill {...iconProps} />,
   cookedApple: <Zap {...iconProps} />,
   crudeMap: <Map {...iconProps} />,
-  ironIngot: <Layers {...iconProps} />,
   ironPlates: <RectangleHorizontal {...iconProps} />,
 };
 

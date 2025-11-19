@@ -105,7 +105,7 @@ const runOfflineSimulation = (state: GameState): GameState => {
 
 const addResource = (inventory: GameState['inventory'], statistics: GameState['statistics'], resource: Resource | Item, amount: number, cap: number) => {
     const newInventory = { ...inventory };
-    newInventory[resource] = Math.min(cap, newInventory[resource] + amount);
+    newInventory[resource] = Math.min(cap, (newInventory[resource] || 0) + amount);
     
     const newStatistics = { ...statistics };
     const newTotalItemsGained = { ...newStatistics.totalItemsGained };
@@ -1133,6 +1133,17 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'SET_THEME': {
       return { ...state, theme: action.payload };
+    }
+
+    case 'CHEAT_ADD_SILVER': {
+      const { amount } = action.payload;
+      const newInventory = { ...state.inventory };
+      newInventory.silver = (newInventory.silver || 0) + amount;
+       return {
+        ...state,
+        inventory: newInventory,
+        log: [{ id: generateUniqueLogId(), text: `DEBUG: Added ${amount} silver.`, type: 'info', timestamp: Date.now() }, ...state.log],
+      };
     }
 
     default:

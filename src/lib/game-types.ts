@@ -16,6 +16,7 @@ export const Resources = {
   peach: 'Peach',
   silver: 'Silver',
   mutatedTwigs: 'Mutated Twigs',
+  ironIngot: 'Iron Ingot',
 } as const;
 export type Resource = keyof typeof Resources;
 
@@ -32,7 +33,6 @@ export const Items = {
   miningRig: 'Mining Rig',
   cookedApple: 'Cooked Apple',
   crudeMap: 'Crude Map',
-  ironIngot: 'Iron Ingot',
   ironPlates: 'Iron Plates',
 } as const;
 export type Item = keyof typeof Items;
@@ -151,4 +151,5 @@ export type GameAction =
   | { type: 'UPGRADE_DRONE' }
   | { type: 'TRAVEL'; payload: { locationId: LocationId } }
   | { type: 'SEND_DRONE' }
-  | { type: 'SET_THEME'; payload: Theme };
+  | { type: 'SET_THEME'; payload: Theme }
+  | { type: 'CHEAT_ADD_SILVER'; payload: { amount: number } };

@@ -14,6 +14,7 @@ const emptyInventory = {
   peach: 0,
   silver: 0,
   mutatedTwigs: 0,
+  ironIngot: 0,
   stoneAxe: 0,
   metalDetector: 0,
   workbench: 0,
@@ -26,7 +27,6 @@ const emptyInventory = {
   miningRig: 0,
   cookedApple: 0,
   crudeMap: 0,
-  ironIngot: 0,
   ironPlates: 0,
 };
 

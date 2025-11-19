@@ -15,6 +15,7 @@ export const itemData: Record<Resource | Item, { name: string; description: stri
   peach: { name: Resources.peach, description: 'A fuzzy fruit.', sellPrice: 5 },
   silver: { name: Resources.silver, description: 'An old-world currency, still valued by traders.' },
   mutatedTwigs: { name: Resources.mutatedTwigs, description: 'Flexible, oddly colored twigs from the mutated forest. They hum with a faint energy.', sellPrice: 8 },
+  ironIngot: { name: Resources.ironIngot, description: 'A bar of refined iron, ready for advanced crafting.', sellPrice: 30 },
 
 
   // Crafted Items
@@ -30,6 +31,5 @@ export const itemData: Record<Resource | Item, { name: string; description: stri
   miningRig: { name: Items.miningRig, description: 'An automated rig that extracts resources from the earth.' },
   cookedApple: { name: Items.cookedApple, description: 'A cooked apple that restores some energy.', sellPrice: 8 },
   crudeMap: { name: Items.crudeMap, description: 'Unlocks the ability to travel to new locations.' },
-  ironIngot: { name: Items.ironIngot, description: 'A bar of refined iron, ready for advanced crafting.', sellPrice: 30 },
   ironPlates: { name: Items.ironPlates, description: 'Reinforced plates of solid iron. Used for heavy construction.', sellPrice: 160 },
 };
