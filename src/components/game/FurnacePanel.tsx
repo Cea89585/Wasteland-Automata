@@ -1,3 +1,4 @@
+
 // src/components/game/FurnacePanel.tsx
 'use client';
 import { useState, useEffect, useMemo } from 'react';
@@ -132,7 +133,7 @@ export default function FurnacePanel() {
     }
   };
   
-  const handleSmeltCharcoal = () => {
+  const handleMakeCharcoal = () => {
     if (maxSmeltableCharcoal > 0) {
       dispatch({ type: 'START_SMELTING_CHARCOAL'});
       setCharcoalProgress(0);
@@ -295,7 +296,7 @@ export default function FurnacePanel() {
             <div className="flex items-center justify-between gap-4">
               <div className="flex-grow">
                   <div className="flex items-center font-semibold text-base mb-2">
-                    <Fuel className="mr-2 h-5 w-5" /> Smelt Charcoal
+                    <Fuel className="mr-2 h-5 w-5" /> Make Charcoal
                   </div>
                   <div className="flex flex-col gap-1 text-xs text-muted-foreground">
                     <div className="flex flex-wrap gap-x-3 gap-y-1">
@@ -319,20 +320,20 @@ export default function FurnacePanel() {
                 <div className="flex flex-col gap-2 mt-4">
                     <p className="text-sm text-muted-foreground text-center flex items-center justify-center">
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
-                        Smelting... ({gameState.charcoalSmeltingQueue} {gameState.charcoalSmeltingQueue > 1 ? 'batches' : 'batch'} left)
+                        Making... ({gameState.charcoalSmeltingQueue} {gameState.charcoalSmeltingQueue > 1 ? 'batches' : 'batch'} left)
                     </p>
                     <Progress value={charcoalProgress} className="w-full" />
                 </div>
             ) : (
                 <div className="flex items-center gap-2 mt-4">
                     <Button 
-                        onClick={handleSmeltCharcoal} 
+                        onClick={handleMakeCharcoal} 
                         disabled={maxSmeltableCharcoal < 1 || isBusy || gameState.playerStats.health <= 0}
                         className="flex-1"
                         variant={maxSmeltableCharcoal > 0 ? 'default' : 'outline'}
                     >
                         <Power className="mr-2 h-4 w-4" />
-                        Smelt
+                        Make
                     </Button>
                      <TooltipProvider>
                         <Tooltip>
@@ -345,12 +346,12 @@ export default function FurnacePanel() {
                                         variant="secondary"
                                     >
                                         <PackageCheck className="mr-2 h-4 w-4" />
-                                        Smelt All ({maxSmeltableCharcoal})
+                                        Make All ({maxSmeltableCharcoal})
                                     </Button>
                                 </div>
                             </TooltipTrigger>
                              <TooltipContent>
-                                {maxSmeltableCharcoal < 2 ? <p>You need enough resources for at least 2 items.</p> : <p>Smelt all possible items.</p>}
+                                {maxSmeltableCharcoal < 2 ? <p>You need enough resources for at least 2 items.</p> : <p>Make all possible items.</p>}
                             </TooltipContent>
                         </Tooltip>
                     </TooltipProvider>
