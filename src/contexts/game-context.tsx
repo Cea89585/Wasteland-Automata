@@ -1,4 +1,3 @@
-
 // src/contexts/game-context.tsx
 'use client';
 
@@ -1394,7 +1393,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!migratedState.lockedItems) migratedState.lockedItems = [];
       if (!migratedState.unlockedFlags) migratedState.unlockedFlags = [];
       if (!migratedState.unlockedLocations) migratedState.unlockedLocations = ['outskirts'];
-      if (!migratedState.unlockedRecipes.includes('recipe_crudeMap')) migratedState.unlockedRecipes.push('recipe_crudeMap');
+      if (!migratedState.unlockedRecipes.includes('recipe_crudeMap')) {
+        if (migratedState.builtStructures.includes('workbench')) {
+            migratedState.unlockedRecipes.push('recipe_crudeMap');
+        }
+      }
       if (!migratedState.unlockedRecipes.includes('recipe_crudeMap_tunnels')) {
         if(migratedState.unlockedLocations.includes('forest')) migratedState.unlockedRecipes.push('recipe_crudeMap_tunnels');
       }

@@ -1,4 +1,3 @@
-
 // src/lib/game-data/quests.ts
 import type { Resource, Item } from '../game-types';
 
