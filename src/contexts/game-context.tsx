@@ -411,14 +411,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
       const newUnlockedRecipes = [...state.unlockedRecipes];
       allRecipes.forEach(r => {
-        if(r.unlockedBy.includes(recipe.creates) && !newUnlockedRecipes.includes(r.id)) {
+        if(r.unlockedBy.includes(recipe.creates as Item) && !newUnlockedRecipes.includes(r.id)) {
           newUnlockedRecipes.push(r.id);
         }
       });
       
-      const itemDetails = itemData[recipe.creates];
+      const itemDetails = itemData[recipe.creates as Item];
       const logMessageText = `You built a ${itemDetails.name}.\n${itemDetails.description}`;
-      const { newStatistics } = addResource(state.inventory, state.statistics, recipe.creates, 1, INVENTORY_CAP);
+      const { newStatistics } = addResource(state.inventory, state.statistics, recipe.creates as Item, 1, INVENTORY_CAP);
 
       return {
         ...state,
@@ -426,7 +426,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         builtStructures: newBuiltStructures,
         unlockedRecipes: newUnlockedRecipes,
         statistics: newStatistics,
-        log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
+        log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates as Item, timestamp: Date.now() }, ...state.log],
       };
     }
 
@@ -511,7 +511,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       
       const newUnlockedRecipes = [...state.unlockedRecipes];
       recipes.forEach(r => {
-        if(r.unlockedBy.includes(recipe.creates) && !newUnlockedRecipes.includes(r.id)) {
+        if(r.unlockedBy.includes(recipe.creates as Item) && !newUnlockedRecipes.includes(r.id)) {
           newUnlockedRecipes.push(r.id);
         }
       });
@@ -1135,17 +1135,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       return { ...state, theme: action.payload };
     }
 
-    case 'CHEAT_ADD_SILVER': {
-      const { amount } = action.payload;
-      const newInventory = { ...state.inventory };
-      newInventory.silver = (newInventory.silver || 0) + amount;
-       return {
-        ...state,
-        inventory: newInventory,
-        log: [{ id: generateUniqueLogId(), text: `DEBUG: Added ${amount} silver.`, type: 'info', timestamp: Date.now() }, ...state.log],
-      };
-    }
-
     default:
       return state;
   }
@@ -1235,6 +1224,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
        if (!migratedState.inventory.ironPlates) {
         migratedState.inventory.ironPlates = 0;
       }
+       if (!migratedState.inventory.biomass) {
+        migratedState.inventory.biomass = 0;
+      }
+       if (!migratedState.inventory.biomassCompressor) {
+        migratedState.inventory.biomassCompressor = 0;
+      }
       if (!migratedState.ironIngotSmeltingQueue) {
         migratedState.ironIngotSmeltingQueue = 0;
       }
@@ -1248,6 +1243,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       // == SAVE MIGRATIONS ==
       if (migratedState.builtStructures.includes('furnace') && !migratedState.unlockedRecipes.includes('recipe_ironPlates')) {
         migratedState.unlockedRecipes.push('recipe_ironPlates');
+      }
+       if (migratedState.builtStructures.includes('furnace') && !migratedState.unlockedRecipes.includes('recipe_biomassCompressor')) {
+        migratedState.unlockedRecipes.push('recipe_biomassCompressor');
       }
       // == END SAVE MIGRATIONS ==
 

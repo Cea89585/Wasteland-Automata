@@ -33,6 +33,7 @@ import {
   Leaf,
   Layers,
   RectangleHorizontal,
+  Package,
 } from 'lucide-react';
 import type { Resource, Item } from '@/lib/game-types';
 
@@ -56,6 +57,7 @@ export const resourceIcons: Record<Resource, React.ReactElement<LucideProps>> = 
   silver: <Coins {...iconProps} className="text-yellow-500" />,
   mutatedTwigs: <Leaf {...iconProps} />,
   ironIngot: <Layers {...iconProps} />,
+  biomass: <Leaf {...iconProps} color="green" />,
 };
 
 export const itemIcons: Record<Item, React.ReactElement<LucideProps>> = {
@@ -72,6 +74,7 @@ export const itemIcons: Record<Item, React.ReactElement<LucideProps>> = {
   cookedApple: <Zap {...iconProps} />,
   crudeMap: <Map {...iconProps} />,
   ironPlates: <RectangleHorizontal {...iconProps} />,
+  biomassCompressor: <Package {...iconProps} />,
 };
 
 export const statIcons = {

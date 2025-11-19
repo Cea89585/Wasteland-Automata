@@ -5,7 +5,7 @@ export interface Recipe {
   id: string;
   name: string;
   description: string;
-  creates: Item;
+  creates: Item | Resource;
   requirements: Partial<Record<Resource | 'silver', number>>;
   unlockedBy: string[]; // Can be item IDs (e.g., 'workbench') or tech IDs
 }
@@ -90,5 +90,21 @@ export const recipes: Recipe[] = [
     creates: 'ironPlates',
     requirements: { ironIngot: 5, components: 1 },
     unlockedBy: ['furnace'],
+  },
+  {
+    id: 'recipe_biomassCompressor',
+    name: 'Biomass Compressor',
+    description: 'A machine to compress organic matter. Unlocks biomass crafting.',
+    creates: 'biomassCompressor',
+    requirements: { scrap: 75, components: 20, ironIngot: 10 },
+    unlockedBy: ['furnace'],
+  },
+  {
+    id: 'recipe_createBiomass',
+    name: 'Create Biomass',
+    description: 'Compresses organic material into a dense, energy-rich block.',
+    creates: 'biomass',
+    requirements: { mutatedTwigs: 150, wood: 100 },
+    unlockedBy: ['biomassCompressor'],
   },
 ];

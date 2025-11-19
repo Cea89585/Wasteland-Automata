@@ -17,6 +17,7 @@ export const Resources = {
   silver: 'Silver',
   mutatedTwigs: 'Mutated Twigs',
   ironIngot: 'Iron Ingot',
+  biomass: 'Biomass',
 } as const;
 export type Resource = keyof typeof Resources;
 
@@ -34,6 +35,7 @@ export const Items = {
   cookedApple: 'Cooked Apple',
   crudeMap: 'Crude Map',
   ironPlates: 'Iron Plates',
+  biomassCompressor: 'Biomass Compressor',
 } as const;
 export type Item = keyof typeof Items;
 

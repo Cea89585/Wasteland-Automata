@@ -15,6 +15,7 @@ const emptyInventory = {
   silver: 0,
   mutatedTwigs: 0,
   ironIngot: 0,
+  biomass: 0,
   stoneAxe: 0,
   metalDetector: 0,
   workbench: 0,
@@ -28,6 +29,7 @@ const emptyInventory = {
   cookedApple: 0,
   crudeMap: 0,
   ironPlates: 0,
+  biomassCompressor: 0,
 };
 
 export const initialStatistics: Statistics = {

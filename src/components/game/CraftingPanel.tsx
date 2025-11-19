@@ -14,7 +14,7 @@ import { useMemo } from 'react';
 
 export default function CraftingPanel() {
   const { gameState, dispatch } = useGame();
-  const { inventory, unlockedRecipes, unlockedLocations } = gameState;
+  const { inventory, unlockedRecipes, unlockedLocations, builtStructures, inventory: inv } = gameState;
 
   const allLocationsUnlocked = unlockedLocations.length >= locationOrder.length;
 
@@ -45,6 +45,7 @@ export default function CraftingPanel() {
     r.id !== 'recipe_furnace' &&
     r.id !== 'recipe_droneBay' &&
     r.id !== 'recipe_hydroponicsBay' &&
+    !(r.id === 'recipe_biomassCompressor' && inv.biomassCompressor > 0) &&
     !(r.creates === 'crudeMap' && allLocationsUnlocked) // Hide all map recipes if all locations are unlocked
   );
 
