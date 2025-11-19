@@ -1,3 +1,4 @@
+
 // src/contexts/game-context.tsx
 'use client';
 
@@ -1102,7 +1103,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'TRAVEL': {
       const { locationId } = action.payload;
       const newLocation = locations[locationId];
-      if (!newLocation || !state.unlockedLocations.includes(locationId)) return state.log.length > 50;
+      if (!newLocation || !state.unlockedLocations.includes(locationId)) return state;
 
       return {
         ...state,
@@ -1232,6 +1233,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!('lastSavedTimestamp' in migratedState)) {
         migratedState.lastSavedTimestamp = Date.now();
       }
+
+      // == SAVE MIGRATIONS ==
+      if (migratedState.builtStructures.includes('furnace') && !migratedState.unlockedRecipes.includes('recipe_ironPlates')) {
+        migratedState.unlockedRecipes.push('recipe_ironPlates');
+      }
+      // == END SAVE MIGRATIONS ==
+
 
       // Run offline simulation
       migratedState = runOfflineSimulation(migratedState);
