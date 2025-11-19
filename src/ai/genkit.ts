@@ -1,5 +1,4 @@
 // src/ai/genkit.ts
-'use server';
 
 import {genkit, Plugin} from 'genkit';
 import {googleAI, GoogleAIVertexPredictResponse} from '@genkit-ai/google-genai';
