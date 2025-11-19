@@ -103,10 +103,9 @@ export const quests: Quest[] = [
             { type: 'item', item: 'mutatedTwigs', amount: 10 },
         ],
         rewards: [
-            { type: 'silver', amount: 100 },
-            { type: 'item', item: 'crudeMap', amount: 1 },
+            { type: 'silver', amount: 150 },
         ],
-        completionMessage: 'Anya takes the twigs, her eyes alight with scientific curiosity. "Incredible! The cellular structure is unlike anything I\'ve seen. This is a major breakthrough. Your efforts have been invaluable. I\'ve marked a new location on your map I found while scouting, a place filled with old-world scrap. Perhaps you\'ll find it useful."',
+        completionMessage: 'Anya takes the twigs, her eyes alight with scientific curiosity. "Incredible! The cellular structure is unlike anything I\'ve seen. This is a major breakthrough. Your efforts have been invaluable. Please, take this for your troubles."',
         dependsOn: 'quest_silas_3',
     }
 ];

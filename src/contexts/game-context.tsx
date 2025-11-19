@@ -1123,6 +1123,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!migratedState.unlockedRecipes.includes('recipe_crudeMap_forest')) {
         migratedState.unlockedRecipes.push('recipe_crudeMap_forest');
       }
+       if (!migratedState.unlockedRecipes.includes('recipe_crudeMap_tunnels')) {
+        if(migratedState.unlockedLocations.includes('forest')) {
+          migratedState.unlockedRecipes.push('recipe_crudeMap_tunnels');
+        }
+      }
       if (!migratedState.storageLevel) {
           migratedState.storageLevel = 0;
       }

@@ -43,6 +43,14 @@ export const recipes: Recipe[] = [
     requirements: { wood: 10, scrap: 5 },
     unlockedBy: ['start'],
   },
+   {
+    id: 'recipe_crudeMap_tunnels',
+    name: 'Map: Abandoned Subway',
+    description: 'A map to the dark, component-rich subway tunnels.',
+    creates: 'crudeMap',
+    requirements: { scrap: 30, mutatedTwigs: 15 },
+    unlockedBy: ['workbench'],
+  },
   {
     id: 'recipe_cookedApple',
     name: 'Cooked Apple',
