@@ -22,6 +22,7 @@ export default function FurnacePanel() {
   const componentSmeltRequirements = { scrap: 10, wood: 4 };
   const maxComponentSmeltable = useMemo(() => {
     const { scrap, wood } = gameState.inventory;
+    if (!scrap || !wood) return 0;
     return Math.floor(Math.min(scrap / componentSmeltRequirements.scrap, wood / componentSmeltRequirements.wood));
   }, [gameState.inventory]);
   const canSmeltComponent = maxComponentSmeltable >= 1;
@@ -30,6 +31,7 @@ export default function FurnacePanel() {
   const ironSmeltRequirements = { scrap: 20, wood: 10 };
   const maxIronSmeltable = useMemo(() => {
     const { scrap, wood } = gameState.inventory;
+    if (!scrap || !wood) return 0;
     return Math.floor(Math.min(scrap / ironSmeltRequirements.scrap, wood / ironSmeltRequirements.wood));
   }, [gameState.inventory]);
   const canSmeltIron = maxIronSmeltable >= 1;
