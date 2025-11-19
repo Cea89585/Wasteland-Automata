@@ -536,6 +536,40 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
       };
     }
+    
+    case 'CRAFT_ALL': {
+      const { recipeId, amount } = action.payload;
+      const recipe = allRecipes.find((r) => r.id === recipeId);
+      if (!recipe || amount <= 0) return state;
+
+      const newInventory = { ...state.inventory };
+      const INVENTORY_CAP = getInventoryCap();
+      let totalCost: Partial<Record<Resource, number>> = {};
+      
+      for (const [resource, requiredAmount] of Object.entries(recipe.requirements)) {
+        totalCost[resource as Resource] = requiredAmount * amount;
+      }
+
+      for (const [resource, cost] of Object.entries(totalCost)) {
+        if ((newInventory[resource as Resource] || 0) < cost) {
+          return state; // Should not happen if button is disabled correctly
+        }
+        newInventory[resource as Resource] -= cost;
+      }
+      
+      const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, amount, INVENTORY_CAP);
+      
+      const itemDetails = itemData[recipe.creates];
+      const logMessageText = `Batch crafted ${amount} x ${itemDetails.name}.`;
+
+      return {
+        ...state,
+        inventory: finalInventory,
+        statistics: newStatistics,
+        log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
+      }
+    }
+
 
     case 'COMPLETE_QUEST': {
       const { questId } = action.payload;
@@ -840,10 +874,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
     
     case 'START_SMELTING': {
-      const { amount } = action.payload;
       const newInventory = { ...state.inventory };
-      const totalScrapNeeded = 10 * amount;
-      const totalWoodNeeded = 4 * amount;
+      const totalScrapNeeded = 10;
+      const totalWoodNeeded = 4;
 
       if (newInventory.scrap < totalScrapNeeded || newInventory.wood < totalWoodNeeded) {
         return {
@@ -858,8 +891,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       return { 
         ...state, 
         inventory: newInventory,
-        smeltingQueue: state.smeltingQueue + amount,
-        log: [{ id: generateUniqueLogId(), text: `The furnace roars to life... Queued ${amount} batch(es).`, type: 'info', timestamp: Date.now() }, ...state.log],
+        smeltingQueue: state.smeltingQueue + 1,
+        log: [{ id: generateUniqueLogId(), text: `The furnace roars to life...`, type: 'info', timestamp: Date.now() }, ...state.log],
       };
     }
 
@@ -886,10 +919,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'START_SMELTING_IRON': {
-        const { amount } = action.payload;
         const newInventory = { ...state.inventory };
-        const totalScrapNeeded = 20 * amount;
-        const totalWoodNeeded = 10 * amount;
+        const totalScrapNeeded = 20;
+        const totalWoodNeeded = 10;
   
         if (newInventory.scrap < totalScrapNeeded || newInventory.wood < totalWoodNeeded) {
           return {
@@ -904,8 +936,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         return { 
           ...state, 
           inventory: newInventory,
-          ironIngotSmeltingQueue: state.ironIngotSmeltingQueue + amount,
-          log: [{ id: generateUniqueLogId(), text: `The furnace burns hotter... Queued ${amount} iron ingot batch(es).`, type: 'info', timestamp: Date.now() }, ...state.log],
+          ironIngotSmeltingQueue: state.ironIngotSmeltingQueue + 1,
+          log: [{ id: generateUniqueLogId(), text: `The furnace burns hotter...`, type: 'info', timestamp: Date.now() }, ...state.log],
         };
       }
   

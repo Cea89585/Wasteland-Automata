@@ -128,6 +128,7 @@ export type GameAction =
   | { type: 'TRIGGER_ENCOUNTER'; payload: FixedEncounter }
   | { type: 'GATHER'; payload: { resource: Resource; amount: number } }
   | { type: 'CRAFT'; payload: { recipeId: string } }
+  | { type: 'CRAFT_ALL', payload: { recipeId: string; amount: number } }
   | { type: 'BUILD_STRUCTURE'; payload: { recipeId: string } }
   | { type: 'COMPLETE_QUEST'; payload: { questId: string } }
   | { type: 'SELL_ITEM'; payload: { item: Resource, amount: number, price: number } }
@@ -141,9 +142,9 @@ export type GameAction =
   | { type: 'EAT_COOKED_APPLE' }
   | { type: 'START_RESTING' }
   | { type: 'FINISH_RESTING' }
-  | { type: 'START_SMELTING'; payload: { amount: number } }
+  | { type: 'START_SMELTING' }
   | { type: 'FINISH_SMELTING' }
-  | { type: 'START_SMELTING_IRON'; payload: { amount: number } }
+  | { type: 'START_SMELTING_IRON' }
   | { type: 'FINISH_SMELTING_IRON' }
   | { type: 'EQUIP'; payload: { item: Item, slot: EquipmentSlot } }
   | { type: 'UNEQUIP'; payload: { slot: EquipmentSlot } }

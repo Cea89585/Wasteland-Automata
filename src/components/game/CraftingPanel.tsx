@@ -7,10 +7,12 @@ import { recipes as allRecipes } from '@/lib/game-data/recipes';
 import { allIcons, resourceIcons } from './GameIcons';
 import { itemData } from '@/lib/game-data/items';
 import type { Resource } from '@/lib/game-types';
-import { Hammer } from 'lucide-react';
+import { Hammer, PackageCheck } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { locationOrder } from '@/lib/game-types';
 import { useMemo } from 'react';
+import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+
 
 export default function CraftingPanel() {
   const { gameState, dispatch } = useGame();
@@ -50,15 +52,19 @@ export default function CraftingPanel() {
     !(r.creates === 'crudeMap' && allLocationsUnlocked) // Hide all map recipes if all locations are unlocked
   );
 
-  const canCraft = (recipeId: string) => {
+  const calculateMaxCraftable = (recipeId: string) => {
     const recipe = recipes.find(r => r.id === recipeId);
-    if (!recipe) return false;
+    if (!recipe) return 0;
+    
+    let maxCraftable = Infinity;
     for (const [resource, amount] of Object.entries(recipe.requirements)) {
-      if (inventory[resource as keyof typeof inventory] < amount) {
-        return false;
-      }
+        const available = inventory[resource as keyof typeof inventory] || 0;
+        const potential = Math.floor(available / amount);
+        if (potential < maxCraftable) {
+            maxCraftable = potential;
+        }
     }
-    return true;
+    return maxCraftable === Infinity ? 0 : maxCraftable;
   };
   
   const isBusy = gameState.isResting;
@@ -77,11 +83,12 @@ export default function CraftingPanel() {
         ) : (
           <div className="space-y-2">
             {availableRecipes.map(recipe => {
-              const isCraftable = canCraft(recipe.id);
+              const maxCraftable = calculateMaxCraftable(recipe.id);
+              const isCraftable = maxCraftable > 0;
               return (
                 <Card key={recipe.id} className="bg-muted/50">
-                  <CardContent className="p-4 flex items-center justify-between gap-4">
-                    <div className="flex-grow">
+                  <CardContent className="p-4 flex flex-col items-center justify-between gap-4 sm:flex-row">
+                    <div className="flex-grow w-full">
                         <div className="flex items-center font-semibold text-base mb-2">
                           {allIcons[recipe.creates]} {recipe.name}
                         </div>
@@ -97,15 +104,39 @@ export default function CraftingPanel() {
                           </div>
                         </div>
                     </div>
-                    <Button 
-                      size="icon"
-                      variant={isCraftable ? 'default' : 'outline'}
-                      onClick={() => dispatch({ type: 'CRAFT', payload: { recipeId: recipe.id }})} 
-                      disabled={!isCraftable || gameState.playerStats.health <= 0 || isBusy}
-                      aria-label={`Craft ${recipe.name}`}
-                    >
-                      <Hammer className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <Button 
+                            className="flex-1"
+                            variant={isCraftable ? 'default' : 'outline'}
+                            onClick={() => dispatch({ type: 'CRAFT', payload: { recipeId: recipe.id }})} 
+                            disabled={!isCraftable || gameState.playerStats.health <= 0 || isBusy}
+                            aria-label={`Craft ${recipe.name}`}
+                        >
+                            <Hammer className="h-4 w-4" />
+                            Craft
+                        </Button>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="flex-1">
+                                        <Button 
+                                            className="w-full"
+                                            variant="secondary"
+                                            onClick={() => dispatch({ type: 'CRAFT_ALL', payload: { recipeId: recipe.id, amount: maxCraftable }})} 
+                                            disabled={maxCraftable < 2 || gameState.playerStats.health <= 0 || isBusy}
+                                            aria-label={`Craft all ${recipe.name}`}
+                                        >
+                                            <PackageCheck className="h-4 w-4" />
+                                            Craft All ({maxCraftable})
+                                        </Button>
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    {maxCraftable < 2 ? <p>You need enough resources for at least 2 items.</p> : <p>Craft all possible items.</p>}
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </div>
                   </CardContent>
                 </Card>
               )
