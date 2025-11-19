@@ -140,26 +140,41 @@ export default function ExplorationPanel() {
     dispatch({ type: 'CONSUME', payload: { stat: 'energy', amount: 5 } });
 
     setTimeout(() => {
-        let foundApple = false;
+        let foundSomething = false;
         let scavengeText = "You search nearby ruins for supplies...";
 
         // Always find water
         const waterAmount = 1;
         dispatch({ type: 'GATHER', payload: { resource: 'water', amount: waterAmount } });
         scavengeText += ` You found ${waterAmount} ${itemData['water'].name}.`;
+        foundSomething = true;
 
-        // Chance to find an apple
-        if (Math.random() < 0.3) {
-            const appleAmount = 1;
-            dispatch({ type: 'GATHER', payload: { resource: 'apple', amount: appleAmount } });
-            scavengeText += ` You found ${appleAmount} ${itemData['apple'].name}.`;
-            foundApple = true;
+        if (gameState.currentLocation === 'forest') {
+            // In the forest, find bananas and peaches
+            if (Math.random() < 0.3) {
+                const bananaAmount = 1;
+                dispatch({ type: 'GATHER', payload: { resource: 'banana', amount: bananaAmount } });
+                scavengeText += ` You found ${bananaAmount} ${itemData['banana'].name}.`;
+                foundSomething = true;
+            }
+            if (Math.random() < 0.15) {
+                const peachAmount = 1;
+                dispatch({ type: 'GATHER', payload: { resource: 'peach', amount: peachAmount } });
+                scavengeText += ` You found ${peachAmount} ${itemData['peach'].name}.`;
+                foundSomething = true;
+            }
+        } else {
+            // Elsewhere, find apples
+            if (Math.random() < 0.3) {
+                const appleAmount = 1;
+                dispatch({ type: 'GATHER', payload: { resource: 'apple', amount: appleAmount } });
+                scavengeText += ` You found ${appleAmount} ${itemData['apple'].name}.`;
+                foundSomething = true;
+            }
         }
-
-        if (!foundApple) {
-             // This part of the message might be redundant if we always find water,
-             // but we can adjust the text to reflect what was found.
-             // For now, let's keep it simple.
+        
+        if (!foundSomething) {
+             scavengeText += " But you find nothing else of use.";
         }
 
         dispatch({ type: 'ADD_LOG', payload: { text: scavengeText, type: 'info' } });

@@ -40,8 +40,9 @@ export const locations: Record<LocationId, LocationData> = {
     description: 'A dense, overgrown forest with strangely colored flora. The air is thick and humid.',
     resources: [
       { resource: 'wood', min: 3, max: 6, chance: 0.9 },
-      { resource: 'apple', min: 1, max: 2, chance: 0.3 },
       { resource: 'mutatedTwigs', min: 2, max: 5, chance: 0.6 },
+      { resource: 'banana', min: 1, max: 2, chance: 0.2 },
+      { resource: 'peach', min: 1, max: 1, chance: 0.1 },
     ],
     flavorText: [
       'The trees here have an unsettling, almost intelligent look to them.',
