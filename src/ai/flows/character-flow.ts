@@ -1,3 +1,4 @@
+// src/ai/flows/character-flow.ts
 'use server';
 /**
  * @fileOverview A character AI flow for validating names.
@@ -39,30 +40,14 @@ const validateNamePrompt = ai.definePrompt(
   {
     name: 'validateNamePrompt',
     input: { schema: ValidateCharacterNameInputSchema },
-    output: { schema: ValidateCharacterNameOutputSchema },
-    model: 'googleai/gemini-1.5-flash-latest',
     prompt: `You are a content moderator for a family-friendly post-apocalyptic survival game.
 Evaluate the following name for appropriateness. The name should not contain profanity, hate speech, or sexually explicit content.
 
 Name: {{{name}}}
 
-Based on this, is the name allowed?`,
-    config: {
-      // Use safety settings to automatically block harmful content
-      safetySettings: [
-        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-        {
-          category: 'HARM_CATEGORY_DANGEROUS_CONTENT',
-          threshold: 'BLOCK_ONLY_HIGH',
-        },
-        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-        {
-          category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
-          threshold: 'BLOCK_ONLY_HIGH',
-        },
-      ],
-      temperature: 0.1, // Low temperature for consistent moderation
-    },
+Respond with ONLY a valid JSON object in the following format: {"isAllowed": boolean}`,
+    model: 'googleai/gemini-1.5-flash-latest',
+    // Removed config and output to avoid sending responseMimeType
   }
 );
 
@@ -74,7 +59,15 @@ const validateNameFlow = ai.defineFlow(
     outputSchema: ValidateCharacterNameOutputSchema,
   },
   async (input) => {
-    const { output } = await validateNamePrompt(input);
-    return output!;
+    const result = await validateNamePrompt(input);
+    const jsonText = result.text.trim().replace(/```json/g, '').replace(/```/g, '');
+    try {
+        const output = JSON.parse(jsonText);
+        return ValidateCharacterNameOutputSchema.parse(output);
+    } catch(e) {
+        console.error("Failed to parse JSON from model output:", jsonText);
+        // Fallback to a safe default if parsing fails
+        return { isAllowed: false };
+    }
   }
 );
