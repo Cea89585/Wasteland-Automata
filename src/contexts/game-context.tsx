@@ -1152,7 +1152,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const { idleProgress, resetTimer } = useInactivityTimer({
     onIdle: () => dispatch({ type: 'SET_IDLE', payload: true }),
     onActive: () => dispatch({ type: 'SET_IDLE', payload: false }),
-    timeout: 30000,
+    timeout: 37000,
   });
 
   useEffect(() => {
