@@ -10,7 +10,7 @@ import { locations } from '@/lib/game-data/locations';
 import { Loader2, Compass, Search, Bed, Map, Apple } from 'lucide-react';
 import { itemData } from '@/lib/game-data/items';
 import { Progress } from '../ui/progress';
-import { positiveEncounters, negativeEncounters } from '@/lib/game-data/encounters';
+import { encounters } from '@/lib/game-data/encounters';
 import type { FixedEncounter } from '@/lib/game-data/encounters';
 import {
   Dialog,
@@ -61,12 +61,15 @@ export default function ExplorationPanel() {
   }, [restingProgress, finishResting]);
 
   const handleFixedEncounter = () => {
+    const locationEncounters = encounters[gameState.currentLocation];
+    if (!locationEncounters) return; // Should not happen
+
     if (Math.random() < 0.5) { // 50% chance for a positive encounter
-        const encounter = positiveEncounters[Math.floor(Math.random() * positiveEncounters.length)];
+        const encounter = locationEncounters.positive[Math.floor(Math.random() * locationEncounters.positive.length)];
         dispatch({ type: 'TRIGGER_ENCOUNTER', payload: encounter });
     } else { // 50% chance for a negative encounter
         // Filter for negative encounters where the player actually has the item to lose
-        const validNegativeEncounters = negativeEncounters.filter(enc => {
+        const validNegativeEncounters = locationEncounters.negative.filter(enc => {
             if (enc.penalty.type === 'health' || enc.penalty.type === 'stoneAxe') return true;
             return inventory[enc.penalty.type as Resource] > 0;
         });
