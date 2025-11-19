@@ -1,5 +1,6 @@
 // src/lib/game-data/initial-state.ts
 import type { GameState, Statistics, LocationId } from '@/lib/game-types';
+import { xpCurve } from './xp-curve';
 
 const emptyInventory = {
   wood: 0,
@@ -47,7 +48,7 @@ export const initialState: Omit<GameState, 'statistics'> = {
   characterName: 'Survivor',
   level: 1,
   xp: 0,
-  xpToNextLevel: 100,
+  xpToNextLevel: xpCurve[0],
   upgradePoints: 0,
   playerStats: {
     health: 100,

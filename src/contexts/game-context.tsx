@@ -10,6 +10,7 @@ import { locations } from '@/lib/game-data/locations';
 import { useInactivityTimer } from '@/hooks/use-inactivity-timer';
 import { locationOrder } from '@/lib/game-types';
 import { quests } from '@/lib/game-data/quests';
+import { xpCurve } from '@/lib/game-data/xp-curve';
 
 
 const SAVE_KEY = 'wastelandAutomata_save';
@@ -176,8 +177,12 @@ const generateUniqueLogId = () => {
     return Date.now() + logIdCounter++;
 };
 
-const xpForNextLevel = (level: number) => {
-    return Math.floor(100 * Math.pow(1.5, level - 1));
+const xpForNextLevel = (level: number): number => {
+    if (level <= 1) return xpCurve[0]; // Level 2 requirement
+    if (level > xpCurve.length) return Infinity; // Max level reached
+    const cumulativeXpForCurrentLevel = xpCurve[level - 2] || 0;
+    const cumulativeXpForNextLevel = xpCurve[level - 1];
+    return cumulativeXpForNextLevel - cumulativeXpForCurrentLevel;
 }
 
 const reducer = (state: GameState, action: GameAction): GameState => {
@@ -218,7 +223,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         let newUpgradePoints = state.upgradePoints;
         let newLog = [...state.log];
 
-        while (newXp >= newXpToNextLevel) {
+        while (newXp >= newXpToNextLevel && newLevel < 100) {
             newXp -= newXpToNextLevel;
             newLevel++;
             newUpgradePoints++;
@@ -972,7 +977,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         };
     }
 
-    case 'START_SMELting_all': {
+    case 'START_SMELTING_ALL': {
         const { type, amount } = action.payload;
         if (amount <= 0) return state;
 
@@ -999,7 +1004,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             const totalWoodNeeded = 5 * amount;
             if (newInventory.wood < totalWoodNeeded) return state;
             newInventory.wood -= totalWoodNeeded;
-            logText = `Queued ${amount} charcoal for smelting.`;
+            logText = `Queued ${amount} charcoal for making.`;
             return { ...state, inventory: newInventory, charcoalSmeltingQueue: state.charcoalSmeltingQueue + amount, log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log] }
         }
         return state;
@@ -1408,7 +1413,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!migratedState.characterName) migratedState.characterName = 'Survivor';
       if (!migratedState.level) migratedState.level = 1;
       if (!migratedState.xp) migratedState.xp = 0;
-      if (!migratedState.xpToNextLevel) migratedState.xpToNextLevel = 100;
+      
+      migratedState.xpToNextLevel = xpForNextLevel(migratedState.level);
+
       if (!migratedState.upgradePoints) migratedState.upgradePoints = 0;
 
 
