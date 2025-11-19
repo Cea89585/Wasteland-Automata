@@ -78,5 +78,20 @@ export const quests: Quest[] = [
         ],
         completionMessage: 'He takes the component, turning it over in his hand. "See? From useless junk to the heart of a machine. This is how we rebuild. You\'re starting to think long-term. Keep this up. Here\'s some more scrap, put it to good use."',
         dependsOn: 'quest_silas_2',
+    },
+    {
+        id: 'quest_elara_1',
+        title: 'A Hoarder\'s Offer',
+        npc: 'Elara, the Hoarder',
+        description: 'A woman named Elara peeks out from behind a mountain of salvaged goods. "You look like you could use a leg up," she says, her eyes gleaming. "I have more of these shiny bits than I know what to do with. You look hungry. And thirsty. Bring me some simple provisions, and I\'ll make it worth your while. A fair trade."',
+        requirements: [
+            { type: 'item', item: 'apple', amount: 5 },
+            { type: 'item', item: 'water', amount: 5 },
+            { type: 'item', item: 'stone', amount: 30 }
+        ],
+        rewards: [
+            { type: 'item', item: 'components', amount: 5 }
+        ],
+        completionMessage: 'Elara snatches the resources and hands you a small, heavy pouch. "A pleasure doing business. These components are top-notch... probably. Now, if you\'ll excuse me, I have... inventory to sort."',
     }
 ];

@@ -6,7 +6,7 @@ import { useGame } from '@/hooks/use-game';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { locations } from '@/lib/game-data/locations';
-import { Loader2, Compass, Search, Bed, Map } from 'lucide-react';
+import { Loader2, Compass, Search, Bed, Map, Apple } from 'lucide-react';
 import { itemData } from '@/lib/game-data/items';
 import { Progress } from '../ui/progress';
 import { positiveEncounters, negativeEncounters } from '@/lib/game-data/encounters';
@@ -28,7 +28,7 @@ export default function ExplorationPanel() {
   const [restingProgress, setRestingProgress] = useState(0);
 
   const currentLocation = locations[gameState.currentLocation];
-  const { equipment, unlockedLocations } = gameState;
+  const { equipment, unlockedLocations, inventory } = gameState;
 
   const finishResting = useCallback(() => {
     dispatch({ type: 'FINISH_RESTING' });
@@ -40,7 +40,7 @@ export default function ExplorationPanel() {
     let interval: NodeJS.Timeout | undefined;
     if (gameState.isResting) {
       interval = setInterval(() => {
-        setRestingProgress(prev => prev + (100 / 20));
+        setRestingProgress(prev => prev + (100 / 37));
       }, 1000);
     }
     return () => {
@@ -173,12 +173,19 @@ export default function ExplorationPanel() {
     setRestingProgress(0);
     dispatch({ type: 'ADD_LOG', payload: { text: "You find a relatively safe spot to rest your eyes for a moment...", type: 'info' } });
   };
+  
+  const handleEat = () => {
+    if (inventory.apple > 0) {
+      dispatch({ type: 'EAT' });
+    }
+  };
 
   const handleTravel = (locationId: LocationId) => {
     dispatch({ type: 'TRAVEL', payload: { locationId } });
   }
   
   const isBusy = isExploring || isScavenging || gameState.isResting || gameState.smeltingQueue > 0 || gameState.droneIsActive;
+  const isDead = gameState.playerStats.health <= 0;
   
   return (
     <Card>
@@ -189,7 +196,7 @@ export default function ExplorationPanel() {
       <CardContent className="flex flex-col gap-4">
         {gameState.builtStructures.includes('droneBay') && <DronePanel />}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-            <Button onClick={handleExplore} disabled={isBusy || gameState.playerStats.health <= 0} className="flex-1">
+            <Button onClick={handleExplore} disabled={isBusy || isDead} className="flex-1">
               {isExploring ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -197,7 +204,7 @@ export default function ExplorationPanel() {
               )}
               {isExploring ? 'Exploring...' : 'Explore (10 Energy)'}
             </Button>
-            <Button variant="secondary" onClick={handleScavenge} disabled={isBusy || gameState.playerStats.health <= 0} className="flex-1">
+            <Button variant="secondary" onClick={handleScavenge} disabled={isBusy || isDead} className="flex-1">
               {isScavenging ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -205,7 +212,7 @@ export default function ExplorationPanel() {
               )}
               {isScavenging ? 'Scavenging...' : 'Scavenge (5 Energy)'}
             </Button>
-            <Button variant="outline" onClick={handleRest} disabled={isBusy || gameState.playerStats.health <= 0} className="flex-1">
+            <Button variant="outline" onClick={handleRest} disabled={isBusy || isDead} className="flex-1">
               {gameState.isResting ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
@@ -214,35 +221,42 @@ export default function ExplorationPanel() {
               {gameState.isResting ? 'Resting...' : 'Rest'}
             </Button>
         </div>
-        {unlockedLocations.length > 1 && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" disabled={isBusy || gameState.playerStats.health <= 0} className="w-full">
-                  <Map className="mr-2 h-4 w-4" /> Travel
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                  <DialogTitle>Travel to a new location</DialogTitle>
-              </DialogHeader>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
-                  {unlockedLocations.map(locationId => {
-                    const location = locations[locationId];
-                    return (
-                        <Button 
-                            key={location.id}
-                            variant={currentLocation.id === location.id ? 'default' : 'secondary'}
-                            onClick={() => handleTravel(location.id)}
-                            disabled={currentLocation.id === location.id}
-                        >
-                            {location.name}
-                        </Button>
-                    )
-                  })}
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
+        <div className="flex items-center gap-2">
+            {unlockedLocations.length > 1 && (
+            <Dialog>
+                <DialogTrigger asChild>
+                <Button variant="outline" disabled={isBusy || isDead} className="w-full">
+                    <Map className="mr-2 h-4 w-4" /> Travel
+                </Button>
+                </DialogTrigger>
+                <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Travel to a new location</DialogTitle>
+                </DialogHeader>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
+                    {unlockedLocations.map(locationId => {
+                        const location = locations[locationId];
+                        return (
+                            <Button 
+                                key={location.id}
+                                variant={currentLocation.id === location.id ? 'default' : 'secondary'}
+                                onClick={() => handleTravel(location.id)}
+                                disabled={currentLocation.id === location.id}
+                            >
+                                {location.name}
+                            </Button>
+                        )
+                    })}
+                </div>
+                </DialogContent>
+            </Dialog>
+            )}
+            {inventory.apple > 0 && (
+                <Button size="icon" variant="outline" onClick={handleEat} disabled={isDead || inventory.apple === 0 || isBusy} aria-label={`Eat apple (${inventory.apple})`}>
+                    <Apple className="h-4 w-4" />
+                </Button>
+            )}
+        </div>
 
         {gameState.isResting && (
           <div className="flex flex-col gap-2">

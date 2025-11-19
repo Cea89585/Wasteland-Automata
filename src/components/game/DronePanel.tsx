@@ -2,12 +2,13 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useGame } from '@/hooks/use-game';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Bot, Loader2, Apple, GlassWater } from 'lucide-react';
+import { Bot, Loader2 } from 'lucide-react';
 import { Progress } from '../ui/progress';
 import { resourceIcons } from './GameIcons';
 import { itemData } from '@/lib/game-data/items';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 const MISSION_DURATION = 30; // seconds
 
@@ -45,41 +46,25 @@ export default function DronePanel() {
     dispatch({ type: 'SEND_DRONE' });
   };
 
-  return (
-    <Card className="bg-muted/50">
-        <CardHeader>
-            <CardTitle className="flex items-center text-xl">
-                <Bot className="mr-2 h-6 w-6" /> Scavenger Drone
-            </CardTitle>
-            <CardDescription>
-                Send a drone on a {MISSION_DURATION}s mission to collect resources.
-            </CardDescription>
-        </CardHeader>
-        <CardContent>
-            <div className="flex flex-col gap-2 text-sm my-2 items-start mx-auto">
-                <span className="font-semibold text-muted-foreground self-center">Mission Cost:</span>
-                <div className="flex flex-wrap gap-x-4 gap-y-2 justify-center w-full">
-                    <span className="flex items-center">
-                        {resourceIcons['apple']}
-                        {itemData['apple'].name}: {missionRequirements.apple}
-                    </span>
-                    <span className="flex items-center">
-                        {resourceIcons['water']}
-                        {itemData['water'].name}: {missionRequirements.water}
-                    </span>
-                </div>
-            </div>
-
-            {gameState.droneIsActive ? (
-                <div className="flex flex-col gap-2 mt-4">
-                    <p className="text-sm text-muted-foreground text-center flex items-center justify-center">
+  const droneStatusNode = () => {
+      if (gameState.droneIsActive) {
+          return (
+              <div className="flex flex-col gap-2 w-full">
+                <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted-foreground flex items-center">
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Drone exploring...
+                        Exploring...
                     </p>
-                    <Progress value={progress} className="w-full" />
+                    <span className="text-xs font-mono text-muted-foreground">{Math.round(progress)}%</span>
                 </div>
-            ) : (
-                <div className="flex justify-center items-center gap-2 mt-4">
+                <Progress value={progress} className="w-full h-2" />
+            </div>
+          )
+      }
+      return (
+        <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
                     <Button
                         onClick={handleSendDrone}
                         disabled={!canSend || isBusy || gameState.playerStats.health <= 0}
@@ -89,8 +74,34 @@ export default function DronePanel() {
                         <Bot className="mr-2 h-4 w-4" />
                         Send Drone
                     </Button>
-                </div>
-            )}
+                </TooltipTrigger>
+                <TooltipContent>
+                    <div className="flex flex-col gap-1 text-sm items-start">
+                        <span>Send a drone on a {MISSION_DURATION}s mission.</span>
+                        <span className="font-semibold text-muted-foreground">Mission Cost:</span>
+                        <div className="flex flex-wrap gap-x-4 gap-y-1">
+                            <span className="flex items-center">
+                                {resourceIcons['apple']}
+                                {itemData['apple'].name}: {missionRequirements.apple}
+                            </span>
+                            <span className="flex items-center">
+                                {resourceIcons['water']}
+                                {itemData['water'].name}: {missionRequirements.water}
+                            </span>
+                        </div>
+                    </div>
+                </TooltipContent>
+            </Tooltip>
+        </TooltipProvider>
+      )
+  }
+
+  return (
+    <Card className="bg-muted/50">
+        <CardContent className="p-2">
+            <div className="flex items-center justify-center gap-4">
+                {droneStatusNode()}
+            </div>
       </CardContent>
     </Card>
   );
