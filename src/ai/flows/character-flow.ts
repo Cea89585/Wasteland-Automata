@@ -15,18 +15,14 @@ import { z } from 'genkit';
 const ValidateCharacterNameInputSchema = z.object({
   name: z.string().describe('The name to validate.'),
 });
-export type ValidateCharacterNameInput = z.infer<
-  typeof ValidateCharacterNameInputSchema
->;
+export type ValidateCharacterNameInput = z.infer<typeof ValidateCharacterNameInputSchema>;
 
 const ValidateCharacterNameOutputSchema = z.object({
   isAllowed: z
     .boolean()
     .describe('Whether the name is appropriate for a general audience.'),
 });
-export type ValidateCharacterNameOutput = z.infer<
-  typeof ValidateCharacterNameOutputSchema
->;
+export type ValidateCharacterNameOutput = z.infer<typeof ValidateCharacterNameOutputSchema>;
 
 // Main exported validation function
 export async function validateCharacterName(
@@ -36,20 +32,21 @@ export async function validateCharacterName(
 }
 
 // Prompt definition for validation
-const validateNamePrompt = ai.definePrompt(
-  {
-    name: 'validateNamePrompt',
-    input: { schema: ValidateCharacterNameInputSchema },
-    prompt: `You are a content moderator for a family-friendly post-apocalyptic survival game.
-Evaluate the following name for appropriateness. The name should not contain profanity, hate speech, or sexually explicit content.
+const validateNamePrompt = ai.definePrompt({
+  name: 'validateNamePrompt',
+  input: { schema: ValidateCharacterNameInputSchema },
+  prompt: `
+You are a content moderator for a family-friendly post-apocalyptic survival game.
+Evaluate the following name for appropriateness. The name should not contain profanity,
+hate speech, or sexually explicit content.
 
 Name: {{{name}}}
 
-Respond with ONLY a valid JSON object in the following format: {"isAllowed": boolean}`,
-    model: 'googleai/gemini-1.5-flash-latest',
-    // Removed config and output to avoid sending responseMimeType
-  }
-);
+Respond with ONLY a valid JSON object in the following format:
+{"isAllowed": boolean}
+  `,
+  model: 'googleai/gemini-1.5-flash', // Corrected model ID
+});
 
 // Flow definition for validation
 const validateNameFlow = ai.defineFlow(
@@ -60,14 +57,19 @@ const validateNameFlow = ai.defineFlow(
   },
   async (input) => {
     const result = await validateNamePrompt(input);
-    const jsonText = result.text.trim().replace(/```json/g, '').replace(/```/g, '');
+
+    // Clean up the model output (removes code blocks)
+    const jsonText = result.text.trim()
+      .replace(/```json/gi, '')
+      .replace(/```/g, '');
+
     try {
-        const output = JSON.parse(jsonText);
-        return ValidateCharacterNameOutputSchema.parse(output);
-    } catch(e) {
-        console.error("Failed to parse JSON from model output:", jsonText);
-        // Fallback to a safe default if parsing fails
-        return { isAllowed: false };
+      const output = JSON.parse(jsonText);
+      return ValidateCharacterNameOutputSchema.parse(output);
+    } catch (e) {
+      console.error('Failed to parse JSON from model output:', jsonText);
+      // Safe fallback so bad output never crashes the flow
+      return { isAllowed: false };
     }
   }
 );
