@@ -1,4 +1,3 @@
-
 // src/contexts/game-context.tsx
 'use client';
 
@@ -450,7 +449,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
 
       // Handle map crafting as a special case for unlocking locations
-      if (recipe.id === 'recipe_crudeMap') {
+      if (recipe.creates === 'crudeMap') {
         const lastUnlockedIndex = locationOrder.indexOf(state.unlockedLocations[state.unlockedLocations.length - 1]);
         const nextLocationIndex = lastUnlockedIndex + 1;
 
@@ -458,14 +457,21 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           const nextLocationId = locationOrder[nextLocationIndex];
           const newUnlockedLocations = [...state.unlockedLocations, nextLocationId];
           const logMessageText = `You piece together a crude map, revealing the way to the ${locations[nextLocationId].name}.`;
+          
+          const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, 1, INVENTORY_CAP);
+          
+          // Remove the recipe that was just used to craft the map
+          const newUnlockedRecipes = state.unlockedRecipes.filter(id => id !== recipe.id);
+
           return {
             ...state,
-            inventory: newInventory,
+            inventory: finalInventory,
+            statistics: newStatistics,
+            unlockedRecipes: newUnlockedRecipes,
             unlockedLocations: newUnlockedLocations,
             log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
           };
         } else {
-          // All locations unlocked, maybe just give the item back or a message
            return {
               ...state,
               log: [{ id: generateUniqueLogId(), text: "You've already mapped every known area.", type: 'info', timestamp: Date.now() }, ...state.log],
@@ -541,13 +547,23 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
       
       let rewardLog = '';
+      let newState = { ...state };
 
       // Grant rewards
       for (const reward of quest.rewards) {
         if (reward.type === 'item') {
-           const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(newInventory, newStatistics, reward.item, reward.amount, INVENTORY_CAP);
-            newInventory = updatedInventory;
-            newStatistics = updatedStatistics;
+           if(reward.item === 'crudeMap') {
+              const lastUnlockedIndex = locationOrder.indexOf(newState.unlockedLocations[newState.unlockedLocations.length - 1]);
+              const nextLocationIndex = lastUnlockedIndex + 1;
+              if (nextLocationIndex < locationOrder.length) {
+                const nextLocationId = locationOrder[nextLocationIndex];
+                newState.unlockedLocations = [...newState.unlockedLocations, nextLocationId];
+              }
+           } else {
+             const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(newInventory, newStatistics, reward.item, reward.amount, INVENTORY_CAP);
+              newInventory = updatedInventory;
+              newStatistics = updatedStatistics;
+           }
             rewardLog += `${reward.amount} ${itemData[reward.item].name}`;
         } else if (reward.type === 'silver') {
             newInventory.silver += reward.amount;
@@ -559,7 +575,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const newCompletedQuests = [...state.completedQuests, questId];
       
       return {
-        ...state,
+        ...newState,
         inventory: newInventory,
         statistics: newStatistics,
         completedQuests: newCompletedQuests,
@@ -1104,6 +1120,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!migratedState.unlockedLocations) {
         migratedState.unlockedLocations = ['outskirts'];
       }
+      if (!migratedState.unlockedRecipes.includes('recipe_crudeMap_forest')) {
+        migratedState.unlockedRecipes.push('recipe_crudeMap_forest');
+      }
       if (!migratedState.storageLevel) {
           migratedState.storageLevel = 0;
       }
@@ -1124,6 +1143,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
       if (!migratedState.completedQuests) {
         migratedState.completedQuests = [];
+      }
+      if (!migratedState.inventory.mutatedTwigs) {
+        migratedState.inventory.mutatedTwigs = 0;
       }
       if (!migratedState.theme) {
         migratedState.theme = 'dark';

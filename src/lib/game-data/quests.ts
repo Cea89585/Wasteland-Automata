@@ -93,5 +93,20 @@ export const quests: Quest[] = [
             { type: 'item', item: 'components', amount: 5 }
         ],
         completionMessage: 'Elara snatches the resources and hands you a small, heavy pouch. "A pleasure doing business. These components are top-notch... probably. Now, if you\'ll excuse me, I have... inventory to sort."',
+    },
+    {
+        id: 'quest_anya_1',
+        title: 'Forest Specimen',
+        npc: 'Anya, the Botanist',
+        description: 'A woman with dirt-stained hands and analytical eyes approaches you. "I\'ve seen you exploring. I\'m Anya. The flora in that forest... it\'s changing. Fascinating! I need samples. Bring me some of those strangely glowing mutated twigs. I need to understand what\'s happening."',
+        requirements: [
+            { type: 'item', item: 'mutatedTwigs', amount: 10 },
+        ],
+        rewards: [
+            { type: 'silver', amount: 100 },
+            { type: 'item', item: 'crudeMap', amount: 1 },
+        ],
+        completionMessage: 'Anya takes the twigs, her eyes alight with scientific curiosity. "Incredible! The cellular structure is unlike anything I\'ve seen. This is a major breakthrough. Your efforts have been invaluable. I\'ve marked a new location on your map I found while scouting, a place filled with old-world scrap. Perhaps you\'ll find it useful."',
+        dependsOn: 'quest_silas_3',
     }
 ];

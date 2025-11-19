@@ -41,10 +41,12 @@ export const locations: Record<LocationId, LocationData> = {
     resources: [
       { resource: 'wood', min: 3, max: 6, chance: 0.9 },
       { resource: 'apple', min: 1, max: 2, chance: 0.3 },
+      { resource: 'mutatedTwigs', min: 2, max: 5, chance: 0.6 },
     ],
     flavorText: [
       'The trees here have an unsettling, almost intelligent look to them.',
       'You hear a strange rustling in the undergrowth nearby.',
+      'A bizarre, glowing fungus illuminates a small patch of the forest floor.',
     ],
   },
   tunnels: {

@@ -1,4 +1,3 @@
-
 // src/components/game/GameUI.tsx
 'use client';
 
@@ -20,7 +19,7 @@ import MarketPanel from './MarketPanel';
 import IdleTimer from './IdleTimer';
 import CommunityPanel from './CommunityPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Backpack, Compass, Hammer, Home, BookOpen, User, Power, AlertTriangle, Coins, Settings, Users, Quests } from 'lucide-react';
+import { Backpack, Compass, Hammer, Home, BookOpen, User, Power, AlertTriangle, Coins, Settings, Users } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,7 +28,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
   Select,

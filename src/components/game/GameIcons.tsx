@@ -30,6 +30,7 @@ import {
   Heart,
   Map,
   Sprout,
+  Leaf,
 } from 'lucide-react';
 import type { Resource, Item } from '@/lib/game-types';
 
@@ -51,6 +52,7 @@ export const resourceIcons: Record<Resource, React.ReactElement<LucideProps>> = 
   banana: <Banana {...iconProps} />,
   peach: <Grape {...iconProps} />,
   silver: <Coins {...iconProps} className="text-yellow-500" />,
+  mutatedTwigs: <Leaf {...iconProps} />,
 };
 
 export const itemIcons: Record<Item, React.ReactElement<LucideProps>> = {

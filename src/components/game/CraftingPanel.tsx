@@ -25,7 +25,7 @@ export default function CraftingPanel() {
     r.id !== 'recipe_furnace' &&
     r.id !== 'recipe_droneBay' &&
     r.id !== 'recipe_hydroponicsBay' &&
-    !(r.id === 'recipe_crudeMap' && allLocationsUnlocked) // Hide map if all locations are unlocked
+    !(r.creates === 'crudeMap' && allLocationsUnlocked) // Hide all map recipes if all locations are unlocked
   );
 
   const canCraft = (recipeId: string) => {

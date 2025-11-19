@@ -14,7 +14,8 @@ export const Resources = {
   lemon: 'Lemon',
   banana: 'Banana',
   peach: 'Peach',
-  silver: 'Silver'
+  silver: 'Silver',
+  mutatedTwigs: 'Mutated Twigs',
 } as const;
 export type Resource = keyof typeof Resources;
 

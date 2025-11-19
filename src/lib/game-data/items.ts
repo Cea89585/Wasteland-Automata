@@ -14,6 +14,7 @@ export const itemData: Record<Resource | Item, { name: string; description: stri
   banana: { name: Resources.banana, description: 'A yellow fruit.', sellPrice: 5 },
   peach: { name: Resources.peach, description: 'A fuzzy fruit.', sellPrice: 5 },
   silver: { name: Resources.silver, description: 'An old-world currency, still valued by traders.' },
+  mutatedTwigs: { name: Resources.mutatedTwigs, description: 'Flexible, oddly colored twigs from the mutated forest. They hum with a faint energy.', sellPrice: 8 },
 
 
   // Crafted Items
