@@ -28,7 +28,7 @@ const NameEditor = () => {
     }, [characterName]);
 
     const handleSave = () => {
-        if (name.length < 3 || name.length > 25) {
+        if (name.trim().length < 3 || name.trim().length > 25) {
             toast({ variant: 'destructive', title: 'Invalid Name', description: 'Name must be between 3 and 25 characters.' });
             return;
         }
@@ -39,8 +39,11 @@ const NameEditor = () => {
             return;
         }
 
-        // Basic check for naughty words, now case-insensitive
-        const isProfane = filter.en.some(word => name.toLowerCase().includes(word.toLowerCase()));
+        // Remove spaces for profanity check
+        const sanitizedName = name.replace(/\s+/g, '').toLowerCase();
+
+        // Check for naughty words
+        const isProfane = filter.en.some(word => sanitizedName.includes(word.toLowerCase()));
 
         if (isProfane) {
             toast({ variant: 'destructive', title: 'Name Not Allowed', description: 'Please choose a more appropriate name.' });
@@ -68,7 +71,7 @@ const NameEditor = () => {
                     </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button onClick={handleSave} disabled={name === characterName}>
+                    <Button onClick={handleSave} disabled={name.trim() === characterName}>
                         <Save className="mr-2" />
                         Save
                     </Button>
