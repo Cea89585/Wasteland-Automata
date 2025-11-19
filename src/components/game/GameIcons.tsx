@@ -1,7 +1,7 @@
 // src/components/game/GameIcons.tsx
 import {
   Trees,
-  Gem,
+  Disc,
   Wrench,
   Apple,
   GlassWater,
@@ -42,7 +42,7 @@ const iconProps: LucideProps = {
 
 export const resourceIcons: Record<Resource, React.ReactElement<LucideProps>> = {
   wood: <Trees {...iconProps} />,
-  stone: <Gem {...iconProps} />,
+  stone: <Disc {...iconProps} />,
   scrap: <Wrench {...iconProps} />,
   apple: <Apple {...iconProps} />,
   water: <GlassWater {...iconProps} />,
