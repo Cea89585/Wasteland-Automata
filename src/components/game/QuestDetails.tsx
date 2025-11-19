@@ -1,3 +1,4 @@
+
 // src/components/game/QuestDetails.tsx
 'use client';
 
@@ -8,23 +9,26 @@ import { ArrowLeft, Check } from 'lucide-react';
 import type { Quest } from '@/lib/game-data/quests';
 import { itemData } from '@/lib/game-data/items';
 import { allIcons } from './GameIcons';
+import { quests } from '@/lib/game-data/quests';
 
 interface QuestDetailsProps {
     quest: Quest;
     onBack: () => void;
 }
 
-export default function QuestDetails({ quest, onBack }: QuestDetailsProps) {
+export default function QuestDetails({ quest: questProp, onBack }: QuestDetailsProps) {
     const { gameState, dispatch } = useGame();
     const { inventory, completedQuests, playerStats, isResting, smeltingQueue, builtStructures } = gameState;
     const isBusy = isResting || smeltingQueue > 0;
     const isDead = playerStats.health <= 0;
 
     const canComplete = (questId: string) => {
-        const quest = gameState.completedQuests.includes(questId) ? null : quest;
-        if (!quest) return false;
+        const questToComplete = quests.find(q => q.id === questId);
+        if (!questToComplete || completedQuests.includes(questId)) {
+            return false;
+        }
 
-        for (const req of quest.requirements) {
+        for (const req of questToComplete.requirements) {
             if (req.type === 'item') {
                 if ((inventory[req.item] || 0) < req.amount) {
                     return false;
@@ -42,6 +46,8 @@ export default function QuestDetails({ quest, onBack }: QuestDetailsProps) {
         dispatch({ type: 'COMPLETE_QUEST', payload: { questId } });
         onBack(); // Go back to the list after completing
     }
+
+    const quest = questProp;
 
     return (
         <div className="space-y-4">
