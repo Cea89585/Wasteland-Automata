@@ -197,6 +197,10 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       return state;
     }
 
+    case 'SET_CHARACTER_NAME': {
+        return { ...state, characterName: action.payload };
+    }
+
     case 'GAME_TICK': {
       let currentState = { ...state };
       const logMessages: LogMessage[] = [];
@@ -1269,6 +1273,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!migratedState.droneMissionQueue) migratedState.droneMissionQueue = 0;
       if (!migratedState.theme) migratedState.theme = 'dark';
       if (!('lastSavedTimestamp' in migratedState)) migratedState.lastSavedTimestamp = Date.now();
+      if (!migratedState.characterName) migratedState.characterName = 'Survivor';
 
       if (migratedState.builtStructures.includes('furnace') && !migratedState.unlockedRecipes.includes('recipe_ironPlates')) {
         migratedState.unlockedRecipes.push('recipe_ironPlates');

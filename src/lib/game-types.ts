@@ -84,6 +84,7 @@ export type Equipment = Partial<Record<EquipmentSlot, Item | null>>;
 export type Theme = 'light' | 'dark' | 'system';
 
 export interface GameState {
+  characterName: string;
   playerStats: PlayerStats;
   inventory: Inventory;
   equipment: Equipment;
@@ -120,6 +121,7 @@ export interface GameState {
 export type GameAction =
   | { type: 'INITIALIZE'; payload: { gameState: Omit<GameState, 'statistics'>, statistics: Statistics } }
   | { type: 'RESET_GAME' }
+  | { type: 'SET_CHARACTER_NAME'; payload: string }
   | { type: 'GAME_TICK' }
   | { type: 'SET_IDLE', payload: boolean }
   | { type: 'TRACK_STAT'; payload: { stat: keyof Pick<Statistics, 'timesExplored' | 'timesScavenged'> } }

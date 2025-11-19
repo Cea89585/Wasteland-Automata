@@ -43,6 +43,7 @@ export const initialStatistics: Statistics = {
 
 
 export const initialState: Omit<GameState, 'statistics'> = {
+  characterName: 'Survivor',
   playerStats: {
     health: 100,
     hunger: 100,

@@ -6,9 +6,86 @@ import { itemData } from '@/lib/game-data/items';
 import { allIcons } from './GameIcons';
 import type { EquipmentSlot, Item } from '@/lib/game-types';
 import { Button } from '../ui/button';
-import { Shirt, Hand, PersonStanding, Map } from 'lucide-react';
+import { Shirt, Hand, PersonStanding, Map, Edit, Save, RefreshCw, Loader2 } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { locations } from '@/lib/game-data/locations';
+import { useState, useEffect } from 'react';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
+import { generateCharacterName, validateCharacterName } from '@/ai/flows/character-flow';
+
+
+const NameEditor = () => {
+    const { gameState, dispatch } = useGame();
+    const { characterName } = gameState;
+    const [name, setName] = useState(characterName);
+    const [isEditing, setIsEditing] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const { toast } = useToast();
+
+    useEffect(() => {
+        setName(characterName);
+    }, [characterName]);
+
+    const handleSave = async () => {
+        setIsLoading(true);
+        try {
+            const validation = await validateCharacterName(name);
+            if (validation.isValid) {
+                dispatch({ type: 'SET_CHARACTER_NAME', payload: name });
+                setIsEditing(false);
+                toast({ title: 'Name Updated', description: `You are now known as ${name}.` });
+            } else {
+                toast({ variant: 'destructive', title: 'Invalid Name', description: validation.reason });
+            }
+        } catch (error) {
+            console.error(error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not validate name.' });
+        }
+        setIsLoading(false);
+    };
+
+    const handleRandomize = async () => {
+        setIsLoading(true);
+        try {
+            const newName = await generateCharacterName();
+            setName(newName);
+        } catch (error) {
+            console.error(error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not generate a name.' });
+        }
+        setIsLoading(false);
+    };
+
+    if (isEditing) {
+        return (
+            <div className="flex flex-col items-center gap-2">
+                <div className="flex items-center gap-2 w-full">
+                    <Input value={name} onChange={(e) => setName(e.target.value)} disabled={isLoading} />
+                    <Button size="icon" onClick={handleRandomize} disabled={isLoading}>
+                        {isLoading ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+                    </Button>
+                </div>
+                <div className="flex items-center gap-2">
+                    <Button onClick={handleSave} disabled={isLoading || name === characterName}>
+                        {isLoading ? <Loader2 className="animate-spin mr-2" /> : <Save className="mr-2" />}
+                        Save
+                    </Button>
+                    <Button variant="ghost" onClick={() => setIsEditing(false)} disabled={isLoading}>Cancel</Button>
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <div className="flex items-center gap-2">
+            <h2 className="text-2xl font-bold text-primary">{characterName}</h2>
+            <Button variant="ghost" size="icon" onClick={() => setIsEditing(true)}>
+                <Edit />
+            </Button>
+        </div>
+    )
+}
 
 const slotIcons: Record<EquipmentSlot, React.ReactElement> = {
     hand: <Hand className="h-6 w-6 text-muted-foreground" />,
@@ -40,9 +117,11 @@ export default function CharacterPanel() {
         <CardDescription>Equip items to gain bonuses and abilities.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center gap-4">
             <PersonStanding className="h-24 w-24 text-primary/50" />
+            <NameEditor />
         </div>
+        <Separator />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {(Object.keys(equipment) as EquipmentSlot[]).map((slot) => {
             const equippedItem = equipment[slot];
