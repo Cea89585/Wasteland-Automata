@@ -460,14 +460,10 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           
           const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, 1, INVENTORY_CAP);
           
-          // Remove the recipe that was just used to craft the map
-          const newUnlockedRecipes = state.unlockedRecipes.filter(id => id !== recipe.id);
-
           return {
             ...state,
             inventory: finalInventory,
             statistics: newStatistics,
-            unlockedRecipes: newUnlockedRecipes,
             unlockedLocations: newUnlockedLocations,
             log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
           };
@@ -1120,8 +1116,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!migratedState.unlockedLocations) {
         migratedState.unlockedLocations = ['outskirts'];
       }
-      if (!migratedState.unlockedRecipes.includes('recipe_crudeMap_forest')) {
-        migratedState.unlockedRecipes.push('recipe_crudeMap_forest');
+      if (!migratedState.unlockedRecipes.includes('recipe_crudeMap')) {
+        migratedState.unlockedRecipes.push('recipe_crudeMap');
       }
        if (!migratedState.unlockedRecipes.includes('recipe_crudeMap_tunnels')) {
         if(migratedState.unlockedLocations.includes('forest')) {

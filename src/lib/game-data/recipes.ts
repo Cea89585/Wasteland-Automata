@@ -36,20 +36,12 @@ export const recipes: Recipe[] = [
     unlockedBy: [], // No longer unlocked at start
   },
   {
-    id: 'recipe_crudeMap_forest',
-    name: 'Map: Mutated Forest',
-    description: 'Piece together scraps of information to map a path to the nearby forest.',
+    id: 'recipe_crudeMap',
+    name: 'Craft Crude Map',
+    description: 'Piece together scraps of information to map a path to a new location.',
     creates: 'crudeMap',
     requirements: { wood: 10, scrap: 5 },
     unlockedBy: ['start'],
-  },
-   {
-    id: 'recipe_crudeMap_tunnels',
-    name: 'Map: Abandoned Subway',
-    description: 'A map to the dark, component-rich subway tunnels.',
-    creates: 'crudeMap',
-    requirements: { scrap: 30, mutatedTwigs: 15 },
-    unlockedBy: ['workbench'],
   },
   {
     id: 'recipe_cookedApple',

@@ -3,19 +3,35 @@
 import { useGame } from '@/hooks/use-game';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { recipes } from '@/lib/game-data/recipes';
+import { recipes as allRecipes } from '@/lib/game-data/recipes';
 import { allIcons, resourceIcons } from './GameIcons';
 import { itemData } from '@/lib/game-data/items';
 import type { Resource } from '@/lib/game-types';
 import { Hammer } from 'lucide-react';
 import { ScrollArea } from '../ui/scroll-area';
 import { locationOrder } from '@/lib/game-types';
+import { useMemo } from 'react';
 
 export default function CraftingPanel() {
   const { gameState, dispatch } = useGame();
   const { inventory, unlockedRecipes, unlockedLocations } = gameState;
 
   const allLocationsUnlocked = unlockedLocations.length >= locationOrder.length;
+
+  const recipes = useMemo(() => {
+    let currentMapCostMultiplier = Math.max(1, unlockedLocations.length - 1);
+
+    return allRecipes.map(recipe => {
+      if (recipe.id === 'recipe_crudeMap') {
+        const newReqs: Partial<Record<Resource, number>> = {};
+        for (const [resource, amount] of Object.entries(recipe.requirements)) {
+            newReqs[resource as Resource] = Math.floor(amount * Math.pow(currentMapCostMultiplier, 1.5));
+        }
+        return { ...recipe, requirements: newReqs };
+      }
+      return recipe;
+    });
+  }, [unlockedLocations.length]);
 
   // Filter out items that are now built in the Base panel
   const availableRecipes = recipes.filter(r => 

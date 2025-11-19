@@ -70,7 +70,7 @@ export const initialState: Omit<GameState, 'statistics'> = {
     },
   ],
   currentLocation: 'outskirts',
-  unlockedRecipes: ['recipe_stoneAxe', 'recipe_crudeMap_forest'],
+  unlockedRecipes: ['recipe_stoneAxe', 'recipe_crudeMap'],
   builtStructures: [],
   unlockedFlags: [],
   unlockedLocations: ['outskirts'],
