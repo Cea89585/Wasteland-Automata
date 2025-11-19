@@ -966,6 +966,52 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         };
     }
 
+    case 'START_SMELTING_ALL': {
+        const { type, amount } = action.payload;
+        if (amount <= 0) return state;
+
+        const newInventory = { ...state.inventory };
+        let totalScrapNeeded = 0;
+        let totalWoodNeeded = 0;
+        let newQueue = 0;
+        let logText = '';
+
+        if (type === 'components') {
+            totalScrapNeeded = 10 * amount;
+            totalWoodNeeded = 4 * amount;
+            if (newInventory.scrap < totalScrapNeeded || newInventory.wood < totalWoodNeeded) {
+                return state;
+            }
+            newInventory.scrap -= totalScrapNeeded;
+            newInventory.wood -= totalWoodNeeded;
+            newQueue = state.smeltingQueue + amount;
+            logText = `Queued ${amount} components for smelting.`;
+            return {
+                ...state,
+                inventory: newInventory,
+                smeltingQueue: newQueue,
+                log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log],
+            }
+        } else if (type === 'iron') {
+            totalScrapNeeded = 20 * amount;
+            totalWoodNeeded = 10 * amount;
+            if (newInventory.scrap < totalScrapNeeded || newInventory.wood < totalWoodNeeded) {
+                return state;
+            }
+            newInventory.scrap -= totalScrapNeeded;
+            newInventory.wood -= totalWoodNeeded;
+            newQueue = state.ironIngotSmeltingQueue + amount;
+            logText = `Queued ${amount} iron ingots for smelting.`;
+            return {
+                ...state,
+                inventory: newInventory,
+                ironIngotSmeltingQueue: newQueue,
+                log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log],
+            }
+        }
+        return state;
+    }
+
     case 'START_SMELTING_IRON': {
         const newInventory = { ...state.inventory };
         const totalScrapNeeded = 20;

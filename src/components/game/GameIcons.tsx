@@ -34,6 +34,7 @@ import {
   Layers,
   RectangleHorizontal,
   Package,
+  PackageCheck,
 } from 'lucide-react';
 import type { Resource, Item } from '@/lib/game-types';
 

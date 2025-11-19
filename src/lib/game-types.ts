@@ -151,6 +151,7 @@ export type GameAction =
   | { type: 'FINISH_RESTING' }
   | { type: 'START_SMELTING' }
   | { type: 'FINISH_SMELTING' }
+  | { type: 'START_SMELTING_ALL'; payload: { type: 'components' | 'iron'; amount: number } }
   | { type: 'START_SMELTING_IRON' }
   | { type: 'FINISH_SMELTING_IRON' }
   | { type: 'EQUIP'; payload: { item: Item, slot: EquipmentSlot } }
