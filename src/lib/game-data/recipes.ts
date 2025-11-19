@@ -6,7 +6,7 @@ export interface Recipe {
   name: string;
   description: string;
   creates: Item;
-  requirements: Partial<Record<Resource, number>>;
+  requirements: Partial<Record<Resource | 'silver', number>>;
   unlockedBy: string[]; // Can be item IDs (e.g., 'workbench') or tech IDs
 }
 
@@ -40,7 +40,7 @@ export const recipes: Recipe[] = [
     name: 'Craft Crude Map',
     description: 'Piece together scraps of information to map a path to a new location.',
     creates: 'crudeMap',
-    requirements: { wood: 50, stone: 50, components: 10 },
+    requirements: { wood: 50, stone: 50, components: 10, silver: 1000 },
     unlockedBy: ['start'],
   },
   {

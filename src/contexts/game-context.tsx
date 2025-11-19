@@ -4,7 +4,7 @@
 import React, { createContext, useReducer, useEffect, type ReactNode, useState } from 'react';
 import type { GameState, GameAction, LogMessage, Resource, Item, Statistics, LocationId, Theme } from '@/lib/game-types';
 import { initialState, initialStatistics } from '@/lib/game-data/initial-state';
-import { recipes } from '@/lib/game-data/recipes';
+import { recipes as allRecipes } from '@/lib/game-data/recipes';
 import { itemData } from '@/lib/game-data/items';
 import { locations } from '@/lib/game-data/locations';
 import { useInactivityTimer } from '@/hooks/use-inactivity-timer';
@@ -375,7 +375,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'BUILD_STRUCTURE': {
-      const recipe = recipes.find((r) => r.id === action.payload.recipeId);
+      const recipe = allRecipes.find((r) => r.id === action.payload.recipeId);
       if (!recipe) return state;
       const INVENTORY_CAP = getInventoryCap();
 
@@ -402,7 +402,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const newBuiltStructures = [...state.builtStructures, recipe.creates];
 
       const newUnlockedRecipes = [...state.unlockedRecipes];
-      recipes.forEach(r => {
+      allRecipes.forEach(r => {
         if(r.unlockedBy.includes(recipe.creates) && !newUnlockedRecipes.includes(r.id)) {
           newUnlockedRecipes.push(r.id);
         }
@@ -423,6 +423,22 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'CRAFT': {
+      const currentMapCostMultiplier = Math.max(1, state.unlockedLocations.length - 1);
+      const recipes = allRecipes.map(recipe => {
+        if (recipe.id === 'recipe_crudeMap') {
+          const newReqs: Partial<Record<Resource | 'silver', number>> = {};
+          for (const [resource, amount] of Object.entries(recipe.requirements)) {
+              if (resource === 'silver') {
+                newReqs.silver = Math.floor(amount * Math.pow(currentMapCostMultiplier, 1.2));
+              } else {
+                newReqs[resource as Resource] = Math.floor(amount * Math.pow(currentMapCostMultiplier, 1.5));
+              }
+          }
+          return { ...recipe, requirements: newReqs };
+        }
+        return recipe;
+      });
+
       const recipe = recipes.find((r) => r.id === action.payload.recipeId);
       if (!recipe) return state;
       

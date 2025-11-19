@@ -23,9 +23,13 @@ export default function CraftingPanel() {
 
     return allRecipes.map(recipe => {
       if (recipe.id === 'recipe_crudeMap') {
-        const newReqs: Partial<Record<Resource, number>> = {};
+        const newReqs: Partial<Record<Resource | 'silver', number>> = {};
         for (const [resource, amount] of Object.entries(recipe.requirements)) {
-            newReqs[resource as Resource] = Math.floor(amount * Math.pow(currentMapCostMultiplier, 1.5));
+            if (resource === 'silver') {
+                newReqs.silver = Math.floor(amount * Math.pow(currentMapCostMultiplier, 1.2));
+            } else {
+                newReqs[resource as Resource] = Math.floor(amount * Math.pow(currentMapCostMultiplier, 1.5));
+            }
         }
         return { ...recipe, requirements: newReqs };
       }
@@ -48,7 +52,7 @@ export default function CraftingPanel() {
     const recipe = recipes.find(r => r.id === recipeId);
     if (!recipe) return false;
     for (const [resource, amount] of Object.entries(recipe.requirements)) {
-      if (inventory[resource as Resource] < amount) {
+      if (inventory[resource as keyof typeof inventory] < amount) {
         return false;
       }
     }
@@ -84,8 +88,8 @@ export default function CraftingPanel() {
                           <div className="flex flex-wrap gap-x-3 gap-y-1">
                             {Object.entries(recipe.requirements).map(([resource, amount]) => (
                               <span key={resource} className="flex items-center">
-                                {resourceIcons[resource as Resource]}
-                                {itemData[resource as Resource].name}: {amount}
+                                {resourceIcons[resource as Resource] || allIcons.silver}
+                                {itemData[resource as keyof typeof itemData].name}: {amount}
                               </span>
                             ))}
                           </div>
