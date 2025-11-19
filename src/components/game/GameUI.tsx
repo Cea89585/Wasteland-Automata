@@ -1,3 +1,4 @@
+
 // src/components/game/GameUI.tsx
 'use client';
 
@@ -28,6 +29,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
   Select,
@@ -44,7 +46,7 @@ import { ScrollArea } from '../ui/scroll-area';
 export default function GameUI() {
   const { gameState } = useGame();
   const isMobile = useBreakpoint('sm');
-  const [activeTab, setActiveTab] = useState('explore');
+  const [activeTab, setActiveTab] = useState('community');
 
   if (!gameState.isInitialized) {
     return <LoadingScreen />;
