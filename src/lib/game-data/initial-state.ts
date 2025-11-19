@@ -44,6 +44,10 @@ export const initialStatistics: Statistics = {
 
 export const initialState: Omit<GameState, 'statistics'> = {
   characterName: 'Survivor',
+  level: 1,
+  xp: 0,
+  xpToNextLevel: 100,
+  upgradePoints: 0,
   playerStats: {
     health: 100,
     hunger: 100,

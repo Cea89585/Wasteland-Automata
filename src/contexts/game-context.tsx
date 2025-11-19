@@ -170,6 +170,10 @@ const generateUniqueLogId = () => {
     return Date.now() + logIdCounter++;
 };
 
+const xpForNextLevel = (level: number) => {
+    return Math.floor(100 * Math.pow(1.5, level - 1));
+}
+
 const reducer = (state: GameState, action: GameAction): GameState => {
   const getInventoryCap = () => 200 + (state.storageLevel || 0) * 50;
   const getMaxEnergy = () => 100 + (state.energyLevel || 0) * 5;
@@ -199,6 +203,36 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'SET_CHARACTER_NAME': {
         return { ...state, characterName: action.payload };
+    }
+
+    case 'ADD_XP': {
+        let newXp = state.xp + action.payload;
+        let newLevel = state.level;
+        let newXpToNextLevel = state.xpToNextLevel;
+        let newUpgradePoints = state.upgradePoints;
+        let newLog = [...state.log];
+
+        while (newXp >= newXpToNextLevel) {
+            newXp -= newXpToNextLevel;
+            newLevel++;
+            newUpgradePoints++;
+            newXpToNextLevel = xpForNextLevel(newLevel);
+            newLog.unshift({
+                id: generateUniqueLogId(),
+                text: `You have reached Level ${newLevel}! You gained an upgrade point.`,
+                type: 'success',
+                timestamp: Date.now()
+            });
+        }
+        
+        return {
+            ...state,
+            xp: newXp,
+            level: newLevel,
+            xpToNextLevel: newXpToNextLevel,
+            upgradePoints: newUpgradePoints,
+            log: newLog,
+        };
     }
 
     case 'GAME_TICK': {
@@ -435,14 +469,16 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const logMessageText = `You built a ${itemDetails.name}.\n${itemDetails.description}`;
       const { newStatistics } = addResource(state.inventory, state.statistics, recipe.creates as Item, 1, INVENTORY_CAP);
 
-      return {
+      let withXpState = reducer({
         ...state,
         inventory: newInventory,
         builtStructures: newBuiltStructures,
         unlockedRecipes: newUnlockedRecipes,
         statistics: newStatistics,
         log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates as Item, timestamp: Date.now() }, ...state.log],
-      };
+      }, { type: 'ADD_XP', payload: 50 });
+
+      return withXpState;
     }
 
     case 'CRAFT': {
@@ -498,13 +534,15 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           
           const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, 1, INVENTORY_CAP);
           
-          return {
+           let withXpState = reducer({
             ...state,
             inventory: finalInventory,
             statistics: newStatistics,
             unlockedLocations: newUnlockedLocations,
             log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
-          };
+          }, { type: 'ADD_XP', payload: 100 });
+
+          return withXpState;
         } else {
            return {
               ...state,
@@ -532,13 +570,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const itemDetails = itemData[recipe.creates];
       const logMessageText = `Crafted ${itemDetails.name}.\n${itemDetails.description}`;
       
-      return {
+      let withXpState = reducer({
         ...state,
         inventory: finalInventory,
         statistics: newStatistics,
         unlockedRecipes: newUnlockedRecipes,
         log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
-      };
+      }, { type: 'ADD_XP', payload: 10 });
+      return withXpState;
     }
     
     case 'CRAFT_ALL': {
@@ -566,12 +605,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const itemDetails = itemData[recipe.creates];
       const logMessageText = `Batch crafted ${amount} x ${itemDetails.name}.`;
 
-      return {
+      let withXpState = reducer({
         ...state,
         inventory: finalInventory,
         statistics: newStatistics,
         log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
-      }
+      }, { type: 'ADD_XP', payload: 10 * amount });
+      
+      return withXpState;
     }
 
 
@@ -613,6 +654,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       
       let rewardLog = '';
       let newState = { ...state };
+      let xpGained = 100;
 
       for (const reward of quest.rewards) {
         if (reward.type === 'item') {
@@ -638,17 +680,19 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       
       const newCompletedQuests = [...state.completedQuests, questId];
       
-      return {
+       let finalState = reducer({
         ...newState,
         inventory: newInventory,
         statistics: newStatistics,
         completedQuests: newCompletedQuests,
         log: [
-            { id: generateUniqueLogId(), text: `Quest Complete: ${quest.title}`, type: 'success', timestamp: Date.now() },
+            { id: generateUniqueLogId(), text: `Quest Complete: ${quest.title} (+${xpGained} XP)`, type: 'success', timestamp: Date.now() },
             { id: generateUniqueLogId(), text: quest.completionMessage, type: 'event', timestamp: Date.now() },
              { id: generateUniqueLogId(), text: `You received: ${rewardLog}.`, type: 'success', timestamp: Date.now() }
         , ...state.log],
-      };
+      }, { type: 'ADD_XP', payload: xpGained });
+
+      return finalState;
     }
 
     case 'SELL_ITEM': {
@@ -1274,6 +1318,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       if (!migratedState.theme) migratedState.theme = 'dark';
       if (!('lastSavedTimestamp' in migratedState)) migratedState.lastSavedTimestamp = Date.now();
       if (!migratedState.characterName) migratedState.characterName = 'Survivor';
+      if (!migratedState.level) migratedState.level = 1;
+      if (!migratedState.xp) migratedState.xp = 0;
+      if (!migratedState.xpToNextLevel) migratedState.xpToNextLevel = 100;
+      if (!migratedState.upgradePoints) migratedState.upgradePoints = 0;
+
 
       if (migratedState.builtStructures.includes('furnace') && !migratedState.unlockedRecipes.includes('recipe_ironPlates')) {
         migratedState.unlockedRecipes.push('recipe_ironPlates');

@@ -85,6 +85,10 @@ export type Theme = 'light' | 'dark' | 'system';
 
 export interface GameState {
   characterName: string;
+  level: number;
+  xp: number;
+  xpToNextLevel: number;
+  upgradePoints: number;
   playerStats: PlayerStats;
   inventory: Inventory;
   equipment: Equipment;
@@ -124,6 +128,7 @@ export type GameAction =
   | { type: 'SET_CHARACTER_NAME'; payload: string }
   | { type: 'GAME_TICK' }
   | { type: 'SET_IDLE', payload: boolean }
+  | { type: 'ADD_XP', payload: number }
   | { type: 'TRACK_STAT'; payload: { stat: keyof Pick<Statistics, 'timesExplored' | 'timesScavenged'> } }
   | { type: 'ADD_LOG'; payload: { text: string; type: LogMessage['type'], item?: Resource | Item } }
   | { type: 'CLEAR_LOG' }

@@ -6,7 +6,7 @@ import { itemData } from '@/lib/game-data/items';
 import { allIcons } from './GameIcons';
 import type { EquipmentSlot, Item } from '@/lib/game-types';
 import { Button } from '../ui/button';
-import { Shirt, Hand, PersonStanding, Map, Edit, Save, RefreshCw, Loader2 } from 'lucide-react';
+import { Shirt, Hand, PersonStanding, Map, Edit, Save, RefreshCw, Star, ArrowUpCircle } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { locations } from '@/lib/game-data/locations';
 import { useState, useEffect } from 'react';
@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { firstNames, surnames } from '@/lib/game-data/names';
 import filter from 'naughty-words';
+import { Progress } from '../ui/progress';
 
 
 const NameEditor = () => {
@@ -33,17 +34,13 @@ const NameEditor = () => {
             return;
         }
 
-        // Allow only letters and spaces
         if (!/^[a-zA-Z\s]+$/.test(name)) {
             toast({ variant: 'destructive', title: 'Invalid Name', description: 'Name can only contain letters and spaces.' });
             return;
         }
-
-        // Remove spaces for profanity check
+        
         const sanitizedName = name.replace(/\s+/g, '').toLowerCase();
-
-        // Check for naughty words
-        const isProfane = filter.en.some(word => sanitizedName.includes(word.toLowerCase()));
+        const isProfane = filter.en.some((word: string) => sanitizedName.includes(word.toLowerCase()));
 
         if (isProfane) {
             toast({ variant: 'destructive', title: 'Name Not Allowed', description: 'Please choose a more appropriate name.' });
@@ -103,7 +100,7 @@ const slotNames: Record<EquipmentSlot, string> = {
 
 export default function CharacterPanel() {
   const { gameState, dispatch } = useGame();
-  const { equipment } = gameState;
+  const { equipment, level, xp, xpToNextLevel, upgradePoints } = gameState;
 
   const handleUnequip = (slot: EquipmentSlot) => {
     dispatch({ type: 'UNEQUIP', payload: { slot } });
@@ -113,6 +110,7 @@ export default function CharacterPanel() {
   const isBusy = gameState.isResting;
 
   const discoveredLocations = gameState.unlockedLocations.slice(1); // Exclude starting location
+  const xpPercentage = (xp / xpToNextLevel) * 100;
 
   return (
     <Card>
@@ -125,6 +123,19 @@ export default function CharacterPanel() {
             <PersonStanding className="h-24 w-24 text-primary/50" />
             <NameEditor />
         </div>
+        <Separator />
+        <Card className="bg-muted/50 p-4">
+            <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between text-lg">
+                    <div className="font-semibold flex items-center gap-2"><Star className="h-5 w-5 text-yellow-400" /> Level {level}</div>
+                    <div className="font-mono text-muted-foreground text-sm">{xp} / {xpToNextLevel} XP</div>
+                </div>
+                <Progress value={xpPercentage} />
+                <div className="flex items-center justify-end text-sm text-primary font-medium gap-2 mt-1">
+                    <ArrowUpCircle className="h-5 w-5" /> {upgradePoints} Upgrade Point{upgradePoints !== 1 ? 's' : ''} Available
+                </div>
+            </div>
+        </Card>
         <Separator />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {(Object.keys(equipment) as EquipmentSlot[]).map((slot) => {
