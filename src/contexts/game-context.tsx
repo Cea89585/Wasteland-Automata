@@ -1102,7 +1102,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'TRAVEL': {
       const { locationId } = action.payload;
       const newLocation = locations[locationId];
-      if (!newLocation || !state.unlockedLocations.includes(locationId)) return state;
+      if (!newLocation || !state.unlockedLocations.includes(locationId)) return state.log.length > 50;
 
       return {
         ...state,
@@ -1219,6 +1219,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
       if (!migratedState.inventory.ironIngot) {
         migratedState.inventory.ironIngot = 0;
+      }
+       if (!migratedState.inventory.ironPlates) {
+        migratedState.inventory.ironPlates = 0;
       }
       if (!migratedState.ironIngotSmeltingQueue) {
         migratedState.ironIngotSmeltingQueue = 0;

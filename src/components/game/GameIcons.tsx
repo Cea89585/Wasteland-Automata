@@ -32,6 +32,7 @@ import {
   Sprout,
   Leaf,
   Layers,
+  RectangleHorizontal,
 } from 'lucide-react';
 import type { Resource, Item } from '@/lib/game-types';
 
@@ -70,6 +71,7 @@ export const itemIcons: Record<Item, React.ReactElement<LucideProps>> = {
   cookedApple: <Zap {...iconProps} />,
   crudeMap: <Map {...iconProps} />,
   ironIngot: <Layers {...iconProps} />,
+  ironPlates: <RectangleHorizontal {...iconProps} />,
 };
 
 export const statIcons = {

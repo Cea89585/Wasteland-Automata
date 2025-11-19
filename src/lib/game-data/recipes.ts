@@ -82,5 +82,13 @@ export const recipes: Recipe[] = [
     creates: 'hydroponicsBay',
     requirements: { scrap: 30, components: 15, water: 20 },
     unlockedBy: ['workbench'],
-  }
+  },
+  {
+    id: 'recipe_ironPlates',
+    name: 'Craft Iron Plates',
+    description: 'Forge iron ingots into durable plates.',
+    creates: 'ironPlates',
+    requirements: { ironIngot: 5, components: 1 },
+    unlockedBy: ['furnace'],
+  },
 ];

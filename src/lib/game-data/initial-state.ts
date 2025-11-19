@@ -27,6 +27,7 @@ const emptyInventory = {
   cookedApple: 0,
   crudeMap: 0,
   ironIngot: 0,
+  ironPlates: 0,
 };
 
 export const initialStatistics: Statistics = {

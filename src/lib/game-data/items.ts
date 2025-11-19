@@ -31,4 +31,5 @@ export const itemData: Record<Resource | Item, { name: string; description: stri
   cookedApple: { name: Items.cookedApple, description: 'A cooked apple that restores some energy.', sellPrice: 8 },
   crudeMap: { name: Items.crudeMap, description: 'Unlocks the ability to travel to new locations.' },
   ironIngot: { name: Items.ironIngot, description: 'A bar of refined iron, ready for advanced crafting.', sellPrice: 30 },
+  ironPlates: { name: Items.ironPlates, description: 'Reinforced plates of solid iron. Used for heavy construction.', sellPrice: 160 },
 };

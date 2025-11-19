@@ -33,6 +33,7 @@ export const Items = {
   cookedApple: 'Cooked Apple',
   crudeMap: 'Crude Map',
   ironIngot: 'Iron Ingot',
+  ironPlates: 'Iron Plates',
 } as const;
 export type Item = keyof typeof Items;
 
