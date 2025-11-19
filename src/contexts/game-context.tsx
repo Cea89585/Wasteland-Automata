@@ -1,3 +1,4 @@
+
 // src/contexts/game-context.tsx
 'use client';
 
@@ -216,6 +217,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'ADD_XP': {
+        if (action.payload <= 0) return state;
+
         let newXp = state.xp + action.payload;
         let newLevel = state.level;
         let newXpToNextLevel = state.xpToNextLevel;
@@ -476,7 +479,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       });
       
       const itemDetails = itemData[recipe.creates as Item];
-      const logMessageText = `You built a ${itemDetails.name}.\n${itemDetails.description}`;
+      const xpAmount = 50;
+      const logMessageText = `You built a ${itemDetails.name}. (+${xpAmount} XP)\n${itemDetails.description}`;
       const { newStatistics } = addResource(state.inventory, state.statistics, recipe.creates as Item, 1, INVENTORY_CAP);
 
       let withXpState = reducer({
@@ -486,7 +490,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         unlockedRecipes: newUnlockedRecipes,
         statistics: newStatistics,
         log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates as Item, timestamp: Date.now() }, ...state.log],
-      }, { type: 'ADD_XP', payload: 50 });
+      }, { type: 'ADD_XP', payload: xpAmount });
 
       return withXpState;
     }
@@ -540,7 +544,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         if (nextLocationIndex < locationOrder.length) {
           const nextLocationId = locationOrder[nextLocationIndex];
           const newUnlockedLocations = [...state.unlockedLocations, nextLocationId];
-          const logMessageText = `You piece together a crude map, revealing the way to the ${locations[nextLocationId].name}.`;
+          const xpAmount = 100;
+          const logMessageText = `You piece together a crude map, revealing the way to the ${locations[nextLocationId].name}. (+${xpAmount} XP)`;
           
           const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, 1, INVENTORY_CAP);
           
@@ -550,7 +555,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
             statistics: newStatistics,
             unlockedLocations: newUnlockedLocations,
             log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
-          }, { type: 'ADD_XP', payload: 100 });
+          }, { type: 'ADD_XP', payload: xpAmount });
 
           return withXpState;
         } else {
@@ -578,7 +583,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       });
 
       const itemDetails = itemData[recipe.creates];
-      const logMessageText = `Crafted ${itemDetails.name}.\n${itemDetails.description}`;
+      const xpAmount = 10;
+      const logMessageText = `Crafted ${itemDetails.name}. (+${xpAmount} XP)\n${itemDetails.description}`;
       
       let withXpState = reducer({
         ...state,
@@ -586,7 +592,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         statistics: newStatistics,
         unlockedRecipes: newUnlockedRecipes,
         log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
-      }, { type: 'ADD_XP', payload: 10 });
+      }, { type: 'ADD_XP', payload: xpAmount });
       return withXpState;
     }
     
@@ -613,14 +619,15 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, amount, INVENTORY_CAP);
       
       const itemDetails = itemData[recipe.creates];
-      const logMessageText = `Batch crafted ${amount} x ${itemDetails.name}.`;
+      const xpAmount = 10 * amount;
+      const logMessageText = `Batch crafted ${amount} x ${itemDetails.name}. (+${xpAmount} XP)`;
 
       let withXpState = reducer({
         ...state,
         inventory: finalInventory,
         statistics: newStatistics,
         log: [{ id: generateUniqueLogId(), text: logMessageText, type: 'craft', item: recipe.creates, timestamp: Date.now() }, ...state.log],
-      }, { type: 'ADD_XP', payload: 10 * amount });
+      }, { type: 'ADD_XP', payload: xpAmount });
       
       return withXpState;
     }

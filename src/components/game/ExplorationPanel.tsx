@@ -1,3 +1,4 @@
+
 // src/components/game/ExplorationPanel.tsx
 'use client';
 
@@ -89,6 +90,7 @@ export default function ExplorationPanel() {
             let foundSomething = false;
             let foundText = 'You explore the area...';
             let foundScrapThisTurn = false;
+            let xpGained = 0;
 
             currentLocation.resources.forEach((res) => {
                 if (Math.random() < res.chance) {
@@ -108,6 +110,7 @@ export default function ExplorationPanel() {
                     dispatch({ type: 'GATHER', payload: { resource: res.resource, amount } });
                     foundText += ` You found ${amount} ${itemData[res.resource].name}.`;
                     foundSomething = true;
+                    xpGained += 5; // Gain 5 XP for each resource type found
                 }
             });
             
@@ -117,11 +120,15 @@ export default function ExplorationPanel() {
                 dispatch({ type: 'GATHER', payload: { resource: 'scrap', amount } });
                 foundText += ` Your metal detector chirps, leading you to ${amount} ${itemData['scrap'].name}.`;
                 foundSomething = true;
+                xpGained += 5;
             }
         
             if (!foundSomething) {
                 const flavor = currentLocation.flavorText[Math.floor(Math.random() * currentLocation.flavorText.length)];
                 foundText += ` ${flavor}`;
+            } else {
+                dispatch({ type: 'ADD_XP', payload: xpGained });
+                foundText += ` (+${xpGained} XP)`;
             }
 
             dispatch({ type: 'ADD_LOG', payload: { text: foundText, type: 'info' } });
