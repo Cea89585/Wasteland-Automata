@@ -147,6 +147,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         if (newStats.thirst === 0 || newStats.hunger === 0) {
           // If starving or dehydrated, lose health
           newStats.health = Math.max(0, newStats.health - 2);
+        } else if (newStats.hunger > (getMaxHunger() * 0.7) && newStats.thirst > (getMaxThirst() * 0.7)) {
+            // Health regen only if well-fed and hydrated
+            // REMOVED - const MAX_HEALTH = getMaxHealth();
+            // REMOVED - if (newStats.health < MAX_HEALTH) {
+            // REMOVED -    newStats.health = Math.min(MAX_HEALTH, newStats.health + 0.1);
+            // REMOVED - }
         }
       }
 
@@ -611,7 +617,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const newStats = { ...state.playerStats };
       newStats.hunger = Math.min(MAX_HUNGER, newStats.hunger + 40);
       newStats.health = Math.min(MAX_HEALTH, newStats.health + 5);
-      newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 5);
+      newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 20);
 
       return {
         ...state,
