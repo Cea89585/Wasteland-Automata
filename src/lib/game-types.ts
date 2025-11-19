@@ -111,6 +111,8 @@ export interface GameState {
   ironIngotSmeltingQueue: number;
   droneIsActive: boolean;
   droneReturnTimestamp: number | null;
+  droneMissionQueue: number;
+  power: number;
   theme: Theme;
   lastSavedTimestamp?: number;
 }
@@ -152,5 +154,7 @@ export type GameAction =
   | { type: 'UPGRADE_HEALTH' }
   | { type: 'UPGRADE_DRONE' }
   | { type: 'TRAVEL'; payload: { locationId: LocationId } }
-  | { type: 'SEND_DRONE' }
-  | { type: 'SET_THEME'; payload: Theme };
+  | { type: 'QUEUE_DRONE_MISSIONS', payload: { amount: number } }
+  | { type: 'ADD_FUEL', payload: { fuelType: 'wood' | 'biomass' } }
+  | { type: 'SET_THEME'; payload: Theme }
+  | { type: 'CHEAT_ADD_SILVER' };

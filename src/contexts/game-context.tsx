@@ -1,4 +1,3 @@
-
 // src/contexts/game-context.tsx
 'use client';
 
@@ -37,14 +36,21 @@ const runOfflineSimulation = (state: GameState): GameState => {
   const getInventoryCap = (s: GameState) => 200 + (s.storageLevel || 0) * 50;
   const getMaxEnergy = (s: GameState) => 100 + (s.energyLevel || 0) * 5;
   const getMaxHealth = (s: GameState) => Math.min(1000, 100 + (s.healthLevel || 0) * 25);
+  const droneMissionDurationTicks = 30 / (TICK_RATE_MS / 1000);
 
   for (let i = 0; i < missedTicks; i++) {
-    // Treat every offline tick as an "idle" tick
+    const currentTick = simulatedState.gameTick + i;
     const INVENTORY_CAP = getInventoryCap(simulatedState);
     const MAX_ENERGY = getMaxEnergy(simulatedState);
     const MAX_HEALTH = getMaxHealth(simulatedState);
-
-    // Health and Energy regen
+    
+    // Power consumption
+    let isPowered = simulatedState.power > 0;
+    if (isPowered) {
+        simulatedState.power = Math.max(0, simulatedState.power - 1);
+    }
+    
+    // Treat every offline tick as an "idle" tick for regen
     if (simulatedState.playerStats.health < MAX_HEALTH) {
       simulatedState.playerStats.health = Math.min(MAX_HEALTH, simulatedState.playerStats.health + 0.25);
     }
@@ -52,8 +58,8 @@ const runOfflineSimulation = (state: GameState): GameState => {
       simulatedState.playerStats.energy = Math.min(MAX_ENERGY, simulatedState.playerStats.energy + 0.25);
     }
 
-    // Passive resource generation (every 2 ticks = 4 seconds)
-    if ((simulatedState.gameTick + i) % 2 === 0) { // Check every other tick
+    // Passive resource generation
+    if (currentTick % 2 === 0) {
       if (simulatedState.builtStructures.includes('waterPurifier') && simulatedState.inventory.water < INVENTORY_CAP) {
         simulatedState.inventory.water = Math.min(INVENTORY_CAP, simulatedState.inventory.water + 1);
       }
@@ -62,37 +68,37 @@ const runOfflineSimulation = (state: GameState): GameState => {
       }
     }
     
-    // Furnace simulation (1 item every 5 ticks = 10 seconds)
+    // Furnace simulation
     const SMELT_DURATION_TICKS = 10 / (TICK_RATE_MS / 1000);
-    if (simulatedState.smeltingQueue > 0 && (simulatedState.gameTick + i) % SMELT_DURATION_TICKS === 0) {
+    if (simulatedState.smeltingQueue > 0 && currentTick % SMELT_DURATION_TICKS === 0) {
       if (simulatedState.inventory.components < INVENTORY_CAP) {
         simulatedState.inventory.components = Math.min(INVENTORY_CAP, simulatedState.inventory.components + 1);
         simulatedState.smeltingQueue -= 1;
       }
     }
-
-    if (simulatedState.ironIngotSmeltingQueue > 0 && (simulatedState.gameTick + i) % SMELT_DURATION_TICKS === 0) {
+    if (simulatedState.ironIngotSmeltingQueue > 0 && currentTick % SMELT_DURATION_TICKS === 0) {
         if (simulatedState.inventory.ironIngot < INVENTORY_CAP) {
           simulatedState.inventory.ironIngot = Math.min(INVENTORY_CAP, simulatedState.inventory.ironIngot + 1);
           simulatedState.ironIngotSmeltingQueue -= 1;
         }
-      }
+    }
+
+    // Drone simulation
+    if (simulatedState.droneIsActive && simulatedState.droneReturnTimestamp && now >= simulatedState.droneReturnTimestamp) {
+        const { droneState, logMessage } = processDroneReturn(simulatedState);
+        simulatedState = droneState;
+    }
+    
+    if (!simulatedState.droneIsActive && simulatedState.droneMissionQueue > 0 && isPowered) {
+        simulatedState.droneMissionQueue -= 1;
+        simulatedState.droneIsActive = true;
+        simulatedState.droneReturnTimestamp = now + (i * TICK_RATE_MS) + 30000;
+    }
   }
   
-  // After the loop, check the drone's final status
-  if (simulatedState.droneIsActive && simulatedState.droneReturnTimestamp && now >= simulatedState.droneReturnTimestamp) {
-      // Drone mission completed while offline.
-      const { droneState, logMessage } = processDroneReturn(simulatedState);
-      simulatedState = droneState;
-      if (logMessage) {
-         simulatedState.log.unshift({ id: generateUniqueLogId(), text: logMessage.text, type: logMessage.type, timestamp: now });
-      }
-  }
-
   simulatedState.gameTick += missedTicks;
   
-  // Add a log entry about offline progress
-  const timeAway = new Date(timeElapsedMs).toISOString().substr(11, 8); // HH:mm:ss format
+  const timeAway = new Date(timeElapsedMs).toISOString().substr(11, 8);
   simulatedState.log.unshift({
     id: generateUniqueLogId(),
     text: `Welcome back. While you were away for ${timeAway}, your base continued to operate.`,
@@ -161,7 +167,6 @@ const processDroneReturn = (state: GameState): { droneState: GameState, logMessa
 };
 
 const generateUniqueLogId = () => {
-    // Combine timestamp with a counter to ensure uniqueness
     return Date.now() + logIdCounter++;
 };
 
@@ -196,6 +201,23 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let currentState = { ...state };
       const logMessages: LogMessage[] = [];
       
+      // Power consumption
+      const isPowered = currentState.power > 0;
+      if (isPowered) {
+          currentState.power = Math.max(0, currentState.power - 1);
+          if (currentState.power === 0) {
+              logMessages.push({ id: generateUniqueLogId(), text: "Generator out of fuel. Automated systems offline.", type: 'danger', timestamp: Date.now() });
+          }
+      }
+
+      // Drone launch logic
+      if (!currentState.droneIsActive && currentState.droneMissionQueue > 0 && isPowered) {
+          currentState.droneMissionQueue -= 1;
+          currentState.droneIsActive = true;
+          currentState.droneReturnTimestamp = Date.now() + 30000;
+          logMessages.push({ id: generateUniqueLogId(), text: `Generator power routed to Drone Bay. Launching drone... ${currentState.droneMissionQueue} missions left in queue.`, type: 'info', timestamp: Date.now() });
+      }
+
       // Drone return logic
       if (currentState.droneIsActive && currentState.droneReturnTimestamp && Date.now() >= currentState.droneReturnTimestamp) {
           const { droneState, logMessage } = processDroneReturn(currentState);
@@ -205,7 +227,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           }
       }
 
-      // Now continue with the rest of the tick logic, using the potentially updated state
       let newStats = { ...currentState.playerStats };
       let newInventory = { ...currentState.inventory };
       const INVENTORY_CAP = getInventoryCap();
@@ -228,23 +249,19 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
       
       if (currentState.isResting || currentState.isIdle) {
-        // Health regenerates while resting or idle
         const MAX_HEALTH = getMaxHealth();
         if (newStats.health < MAX_HEALTH) {
             newStats.health = Math.min(MAX_HEALTH, newStats.health + 0.25);
         }
       } else {
-        // Normal tick logic when not resting/idle
         newStats.thirst = Math.max(0, newStats.thirst - 0.25);
         newStats.hunger = Math.max(0, newStats.hunger - 0.25);
 
         if (newStats.thirst === 0 || newStats.hunger === 0) {
-          // If starving or dehydrated, lose health
           newStats.health = Math.max(0, newStats.health - 2);
         }
       }
 
-      // Universal logic (happens whether idle or not)
       if(newStats.energy < MAX_ENERGY) {
         newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 0.25);
       }
@@ -299,24 +316,19 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           newStats.health = Math.max(0, newStats.health - amount);
           logText += ` You lost ${amount} health.`;
         } else if (penaltyType === 'stoneAxe') {
-          // Special case for breaking the equipped item
           if (newEquipment.hand === 'stoneAxe') {
             newEquipment.hand = null;
-            // Log message is already descriptive, no need to add more text
           } else {
-            // Axe not equipped, so it can't break from use. Don't apply penalty.
-            // We'll also prevent the log message from showing to avoid confusion.
-            return state; // Exit early
+            return state;
           }
         }
-        else { // For all other resource/item penalties
+        else {
           const currentAmount = newInventory[penaltyType] || 0;
           const amountLost = Math.min(currentAmount, amount);
           if (amountLost > 0) {
             newInventory[penaltyType] = currentAmount - amountLost;
             logText += ` You lost ${amountLost} ${itemData[penaltyType].name}.`;
           } else {
-            // Player didn't have the item to lose, so don't show the encounter message.
             return state;
           }
         }
@@ -360,7 +372,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'SET_IDLE': {
       if (state.isIdle === action.payload) return state;
 
-      // Prevent going idle if there are background tasks
       if (action.payload && (state.droneIsActive || state.smeltingQueue > 0 || state.ironIngotSmeltingQueue > 0)) {
         return state;
       }
@@ -472,7 +483,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         newInventory[resource as keyof typeof newInventory] -= requiredAmount;
       }
 
-      // Handle map crafting as a special case for unlocking locations
       if (recipe.creates === 'crudeMap') {
         const lastUnlockedIndex = locationOrder.indexOf(state.unlockedLocations[state.unlockedLocations.length - 1]);
         const nextLocationIndex = lastUnlockedIndex + 1;
@@ -499,7 +509,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         }
       }
 
-      // Handle normal item crafts
       if(newInventory[recipe.creates] >= INVENTORY_CAP) {
         return {
           ...state,
@@ -534,13 +543,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const INVENTORY_CAP = getInventoryCap();
 
       if (!quest || state.completedQuests.includes(questId)) {
-        return state; // Quest not found or already completed
+        return state;
       }
 
       let newInventory = { ...state.inventory };
       let newStatistics = { ...state.statistics };
 
-      // Check requirements
       for (const req of quest.requirements) {
         if (req.type === 'item') {
             if ((newInventory[req.item] || 0) < req.amount) {
@@ -559,7 +567,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         }
       }
 
-      // Deduct item requirements
       for (const req of quest.requirements) {
         if (req.type === 'item') {
             newInventory[req.item] -= req.amount;
@@ -569,7 +576,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let rewardLog = '';
       let newState = { ...state };
 
-      // Grant rewards
       for (const reward of quest.rewards) {
         if (reward.type === 'item') {
            if(reward.item === 'crudeMap') {
@@ -688,9 +694,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const itemIndex = newLockedItems.indexOf(item);
 
       if (itemIndex > -1) {
-        newLockedItems.splice(itemIndex, 1); // Unlock
+        newLockedItems.splice(itemIndex, 1);
       } else {
-        newLockedItems.push(item); // Lock
+        newLockedItems.push(item);
       }
       return { ...state, lockedItems: newLockedItems };
     }
@@ -703,7 +709,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         if (resource && newInventory[resource] > 0) {
             newInventory[resource] -= 1;
         } else if (resource) {
-            // Not enough resource to consume, do nothing.
             return state;
         }
 
@@ -784,18 +789,16 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'EQUIP': {
         const { item, slot } = action.payload;
-        if (state.inventory[item] < 1) return state; // Can't equip something you don't have
+        if (state.inventory[item] < 1) return state;
 
         const newInventory = { ...state.inventory };
         const newEquipment = { ...state.equipment };
 
-        // Unequip current item in slot, if any
         const currentItem = newEquipment[slot];
         if (currentItem) {
             newInventory[currentItem] += 1;
         }
 
-        // Equip new item
         newEquipment[slot] = item;
         newInventory[item] -= 1;
 
@@ -1112,27 +1115,62 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       };
     }
 
-    case 'SEND_DRONE': {
-      if (state.inventory.apple < 10 || state.inventory.water < 10) {
+    case 'QUEUE_DRONE_MISSIONS': {
+        const { amount } = action.payload;
+        if (state.droneMissionQueue + amount > 10) {
+             return { ...state, log: [{ id: generateUniqueLogId(), text: "Drone mission queue is full.", type: 'danger', timestamp: Date.now() }, ...state.log] };
+        }
+        const appleCost = 10 * amount;
+        const waterCost = 10 * amount;
+        if (state.inventory.apple < appleCost || state.inventory.water < waterCost) {
+            return { ...state, log: [{ id: generateUniqueLogId(), text: "Not enough resources to queue missions.", type: 'danger', timestamp: Date.now() }, ...state.log] };
+        }
+        const newInventory = { ...state.inventory };
+        newInventory.apple -= appleCost;
+        newInventory.water -= waterCost;
         return {
-          ...state,
-          log: [{ id: generateUniqueLogId(), text: "Not enough apples and water to fuel the drone.", type: 'danger', timestamp: Date.now() }, ...state.log],
+            ...state,
+            inventory: newInventory,
+            droneMissionQueue: state.droneMissionQueue + amount,
+            log: [{ id: generateUniqueLogId(), text: `Queued ${amount} drone mission(s).`, type: 'info', timestamp: Date.now() }, ...state.log],
         };
-      }
-      const newInventory = { ...state.inventory };
-      newInventory.apple -= 10;
-      newInventory.water -= 10;
-      return {
-        ...state,
-        inventory: newInventory,
-        droneIsActive: true,
-        droneReturnTimestamp: Date.now() + 30000, // 30 seconds
-        log: [{ id: generateUniqueLogId(), text: "Scavenger drone launched. It will return in 30 seconds.", type: 'info', timestamp: Date.now() }, ...state.log],
-      };
     }
+    
+    case 'ADD_FUEL': {
+        const { fuelType } = action.payload;
+        const newInventory = { ...state.inventory };
+        let powerToAdd = 0;
+        let logText = "";
+        
+        if (fuelType === 'wood' && newInventory.wood > 0) {
+            newInventory.wood -= 1;
+            powerToAdd = 10;
+            logText = `You add some wood to the generator. (+${powerToAdd} Power)`;
+        } else if (fuelType === 'biomass' && newInventory.biomass > 0) {
+            newInventory.biomass -= 1;
+            powerToAdd = 250;
+            logText = `You feed biomass into the generator. (+${powerToAdd} Power)`;
+        } else {
+            return { ...state, log: [{ id: generateUniqueLogId(), text: `No ${fuelType} to add.`, type: 'danger', timestamp: Date.now() }, ...state.log] };
+        }
 
+        const newPower = Math.min(1000, state.power + powerToAdd);
+        return {
+            ...state,
+            inventory: newInventory,
+            power: newPower,
+            log: [{ id: generateUniqueLogId(), text: logText, type: 'success', timestamp: Date.now() }, ...state.log],
+        }
+    }
+    
     case 'SET_THEME': {
       return { ...state, theme: action.payload };
+    }
+
+    case 'CHEAT_ADD_SILVER': {
+      const newInventory = { ...state.inventory };
+      newInventory.silver += 10000;
+      return { ...state, inventory: newInventory };
     }
 
     default:
@@ -1163,13 +1201,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
       let loadedState = savedGame ? JSON.parse(savedGame) : initialState;
       let loadedStats = savedStats ? JSON.parse(savedStats) : initialStatistics;
 
-      // Ensure new properties exist on old save files
       let migratedState = { ...initialState, ...loadedState };
       const migratedStats = { ...initialStatistics, ...loadedStats };
       
       migratedState.isResting = false;
-      // smeltingQueue is preserved from save
-      migratedState.isIdle = false; // Initialize idle state
+      migratedState.isIdle = false;
       
       if (!migratedState.builtStructures) {
         migratedState.builtStructures = [];
@@ -1177,84 +1213,46 @@ export function GameProvider({ children }: { children: ReactNode }) {
           migratedState.builtStructures.push('workbench');
         }
       }
-      if (!migratedState.lockedItems) {
-        migratedState.lockedItems = [];
+      if (!migratedState.lockedItems) migratedState.lockedItems = [];
+      if (!migratedState.unlockedFlags) migratedState.unlockedFlags = [];
+      if (!migratedState.unlockedLocations) migratedState.unlockedLocations = ['outskirts'];
+      if (!migratedState.unlockedRecipes.includes('recipe_crudeMap')) migratedState.unlockedRecipes.push('recipe_crudeMap');
+      if (!migratedState.unlockedRecipes.includes('recipe_crudeMap_tunnels')) {
+        if(migratedState.unlockedLocations.includes('forest')) migratedState.unlockedRecipes.push('recipe_crudeMap_tunnels');
       }
-      if (!migratedState.unlockedFlags) {
-        migratedState.unlockedFlags = [];
-      }
-      if (!migratedState.unlockedLocations) {
-        migratedState.unlockedLocations = ['outskirts'];
-      }
-      if (!migratedState.unlockedRecipes.includes('recipe_crudeMap')) {
-        migratedState.unlockedRecipes.push('recipe_crudeMap');
-      }
-       if (!migratedState.unlockedRecipes.includes('recipe_crudeMap_tunnels')) {
-        if(migratedState.unlockedLocations.includes('forest')) {
-          migratedState.unlockedRecipes.push('recipe_crudeMap_tunnels');
-        }
-      }
-      if (!migratedState.storageLevel) {
-          migratedState.storageLevel = 0;
-      }
-      if (!migratedState.energyLevel) {
-          migratedState.energyLevel = 0;
-      }
-      if (!migratedState.hungerLevel) {
-          migratedState.hungerLevel = 0;
-      }
-      if (!migratedState.thirstLevel) {
-          migratedState.thirstLevel = 0;
-      }
-      if (!migratedState.healthLevel) {
-          migratedState.healthLevel = 0;
-      }
-      if (!migratedState.droneLevel) {
-        migratedState.droneLevel = 0;
-      }
-      if (!migratedState.completedQuests) {
-        migratedState.completedQuests = [];
-      }
-      if (!migratedState.inventory.mutatedTwigs) {
-        migratedState.inventory.mutatedTwigs = 0;
-      }
-      if (!migratedState.inventory.ironIngot) {
-        migratedState.inventory.ironIngot = 0;
-      }
-       if (!migratedState.inventory.ironPlates) {
-        migratedState.inventory.ironPlates = 0;
-      }
-       if (!migratedState.inventory.biomass) {
-        migratedState.inventory.biomass = 0;
-      }
-       if (!migratedState.inventory.biomassCompressor) {
-        migratedState.inventory.biomassCompressor = 0;
-      }
-      if (!migratedState.ironIngotSmeltingQueue) {
-        migratedState.ironIngotSmeltingQueue = 0;
-      }
-      if (!migratedState.theme) {
-        migratedState.theme = 'dark';
-      }
-      if (!('lastSavedTimestamp' in migratedState)) {
-        migratedState.lastSavedTimestamp = Date.now();
-      }
+      if (!migratedState.storageLevel) migratedState.storageLevel = 0;
+      if (!migratedState.energyLevel) migratedState.energyLevel = 0;
+      if (!migratedState.hungerLevel) migratedState.hungerLevel = 0;
+      if (!migratedState.thirstLevel) migratedState.thirstLevel = 0;
+      if (!migratedState.healthLevel) migratedState.healthLevel = 0;
+      if (!migratedState.droneLevel) migratedState.droneLevel = 0;
+      if (!migratedState.completedQuests) migratedState.completedQuests = [];
+      if (!migratedState.inventory.mutatedTwigs) migratedState.inventory.mutatedTwigs = 0;
+      if (!migratedState.inventory.ironIngot) migratedState.inventory.ironIngot = 0;
+      if (!migratedState.inventory.ironPlates) migratedState.inventory.ironPlates = 0;
+      if (!migratedState.inventory.biomass) migratedState.inventory.biomass = 0;
+      if (!migratedState.inventory.biomassCompressor) migratedState.inventory.biomassCompressor = 0;
+      if (!migratedState.ironIngotSmeltingQueue) migratedState.ironIngotSmeltingQueue = 0;
+      if (!migratedState.power) migratedState.power = 0;
+      if (!migratedState.droneMissionQueue) migratedState.droneMissionQueue = 0;
+      if (!migratedState.theme) migratedState.theme = 'dark';
+      if (!('lastSavedTimestamp' in migratedState)) migratedState.lastSavedTimestamp = Date.now();
 
-      // == SAVE MIGRATIONS ==
       if (migratedState.builtStructures.includes('furnace') && !migratedState.unlockedRecipes.includes('recipe_ironPlates')) {
         migratedState.unlockedRecipes.push('recipe_ironPlates');
       }
-       if (migratedState.builtStructures.includes('furnace') && !migratedState.unlockedRecipes.includes('recipe_biomassCompressor')) {
+      if (migratedState.builtStructures.includes('furnace') && !migratedState.unlockedRecipes.includes('recipe_biomassCompressor')) {
         migratedState.unlockedRecipes.push('recipe_biomassCompressor');
       }
-      // == END SAVE MIGRATIONS ==
+      if (migratedState.inventory.biomassCompressor > 0 && !migratedState.unlockedRecipes.includes('recipe_createBiomass')) {
+        migratedState.unlockedRecipes.push('recipe_createBiomass');
+      }
+      if (migratedState.builtStructures.includes('biomassCompressor') && !migratedState.unlockedRecipes.includes('recipe_createBiomass')) {
+          migratedState.unlockedRecipes.push('recipe_createBiomass');
+      }
 
-
-      // Run offline simulation
       migratedState = runOfflineSimulation(migratedState);
 
-
-      // IMPORTANT: Remove statistics from the main game state if it exists from an old save
       if ('statistics' in migratedState) {
         delete (migratedState as any).statistics;
       }
@@ -1272,15 +1270,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
       try {
         const { statistics, ...stateToSave } = gameState;
         
-        // Save game state without statistics
         const savableState = { ...stateToSave };
-        savableState.lastSavedTimestamp = Date.now(); // Update timestamp on every save
+        savableState.lastSavedTimestamp = Date.now();
         if (savableState.log.length > 50) {
           savableState.log = savableState.log.slice(0, 50);
         }
         localStorage.setItem(SAVE_KEY, JSON.stringify(savableState));
-
-        // Save statistics separately
         localStorage.setItem(STATS_KEY, JSON.stringify(statistics));
 
       } catch (error) {
@@ -1294,14 +1289,13 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     const tickInterval = setInterval(() => {
       dispatch({ type: 'GAME_TICK' });
-    }, TICK_RATE_MS); // Game tick every 2 seconds
+    }, TICK_RATE_MS);
 
     return () => clearInterval(tickInterval);
   }, [gameState.isInitialized, gameState.playerStats.health]);
   
   useEffect(() => {
     if (gameState.isInitialized) {
-      // Whenever these background tasks change, reset the inactivity timer
       if (gameState.droneIsActive || gameState.smeltingQueue > 0 || gameState.ironIngotSmeltingQueue > 0) {
         resetTimer();
       }

@@ -2,13 +2,74 @@
 'use client';
 import { useGame } from '@/hooks/use-game';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Home, Hammer, CheckCircle, Droplets, Power, Bot, Sprout } from 'lucide-react';
+import { Home, Hammer, CheckCircle, Droplets, Power, Bot, Sprout, Fuel, Leaf } from 'lucide-react';
 import { Button } from '../ui/button';
 import { recipes } from '@/lib/game-data/recipes';
 import type { Resource } from '@/lib/game-types';
 import { resourceIcons } from './GameIcons';
 import { itemData } from '@/lib/game-data/items';
 import { Separator } from '../ui/separator';
+import { Progress } from '../ui/progress';
+import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from '../ui/tooltip';
+import { Trees } from 'lucide-react';
+
+
+const FuelSection = () => {
+    const { gameState, dispatch } = useGame();
+    const { inventory, power } = gameState;
+
+    const canAddWood = inventory.wood > 0;
+    const canAddBiomass = inventory.biomass > 0;
+    
+    const handleAddFuel = (fuelType: 'wood' | 'biomass') => {
+        dispatch({ type: 'ADD_FUEL', payload: { fuelType } });
+    }
+
+    const maxPower = 1000;
+    const powerPercentage = (power / maxPower) * 100;
+
+    return (
+        <Card className="bg-muted/50">
+            <CardHeader className="pb-4">
+                <CardTitle className="flex items-center text-lg gap-2"><Fuel /> Generator Fuel</CardTitle>
+                <CardDescription>Add fuel to the generator to power your automated systems. Biomass is a much more efficient fuel source.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                         <span className="text-sm text-muted-foreground">Power Level</span>
+                         <span className="font-mono text-primary">{power} / {maxPower}</span>
+                    </div>
+                    <Progress value={powerPercentage} />
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="outline" onClick={() => handleAddFuel('wood')} disabled={!canAddWood}>
+                                    <Trees className="mr-2"/> Add Wood
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Adds 10 Power</p>
+                            </TooltipContent>
+                        </Tooltip>
+                         <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="outline" onClick={() => handleAddFuel('biomass')} disabled={!canAddBiomass}>
+                                    <Leaf className="mr-2"/> Add Biomass
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Adds 250 Power</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                </div>
+            </CardContent>
+        </Card>
+    )
+}
 
 const StructureSection = ({
   structureId,
@@ -101,6 +162,7 @@ export default function BasePanel() {
   const { gameState } = useGame();
 
   const isWorkbenchBuilt = gameState.builtStructures.includes('workbench');
+  const isGeneratorBuilt = gameState.builtStructures.includes('generator');
 
   return (
     <Card>
@@ -151,6 +213,17 @@ export default function BasePanel() {
               successText="Furnace built!"
               successDescription="Automated smelting is available."
             />
+             <Separator />
+             <StructureSection
+                structureId="generator"
+                recipeId="recipe_generator"
+                title="Build a Power Generator"
+                description="Consumes fuel to power your automated base systems, like the Drone Bay."
+                Icon={Power}
+                successText="Power Generator built!"
+                successDescription="You can now fuel your base."
+            />
+            {isGeneratorBuilt && <FuelSection />}
              <Separator />
             <StructureSection
               structureId="droneBay"

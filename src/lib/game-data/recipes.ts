@@ -72,8 +72,16 @@ export const recipes: Recipe[] = [
     name: 'Build Drone Bay',
     description: 'Construct a bay to house and operate a scavenger drone.',
     creates: 'droneBay',
-    requirements: { scrap: 25, components: 10 },
-    unlockedBy: ['workbench'],
+    requirements: { scrap: 25, components: 10, ironPlates: 5 },
+    unlockedBy: ['generator'],
+  },
+  {
+    id: 'recipe_generator',
+    name: 'Build Power Generator',
+    description: 'A power source for your automated systems.',
+    creates: 'generator',
+    requirements: { scrap: 50, components: 15, ironPlates: 10 },
+    unlockedBy: ['furnace'],
   },
   {
     id: 'recipe_hydroponicsBay',

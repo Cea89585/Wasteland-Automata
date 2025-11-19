@@ -95,6 +95,8 @@ export const initialState: Omit<GameState, 'statistics'> = {
   ironIngotSmeltingQueue: 0,
   droneIsActive: false,
   droneReturnTimestamp: null,
+  droneMissionQueue: 0,
+  power: 0,
   theme: 'dark',
   lastSavedTimestamp: Date.now(),
 };
