@@ -12,7 +12,7 @@ import { locations } from '@/lib/game-data/locations';
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { generateCharacterName, validateCharacterName } from '@/ai/flows/character-flow';
+import { firstNames, surnames } from '@/lib/game-data/names';
 
 
 const NameEditor = () => {
@@ -20,7 +20,6 @@ const NameEditor = () => {
     const { characterName } = gameState;
     const [name, setName] = useState(characterName);
     const [isEditing, setIsEditing] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
@@ -28,50 +27,36 @@ const NameEditor = () => {
     }, [characterName]);
 
     const handleSave = async () => {
-        setIsLoading(true);
-        try {
-            const validation = await validateCharacterName(name);
-            if (validation.isValid) {
-                dispatch({ type: 'SET_CHARACTER_NAME', payload: name });
-                setIsEditing(false);
-                toast({ title: 'Name Updated', description: `You are now known as ${name}.` });
-            } else {
-                toast({ variant: 'destructive', title: 'Invalid Name', description: validation.reason });
-            }
-        } catch (error) {
-            console.error(error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not validate name.' });
+        if (name.length < 3 || name.length > 25) {
+            toast({ variant: 'destructive', title: 'Invalid Name', description: 'Name must be between 3 and 25 characters.' });
+            return;
         }
-        setIsLoading(false);
+        dispatch({ type: 'SET_CHARACTER_NAME', payload: name });
+        setIsEditing(false);
+        toast({ title: 'Name Updated', description: `You are now known as ${name}.` });
     };
 
     const handleRandomize = async () => {
-        setIsLoading(true);
-        try {
-            const newName = await generateCharacterName();
-            setName(newName);
-        } catch (error) {
-            console.error(error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not generate a name.' });
-        }
-        setIsLoading(false);
+        const randomFirstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+        const randomSurname = surnames[Math.floor(Math.random() * surnames.length)];
+        setName(`${randomFirstName} ${randomSurname}`);
     };
 
     if (isEditing) {
         return (
             <div className="flex flex-col items-center gap-2">
                 <div className="flex items-center gap-2 w-full">
-                    <Input value={name} onChange={(e) => setName(e.target.value)} disabled={isLoading} />
-                    <Button size="icon" onClick={handleRandomize} disabled={isLoading}>
-                        {isLoading ? <Loader2 className="animate-spin" /> : <RefreshCw />}
+                    <Input value={name} onChange={(e) => setName(e.target.value)} />
+                    <Button size="icon" onClick={handleRandomize}>
+                        <RefreshCw />
                     </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button onClick={handleSave} disabled={isLoading || name === characterName}>
-                        {isLoading ? <Loader2 className="animate-spin mr-2" /> : <Save className="mr-2" />}
+                    <Button onClick={handleSave} disabled={name === characterName}>
+                        <Save className="mr-2" />
                         Save
                     </Button>
-                    <Button variant="ghost" onClick={() => setIsEditing(false)} disabled={isLoading}>Cancel</Button>
+                    <Button variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
                 </div>
             </div>
         )
