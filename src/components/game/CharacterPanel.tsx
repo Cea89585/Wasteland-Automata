@@ -13,7 +13,7 @@ import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { firstNames, surnames } from '@/lib/game-data/names';
-import { validateCharacterName } from '@/ai/flows/character-flow';
+import filter from 'naughty-words';
 
 
 const NameEditor = () => {
@@ -21,34 +21,29 @@ const NameEditor = () => {
     const { characterName } = gameState;
     const [name, setName] = useState(characterName);
     const [isEditing, setIsEditing] = useState(false);
-    const [isSaving, setIsSaving] = useState(false);
     const { toast } = useToast();
 
     useEffect(() => {
         setName(characterName);
     }, [characterName]);
 
-    const handleSave = async () => {
+    const handleSave = () => {
         if (name.length < 3 || name.length > 25) {
             toast({ variant: 'destructive', title: 'Invalid Name', description: 'Name must be between 3 and 25 characters.' });
             return;
         }
-        setIsSaving(true);
-        try {
-            const { isAllowed } = await validateCharacterName({ name });
-            if (isAllowed) {
-                dispatch({ type: 'SET_CHARACTER_NAME', payload: name });
-                setIsEditing(false);
-                toast({ title: 'Name Updated', description: `You are now known as ${name}.` });
-            } else {
-                toast({ variant: 'destructive', title: 'Name Not Allowed', description: 'Please choose a more appropriate name.' });
-            }
-        } catch (error) {
-            console.error(error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not validate name. Please try again.' });
-        } finally {
-            setIsSaving(false);
+
+        // Basic check for naughty words
+        const isProfane = filter.en.some(word => name.toLowerCase().includes(word));
+
+        if (isProfane) {
+            toast({ variant: 'destructive', title: 'Name Not Allowed', description: 'Please choose a more appropriate name.' });
+            return;
         }
+
+        dispatch({ type: 'SET_CHARACTER_NAME', payload: name });
+        setIsEditing(false);
+        toast({ title: 'Name Updated', description: `You are now known as ${name}.` });
     };
 
     const handleRandomize = () => {
@@ -61,17 +56,17 @@ const NameEditor = () => {
         return (
             <div className="flex flex-col items-center gap-2">
                 <div className="flex items-center gap-2 w-full">
-                    <Input value={name} onChange={(e) => setName(e.target.value)} disabled={isSaving} />
-                    <Button size="icon" onClick={handleRandomize} disabled={isSaving}>
+                    <Input value={name} onChange={(e) => setName(e.target.value)} />
+                    <Button size="icon" onClick={handleRandomize}>
                         <RefreshCw />
                     </Button>
                 </div>
                 <div className="flex items-center gap-2">
-                    <Button onClick={handleSave} disabled={name === characterName || isSaving}>
-                        {isSaving ? <Loader2 className="mr-2 animate-spin" /> : <Save className="mr-2" />}
-                        {isSaving ? 'Validating...' : 'Save'}
+                    <Button onClick={handleSave} disabled={name === characterName}>
+                        <Save className="mr-2" />
+                        Save
                     </Button>
-                    <Button variant="ghost" onClick={() => setIsEditing(false)} disabled={isSaving}>Cancel</Button>
+                    <Button variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
                 </div>
             </div>
         )
