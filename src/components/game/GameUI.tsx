@@ -47,7 +47,7 @@ import { ScrollArea } from '../ui/scroll-area';
 export default function GameUI() {
   const { gameState } = useGame();
   const isMobile = useBreakpoint('sm');
-  const [activeTab, setActiveTab] = useState('community');
+  const [activeTab, setActiveTab] = useState('explore');
 
   if (!gameState.isInitialized) {
     return <LoadingScreen />;
@@ -58,7 +58,7 @@ export default function GameUI() {
   }
 
   const isGameOver = gameState.playerStats.health <= 0;
-  const isBusy = gameState.isResting || gameState.smeltingQueue > 0;
+  const isBusy = gameState.isResting || gameState.smeltingQueue > 0 || gameState.ironIngotSmeltingQueue > 0 || gameState.charcoalSmeltingQueue > 0;
 
   const showFurnace = gameState.builtStructures.includes('furnace');
   const showMarket = gameState.builtStructures.includes('workbench');
@@ -128,25 +128,14 @@ export default function GameUI() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         <div className={cn("lg:col-span-3 lg:order-1", isMobile ? "order-1" : "order-2")}>
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-             {isMobile ? (
-              <TabsList className="h-auto flex-wrap justify-start">
+             <TabsList className="h-auto flex-wrap justify-start">
                 {tabs.map((tab) => (
-                  <TabsTrigger key={tab.value} value={tab.value} disabled={isBusy} className="flex items-center gap-2 text-xs h-9">
+                  <TabsTrigger key={tab.value} value={tab.value} disabled={isBusy} className="flex items-center gap-2 text-xs h-9 sm:text-sm">
                     {tab.icon}
                     <span>{tab.label}</span>
                   </TabsTrigger>
                 ))}
               </TabsList>
-            ) : (
-              <TabsList className="grid w-full" style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}>
-                {tabs.map((tab) => (
-                  <TabsTrigger key={tab.value} value={tab.value} disabled={isBusy} className="sm:flex sm:items-center sm:gap-2">
-                    {tab.icon}
-                    <span className="hidden sm:inline">{tab.label}</span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
-            )}
 
             <TabsContent value="explore" className="mt-4"><ExplorationPanel /></TabsContent>
             <TabsContent value="community" className="mt-4"><CommunityPanel /></TabsContent>
