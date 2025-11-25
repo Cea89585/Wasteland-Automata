@@ -73,9 +73,12 @@ export default function WelcomeScreen() {
             // Dispatch is now handled by the onSnapshot listener in GameContext
             toast({ title: 'Welcome to the Wasteland', description: `Your journey as ${trimmedName} begins now.` });
 
-        } catch (error) {
-            console.error("Error setting character name: ", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not set character name. Please try again.' });
+        } catch (error: any) {
+            // This is a generic catch-all for other errors (like network issues)
+            // The specific permission error will be handled by the .catch on the commit itself.
+            if (error.code !== 'permission-denied') {
+                 toast({ variant: 'destructive', title: 'Error', description: 'Could not set character name. Please try again.' });
+            }
         } finally {
             setIsLoading(false);
         }

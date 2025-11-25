@@ -13,7 +13,7 @@ import { quests } from '@/lib/game-data/quests';
 import { xpCurve } from '@/lib/game-data/xp-curve';
 import { useUser } from '@/hooks/use-user';
 import { useFirebase } from '@/firebase/provider';
-import { doc, setDoc, onSnapshot, DocumentData } from 'firebase/firestore';
+import { doc, setDoc, onSnapshot, DocumentData, writeBatch } from 'firebase/firestore';
 
 
 const TICK_RATE_MS = 2000;
@@ -1296,18 +1296,20 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const docRef = doc(firestore, 'users', user.uid);
       const unsubscribe = onSnapshot(docRef, (doc) => {
         if (doc.exists()) {
-            const data = doc.data() as GameState;
-            if(!isSavingRef.current) {
-                dispatch({ type: 'SET_GAME_STATE', payload: data });
+            const data = doc.data() as DocumentData;
+             if(!isSavingRef.current) {
+                dispatch({ type: 'SET_GAME_STATE', payload: data as GameState });
             }
         } else {
           // New user, create initial state in Firestore
+          const batch = writeBatch(firestore);
+          const userRef = doc(firestore, "users", user.uid);
           const newGameData = {
             ...initialState,
-            statistics: initialStatistics,
             isInitialized: true,
           };
-          setDoc(docRef, newGameData);
+          batch.set(userRef, newGameData);
+          batch.commit();
           dispatch({ type: 'SET_GAME_STATE', payload: newGameData });
         }
       });
@@ -1320,11 +1322,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // Effect for saving game state to Firestore
   useEffect(() => {
-    if (gameState.isInitialized && user) {
+    if (gameState.isInitialized && user && gameState.lastSavedTimestamp && Date.now() - gameState.lastSavedTimestamp > 2000) {
         isSavingRef.current = true;
         const docRef = doc(firestore, 'users', user.uid);
         const { isInitialized, ...savableState } = gameState;
-        setDoc(docRef, savableState, { merge: true }).finally(() => {
+        setDoc(docRef, {...savableState, lastSavedTimestamp: Date.now() }, { merge: true }).finally(() => {
             isSavingRef.current = false;
         });
     }
