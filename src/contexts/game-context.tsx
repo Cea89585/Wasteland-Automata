@@ -1293,22 +1293,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
   // Effect for loading game state from Firestore
   useEffect(() => {
     if (user) {
-      const docRef = doc(firestore, 'users', user.uid);
-      const unsubscribe = onSnapshot(docRef, (doc) => {
-        if (doc.exists()) {
-            const data = doc.data() as DocumentData;
+      const userDocRef = doc(firestore, 'users', user.uid);
+      const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+        if (docSnap.exists()) {
+            const data = docSnap.data() as DocumentData;
              if(!isSavingRef.current) {
                 dispatch({ type: 'SET_GAME_STATE', payload: data as GameState });
             }
         } else {
           // New user, create initial state in Firestore
           const batch = writeBatch(firestore);
-          const userRef = doc(firestore, "users", user.uid);
           const newGameData = {
             ...initialState,
             isInitialized: true,
           };
-          batch.set(userRef, newGameData);
+          batch.set(userDocRef, newGameData);
           batch.commit();
           dispatch({ type: 'SET_GAME_STATE', payload: newGameData });
         }
