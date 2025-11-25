@@ -3,7 +3,7 @@
 import { createContext, useContext } from 'react';
 import type { FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
-import type { Firestore }m 'firebase/firestore';
+import type { Firestore } from 'firebase/firestore';
 import { firebaseApp, auth, firestore } from './config';
 
 type FirebaseContextValue = {

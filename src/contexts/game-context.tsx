@@ -1,7 +1,7 @@
 // src/contexts/game-context.tsx
 'use client';
 
-import React, { createContext, useReducer, useEffect, type ReactNode, useState, useCallback } from 'react';
+import React, { createContext, useReducer, useEffect, type ReactNode, useState, useCallback, useRef } from 'react';
 import type { GameState, GameAction, LogMessage, Resource, Item, Statistics, LocationId, Theme } from '@/lib/game-types';
 import { initialState, initialStatistics } from '@/lib/game-data/initial-state';
 import { recipes as allRecipes } from '@/lib/game-data/recipes';
