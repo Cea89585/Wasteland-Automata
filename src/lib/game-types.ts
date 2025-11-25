@@ -126,7 +126,9 @@ export interface GameState {
 
 export type GameAction =
   | { type: 'INITIALIZE'; payload: { gameState: Omit<GameState, 'statistics'>, statistics: Statistics } }
+  | { type: 'SET_GAME_STATE', payload: Partial<GameState> }
   | { type: 'RESET_GAME' }
+  | { type: 'RESET_GAME_NO_LOCALSTORAGE' }
   | { type: 'SET_CHARACTER_NAME'; payload: string }
   | { type: 'GAME_TICK' }
   | { type: 'SET_IDLE', payload: boolean }

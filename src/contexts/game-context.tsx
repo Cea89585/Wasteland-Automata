@@ -1,7 +1,7 @@
 // src/contexts/game-context.tsx
 'use client';
 
-import React, { createContext, useReducer, useEffect, type ReactNode, useState } from 'react';
+import React, { createContext, useReducer, useEffect, type ReactNode, useState, useCallback } from 'react';
 import type { GameState, GameAction, LogMessage, Resource, Item, Statistics, LocationId, Theme } from '@/lib/game-types';
 import { initialState, initialStatistics } from '@/lib/game-data/initial-state';
 import { recipes as allRecipes } from '@/lib/game-data/recipes';
@@ -11,110 +11,14 @@ import { useInactivityTimer } from '@/hooks/use-inactivity-timer';
 import { locationOrder } from '@/lib/game-types';
 import { quests } from '@/lib/game-data/quests';
 import { xpCurve } from '@/lib/game-data/xp-curve';
+import { useUser } from '@/hooks/use-user';
+import { useFirebase } from '@/firebase/provider';
+import { doc, setDoc, onSnapshot, DocumentData } from 'firebase/firestore';
 
 
-const SAVE_KEY = 'wastelandAutomata_save';
-const STATS_KEY = 'wastelandAutomata_stats';
 const TICK_RATE_MS = 2000;
 
 let logIdCounter = 0;
-
-const runOfflineSimulation = (state: GameState): GameState => {
-  if (!state.lastSavedTimestamp) {
-    return state; // No timestamp to compare against
-  }
-
-  const now = Date.now();
-  const timeElapsedMs = now - state.lastSavedTimestamp;
-  const missedTicks = Math.floor(timeElapsedMs / TICK_RATE_MS);
-
-  if (missedTicks <= 0) {
-    return state;
-  }
-  
-  let simulatedState = { ...state };
-  
-  const getInventoryCap = (s: GameState) => 200 + (s.storageLevel || 0) * 50;
-  const getMaxEnergy = (s: GameState) => 100 + (s.energyLevel || 0) * 5;
-  const getMaxHealth = (s: GameState) => Math.min(1000, 100 + (s.healthLevel || 0) * 25);
-  const droneMissionDurationTicks = 30 / (TICK_RATE_MS / 1000);
-
-  for (let i = 0; i < missedTicks; i++) {
-    const currentTick = simulatedState.gameTick + i;
-    const INVENTORY_CAP = getInventoryCap(simulatedState);
-    const MAX_ENERGY = getMaxEnergy(simulatedState);
-    const MAX_HEALTH = getMaxHealth(simulatedState);
-    
-    // Power consumption
-    let isPowered = simulatedState.power > 0;
-    if (isPowered) {
-        simulatedState.power = Math.max(0, simulatedState.power - 1);
-    }
-    
-    // Treat every offline tick as an "idle" tick for regen
-    if (simulatedState.playerStats.health < MAX_HEALTH) {
-      simulatedState.playerStats.health = Math.min(MAX_HEALTH, simulatedState.playerStats.health + 0.25);
-    }
-    if (simulatedState.playerStats.energy < MAX_ENERGY) {
-      simulatedState.playerStats.energy = Math.min(MAX_ENERGY, simulatedState.playerStats.energy + 0.25);
-    }
-
-    // Passive resource generation
-    if (currentTick % 2 === 0) {
-      if (simulatedState.builtStructures.includes('waterPurifier') && simulatedState.inventory.water < INVENTORY_CAP) {
-        simulatedState.inventory.water = Math.min(INVENTORY_CAP, simulatedState.inventory.water + 1);
-      }
-      if (simulatedState.builtStructures.includes('hydroponicsBay') && simulatedState.inventory.apple < INVENTORY_CAP) {
-        simulatedState.inventory.apple = Math.min(INVENTORY_CAP, simulatedState.inventory.apple + 1);
-      }
-    }
-    
-    // Furnace simulation
-    const SMELT_DURATION_TICKS = 10 / (TICK_RATE_MS / 1000);
-    if (simulatedState.smeltingQueue > 0 && currentTick % SMELT_DURATION_TICKS === 0) {
-      if (simulatedState.inventory.components < INVENTORY_CAP) {
-        simulatedState.inventory.components = Math.min(INVENTORY_CAP, simulatedState.inventory.components + 1);
-        simulatedState.smeltingQueue -= 1;
-      }
-    }
-    if (simulatedState.ironIngotSmeltingQueue > 0 && currentTick % SMELT_DURATION_TICKS === 0) {
-        if (simulatedState.inventory.ironIngot < INVENTORY_CAP) {
-          simulatedState.inventory.ironIngot = Math.min(INVENTORY_CAP, simulatedState.inventory.ironIngot + 1);
-          simulatedState.ironIngotSmeltingQueue -= 1;
-        }
-    }
-    if (simulatedState.charcoalSmeltingQueue > 0 && currentTick % SMELT_DURATION_TICKS === 0) {
-        if (simulatedState.inventory.charcoal < INVENTORY_CAP) {
-          simulatedState.inventory.charcoal = Math.min(INVENTORY_CAP, simulatedState.inventory.charcoal + 1);
-          simulatedState.charcoalSmeltingQueue -= 1;
-        }
-    }
-
-    // Drone simulation
-    if (simulatedState.droneIsActive && simulatedState.droneReturnTimestamp && now >= simulatedState.droneReturnTimestamp) {
-        const { droneState, logMessage } = processDroneReturn(simulatedState);
-        simulatedState = droneState;
-    }
-    
-    if (!simulatedState.droneIsActive && simulatedState.droneMissionQueue > 0 && isPowered) {
-        simulatedState.droneMissionQueue -= 1;
-        simulatedState.droneIsActive = true;
-        simulatedState.droneReturnTimestamp = now + (i * TICK_RATE_MS) + 30000;
-    }
-  }
-  
-  simulatedState.gameTick += missedTicks;
-  
-  const timeAway = new Date(timeElapsedMs).toISOString().substr(11, 8);
-  simulatedState.log.unshift({
-    id: generateUniqueLogId(),
-    text: `Welcome back. While you were away for ${timeAway}, your base continued to operate.`,
-    type: 'info',
-    timestamp: now
-  });
-
-  return simulatedState;
-};
 
 const addResource = (inventory: GameState['inventory'], statistics: GameState['statistics'], resource: Resource | Item, amount: number, cap: number) => {
     const newInventory = { ...inventory };
@@ -204,11 +108,18 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
       return { ...gameState, statistics, isInitialized: true };
     }
+
+    case 'SET_GAME_STATE': {
+      return { ...state, ...action.payload, isInitialized: true };
+    }
     
     case 'RESET_GAME': {
       localStorage.clear();
-      window.location.reload();
-      return initialState;
+      return { ...initialState, statistics: initialStatistics, isInitialized: true };
+    }
+
+    case 'RESET_GAME_NO_LOCALSTORAGE': {
+      return { ...initialState, isInitialized: false };
     }
 
     case 'SET_CHARACTER_NAME': {
@@ -324,7 +235,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           type: 'danger',
         });
         const newStatistics = { ...currentState.statistics, deaths: currentState.statistics.deaths + 1 };
-        localStorage.setItem(STATS_KEY, JSON.stringify(newStatistics));
         return {
           ...currentState,
           playerStats: newStats,
@@ -836,13 +746,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (state.inventory.apple <= 0) return state;
       const MAX_HUNGER = getMaxHunger();
       const MAX_HEALTH = getMaxHealth();
-      const MAX_ENERGY = getMaxEnergy();
-
+      
       const newInventory = { ...state.inventory, apple: state.inventory.apple - 1 };
       const newStats = { ...state.playerStats };
       newStats.hunger = Math.min(MAX_HUNGER, newStats.hunger + 40);
       newStats.health = Math.min(MAX_HEALTH, newStats.health + 5);
-      newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 1);
+      newStats.energy = Math.min(getMaxEnergy(), newStats.energy + 1);
 
       return {
         ...state,
@@ -1362,7 +1271,10 @@ export const GameContext = createContext<{
 } | undefined>(undefined);
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [gameState, dispatch] = useReducer(reducer, { ...initialState, statistics: initialStatistics, isInitialized: false });
+  const [gameState, dispatch] = useReducer(reducer, { ...initialState, isInitialized: false });
+  const { user } = useUser();
+  const { firestore } = useFirebase();
+  const isSavingRef = useRef(false);
 
   const { idleProgress, resetTimer } = useInactivityTimer({
     onIdle: () => dispatch({ type: 'SET_IDLE', payload: true }),
@@ -1370,111 +1282,47 @@ export function GameProvider({ children }: { children: ReactNode }) {
     timeout: 37000,
   });
 
+  // Effect for loading game state from Firestore
   useEffect(() => {
-    try {
-      const savedGame = localStorage.getItem(SAVE_KEY);
-      const savedStats = localStorage.getItem(STATS_KEY);
-      
-      let loadedState = savedGame ? JSON.parse(savedGame) : initialState;
-      let loadedStats = savedStats ? JSON.parse(savedStats) : initialStatistics;
-
-      let migratedState = { ...initialState, ...loadedState };
-      const migratedStats = { ...initialStatistics, ...loadedStats };
-      
-      migratedState.isResting = false;
-      migratedState.isIdle = false;
-      
-      if (!migratedState.builtStructures) {
-        migratedState.builtStructures = [];
-        if (migratedState.inventory.workbench > 0) {
-          migratedState.builtStructures.push('workbench');
+    if (user) {
+      const docRef = doc(firestore, 'users', user.uid);
+      const unsubscribe = onSnapshot(docRef, (doc) => {
+        if (doc.exists()) {
+            const data = doc.data() as GameState;
+            if(!isSavingRef.current) {
+                dispatch({ type: 'SET_GAME_STATE', payload: data });
+            }
+        } else {
+          // New user, create initial state in Firestore
+          const newGameData = {
+            ...initialState,
+            isInitialized: true,
+          };
+          setDoc(docRef, newGameData);
+          dispatch({ type: 'SET_GAME_STATE', payload: newGameData });
         }
-      }
-      if (!migratedState.lockedItems) migratedState.lockedItems = [];
-      if (!migratedState.unlockedFlags) migratedState.unlockedFlags = [];
-      if (!migratedState.unlockedLocations) migratedState.unlockedLocations = ['outskirts'];
-      if (!migratedState.unlockedRecipes.includes('recipe_crudeMap')) {
-        if (migratedState.builtStructures.includes('workbench')) {
-            migratedState.unlockedRecipes.push('recipe_crudeMap');
-        }
-      }
-      if (!migratedState.unlockedRecipes.includes('recipe_crudeMap_tunnels')) {
-        if(migratedState.unlockedLocations.includes('forest')) migratedState.unlockedRecipes.push('recipe_crudeMap_tunnels');
-      }
-      if (!migratedState.storageLevel) migratedState.storageLevel = 0;
-      if (!migratedState.energyLevel) migratedState.energyLevel = 0;
-      if (!migratedState.hungerLevel) migratedState.hungerLevel = 0;
-      if (!migratedState.thirstLevel) migratedState.thirstLevel = 0;
-      if (!migratedState.healthLevel) migratedState.healthLevel = 0;
-      if (!migratedState.droneLevel) migratedState.droneLevel = 0;
-      if (!migratedState.completedQuests) migratedState.completedQuests = [];
-      if (!migratedState.inventory.mutatedTwigs) migratedState.inventory.mutatedTwigs = 0;
-      if (!migratedState.inventory.ironIngot) migratedState.inventory.ironIngot = 0;
-      if (!migratedState.inventory.ironPlates) migratedState.inventory.ironPlates = 0;
-      if (!migratedState.inventory.biomass) migratedState.inventory.biomass = 0;
-      if (!migratedState.inventory.charcoal) migratedState.inventory.charcoal = 0;
-      if (!migratedState.inventory.biomassCompressor) migratedState.inventory.biomassCompressor = 0;
-      if (!migratedState.ironIngotSmeltingQueue) migratedState.ironIngotSmeltingQueue = 0;
-      if (!migratedState.charcoalSmeltingQueue) migratedState.charcoalSmeltingQueue = 0;
-      if (!migratedState.power) migratedState.power = 0;
-      if (!migratedState.droneMissionQueue) migratedState.droneMissionQueue = 0;
-      if (!migratedState.theme) migratedState.theme = 'dark';
-      if (!('lastSavedTimestamp' in migratedState)) migratedState.lastSavedTimestamp = Date.now();
-      if (!migratedState.characterName) migratedState.characterName = 'Survivor';
-      if (!migratedState.level) migratedState.level = 1;
-      if (!migratedState.xp) migratedState.xp = 0;
-      
-      migratedState.xpToNextLevel = xpForNextLevel(migratedState.level);
+      });
 
-      if (!migratedState.upgradePoints) migratedState.upgradePoints = 0;
-
-
-      if (migratedState.builtStructures.includes('furnace') && !migratedState.unlockedRecipes.includes('recipe_ironPlates')) {
-        migratedState.unlockedRecipes.push('recipe_ironPlates');
-      }
-      if (migratedState.builtStructures.includes('furnace') && !migratedState.unlockedRecipes.includes('recipe_biomassCompressor')) {
-        migratedState.unlockedRecipes.push('recipe_biomassCompressor');
-      }
-      if (migratedState.inventory.biomassCompressor > 0 && !migratedState.unlockedRecipes.includes('recipe_createBiomass')) {
-        migratedState.unlockedRecipes.push('recipe_createBiomass');
-      }
-      if (migratedState.builtStructures.includes('biomassCompressor') && !migratedState.unlockedRecipes.includes('recipe_createBiomass')) {
-          migratedState.unlockedRecipes.push('recipe_createBiomass');
-      }
-
-      migratedState = runOfflineSimulation(migratedState);
-
-      if ('statistics' in migratedState) {
-        delete (migratedState as any).statistics;
-      }
-      
-      dispatch({ type: 'INITIALIZE', payload: { gameState: migratedState, statistics: migratedStats } });
-
-    } catch (error) {
-      console.error("Failed to load game from localStorage", error);
-      dispatch({ type: 'INITIALIZE', payload: { gameState: initialState, statistics: initialStatistics } });
+      return () => unsubscribe();
+    } else {
+        dispatch({ type: 'RESET_GAME_NO_LOCALSTORAGE' });
     }
-  }, []);
+  }, [user, firestore]);
 
+  // Effect for saving game state to Firestore
   useEffect(() => {
-    if (gameState.isInitialized) {
-      try {
-        const { statistics, ...stateToSave } = gameState;
-        
-        const savableState = { ...stateToSave };
-        savableState.lastSavedTimestamp = Date.now();
-        if (savableState.log.length > 50) {
-          savableState.log = savableState.log.slice(0, 50);
-        }
-        localStorage.setItem(SAVE_KEY, JSON.stringify(savableState));
-        localStorage.setItem(STATS_KEY, JSON.stringify(statistics));
-
-      } catch (error) {
-        console.error("Failed to save game to localStorage", error);
-      }
+    if (gameState.isInitialized && user) {
+        isSavingRef.current = true;
+        const docRef = doc(firestore, 'users', user.uid);
+        const { isInitialized, ...savableState } = gameState;
+        setDoc(docRef, savableState, { merge: true }).finally(() => {
+            isSavingRef.current = false;
+        });
     }
-  }, [gameState]);
+  }, [gameState, user, firestore]);
 
+
+  // Effect for game tick
   useEffect(() => {
     if (!gameState.isInitialized || gameState.playerStats.health <= 0) return;
 
@@ -1485,6 +1333,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(tickInterval);
   }, [gameState.isInitialized, gameState.playerStats.health]);
   
+  // Effect for inactivity timer
   useEffect(() => {
     if (gameState.isInitialized) {
       if (gameState.droneIsActive || gameState.smeltingQueue > 0 || gameState.ironIngotSmeltingQueue > 0 || gameState.charcoalSmeltingQueue > 0) {

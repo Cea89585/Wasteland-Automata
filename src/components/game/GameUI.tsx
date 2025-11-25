@@ -21,7 +21,7 @@ import MarketPanel from './MarketPanel';
 import IdleTimer from './IdleTimer';
 import CommunityPanel from './CommunityPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Backpack, Compass, Hammer, Home, BookOpen, User, Power, AlertTriangle, Coins, Settings, Users } from 'lucide-react';
+import { Backpack, Compass, Hammer, Home, BookOpen, User, Power, AlertTriangle, Coins, Settings, Users, LogOut } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,23 +39,41 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '../ui/scroll-area';
+import { useUser } from '@/hooks/use-user';
+import { useRouter } from 'next/navigation';
+import { useFirebase } from '@/firebase/provider';
 
 export default function GameUI() {
-  const { gameState } = useGame();
+  const { gameState, dispatch } = useGame();
+  const { user, isLoading: isUserLoading } = useUser();
+  const { auth } = useFirebase();
+  const router = useRouter();
   const isMobile = useBreakpoint('sm');
   const [activeTab, setActiveTab] = useState('explore');
 
-  if (!gameState.isInitialized) {
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/login');
+    }
+  }, [user, isUserLoading, router]);
+
+  if (isUserLoading || !gameState.isInitialized || !user) {
     return <LoadingScreen />;
   }
 
   if (gameState.characterName === 'Survivor') {
     return <WelcomeScreen />;
   }
+  
+  const handleLogout = async () => {
+    await auth.signOut();
+    dispatch({ type: 'RESET_GAME_NO_LOCALSTORAGE' });
+    router.push('/login');
+  };
 
   const isGameOver = gameState.playerStats.health <= 0;
   const isBusy = gameState.isResting || gameState.smeltingQueue > 0 || gameState.ironIngotSmeltingQueue > 0 || gameState.charcoalSmeltingQueue > 0;
@@ -115,6 +133,10 @@ export default function GameUI() {
                         <span className="sr-only">Settings</span>
                     </Button>
                 </Link>
+                 <Button variant="ghost" size="icon" onClick={handleLogout}>
+                    <LogOut className="h-5 w-5" />
+                    <span className="sr-only">Log Out</span>
+                </Button>
             </div>
         </div>
         <div className="flex flex-col gap-2 w-full">
@@ -164,7 +186,7 @@ export default function GameUI() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => { localStorage.clear(); window.location.reload(); }}>
+            <AlertDialogAction onClick={() => { dispatch({ type: 'RESET_GAME' }); }}>
               Start Anew
             </AlertDialogAction>
           </AlertDialogFooter>

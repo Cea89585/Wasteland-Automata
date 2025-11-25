@@ -1,4 +1,3 @@
-
 // src/components/game/CharacterPanel.tsx
 'use client';
 import { useGame } from '@/hooks/use-game';
@@ -7,7 +6,7 @@ import { itemData } from '@/lib/game-data/items';
 import { allIcons } from './GameIcons';
 import type { EquipmentSlot, Item } from '@/lib/game-types';
 import { Button } from '../ui/button';
-import { Shirt, Hand, PersonStanding, Map, Edit, ArrowUpCircle, Star } from 'lucide-react';
+import { Shirt, Hand, PersonStanding, Map, ArrowUpCircle, Star } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { locations } from '@/lib/game-data/locations';
 import { Progress } from '../ui/progress';
