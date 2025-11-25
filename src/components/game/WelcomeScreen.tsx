@@ -70,7 +70,7 @@ export default function WelcomeScreen() {
 
             await batch.commit();
             
-            // Dispatch is now handled by the onSnapshot listener in GameContext
+            // The onSnapshot listener in GameContext will handle updating the state.
             toast({ title: 'Welcome to the Wasteland', description: `Your journey as ${trimmedName} begins now.` });
 
         } catch (error: any) {
