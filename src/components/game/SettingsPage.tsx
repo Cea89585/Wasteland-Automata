@@ -33,9 +33,11 @@ export default function SettingsPage() {
     const setTheme = (newTheme: Theme) => dispatch({ type: 'SET_THEME', payload: newTheme });
 
 
-    const totalItemsGained = Object.entries(statistics.totalItemsGained)
-        .filter(([, quantity]) => quantity > 0)
-        .sort((a, b) => a[0].localeCompare(b[0]));
+    const totalItemsGained = statistics?.totalItemsGained 
+        ? Object.entries(statistics.totalItemsGained)
+            .filter(([, quantity]) => quantity > 0)
+            .sort((a, b) => a[0].localeCompare(b[0]))
+        : [];
 
 
     return (
@@ -86,19 +88,19 @@ export default function SettingsPage() {
                             <div className="flex items-center gap-2 font-medium">
                                 <Compass /> Times Explored
                             </div>
-                            <span className="font-mono text-lg font-semibold text-primary">{statistics.timesExplored}</span>
+                            <span className="font-mono text-lg font-semibold text-primary">{statistics?.timesExplored || 0}</span>
                         </div>
                          <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
                             <div className="flex items-center gap-2 font-medium">
                                 <Search /> Times Scavenged
                             </div>
-                            <span className="font-mono text-lg font-semibold text-primary">{statistics.timesScavenged}</span>
+                            <span className="font-mono text-lg font-semibold text-primary">{statistics?.timesScavenged || 0}</span>
                         </div>
                          <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
                             <div className="flex items-center gap-2 font-medium">
                                 <Skull /> Times Died
                             </div>
-                            <span className="font-mono text-lg font-semibold text-primary">{statistics.deaths}</span>
+                            <span className="font-mono text-lg font-semibold text-primary">{statistics?.deaths || 0}</span>
                         </div>
                     </CardContent>
                 </Card>

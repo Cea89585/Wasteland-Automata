@@ -44,7 +44,7 @@ export const initialStatistics: Statistics = {
 };
 
 
-export const initialState: Omit<GameState, 'statistics'> = {
+export const initialState: GameState = {
   characterName: 'Survivor',
   level: 1,
   xp: 0,
@@ -66,6 +66,7 @@ export const initialState: Omit<GameState, 'statistics'> = {
     hand: null,
     body: null,
   },
+  statistics: initialStatistics,
   log: [
     {
       id: 1,

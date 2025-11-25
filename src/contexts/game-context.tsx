@@ -110,7 +110,15 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'SET_GAME_STATE': {
-      return { ...state, ...action.payload, isInitialized: true };
+        const newState = { ...state, ...action.payload };
+        // Ensure statistics object is always present and has totalItemsGained
+        if (!newState.statistics) {
+            newState.statistics = { ...initialStatistics };
+        }
+        if (!newState.statistics.totalItemsGained) {
+            newState.statistics.totalItemsGained = { ...initialStatistics.totalItemsGained };
+        }
+        return { ...newState, isInitialized: true };
     }
     
     case 'RESET_GAME': {
@@ -119,7 +127,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'RESET_GAME_NO_LOCALSTORAGE': {
-      return { ...initialState, isInitialized: false };
+      return { ...initialState, isInitialized: false, statistics: initialStatistics };
     }
 
     case 'SET_CHARACTER_NAME': {
@@ -1271,7 +1279,7 @@ export const GameContext = createContext<{
 } | undefined>(undefined);
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [gameState, dispatch] = useReducer(reducer, { ...initialState, isInitialized: false });
+  const [gameState, dispatch] = useReducer(reducer, { ...initialState, statistics: initialStatistics, isInitialized: false });
   const { user } = useUser();
   const { firestore } = useFirebase();
   const isSavingRef = useRef(false);
@@ -1296,6 +1304,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
           // New user, create initial state in Firestore
           const newGameData = {
             ...initialState,
+            statistics: initialStatistics,
             isInitialized: true,
           };
           setDoc(docRef, newGameData);
