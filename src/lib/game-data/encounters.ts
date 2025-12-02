@@ -1,25 +1,29 @@
 // src/lib/game-data/encounters.ts
 import type { Resource, Item, LocationId } from "../game-types";
 
-export type FixedEncounter = {
+export type PositiveEncounter = {
     type: 'positive';
     message: string;
     reward: {
         item: Resource | Item;
         amount: number;
     };
-} | {
+};
+
+export type NegativeEncounter = {
     type: 'negative';
     message: string;
     penalty: {
         type: 'health' | Resource | Item;
         amount: number;
     };
-}
+};
+
+export type FixedEncounter = PositiveEncounter | NegativeEncounter;
 
 type LocationEncounters = {
-    positive: FixedEncounter[];
-    negative: FixedEncounter[];
+    positive: PositiveEncounter[];
+    negative: NegativeEncounter[];
 }
 
 export const encounters: Record<LocationId, LocationEncounters> = {
@@ -53,7 +57,7 @@ export const encounters: Record<LocationId, LocationEncounters> = {
             { type: 'negative', message: "Thorny vines snag your pack, tearing a hole and spilling some of your wood.", penalty: { type: 'wood', amount: 5 } },
             { type: 'negative', message: "You eat a strange-looking fruit and feel a wave of nausea.", penalty: { type: 'health', amount: 15 } },
             { type: 'negative', message: "You get lost in the dense woods, wasting time and energy.", penalty: { type: 'health', amount: 5 } },
-             { type: 'negative', message: "A territorial creature with glowing eyes forces you to drop some of your food to escape.", penalty: { type: 'apple', amount: 4 } },
+            { type: 'negative', message: "A territorial creature with glowing eyes forces you to drop some of your food to escape.", penalty: { type: 'apple', amount: 4 } },
         ]
     },
     tunnels: {

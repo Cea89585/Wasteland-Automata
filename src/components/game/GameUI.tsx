@@ -20,8 +20,11 @@ import FurnacePanel from './FurnacePanel';
 import MarketPanel from './MarketPanel';
 import IdleTimer from './IdleTimer';
 import CommunityPanel from './CommunityPanel';
+import FarmingPanel from './FarmingPanel';
+import DailyRewardModal from './DailyRewardModal';
+import FactoryPanel from './FactoryPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Backpack, Compass, Hammer, Home, BookOpen, User, Power, AlertTriangle, Coins, Settings, Users, LogOut } from 'lucide-react';
+import { Backpack, Compass, Hammer, Home, BookOpen, User, Power, AlertTriangle, Coins, Settings, Users, LogOut, Sprout, Factory } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -68,7 +71,7 @@ export default function GameUI() {
   if (gameState.characterName === 'Survivor') {
     return <WelcomeScreen />;
   }
-  
+
   const handleLogout = async () => {
     await auth.signOut();
     dispatch({ type: 'RESET_GAME_NO_LOCALSTORAGE' });
@@ -80,6 +83,7 @@ export default function GameUI() {
 
   const showFurnace = gameState.builtStructures.includes('furnace');
   const showMarket = gameState.builtStructures.includes('workbench');
+  const showFarming = gameState.builtStructures.includes('hydroponicsBay');
 
   const tabs = [
     { value: "explore", label: "Explore", icon: <Compass className="h-4 w-4" /> },
@@ -90,74 +94,79 @@ export default function GameUI() {
     { value: "base", label: "Base", icon: <Home className="h-4 w-4" /> },
     { value: "furnace", label: "Furnace", icon: <Power className="h-4 w-4" />, condition: showFurnace },
     { value: "market", label: "Market", icon: <Coins className="h-4 w-4" />, condition: showMarket },
+    { value: "farming", label: "Farming", icon: <Sprout className="h-4 w-4" />, condition: showFarming },
+    { value: "factory", label: "Factory", icon: <Factory className="h-4 w-4" /> },
     { value: "tech", label: "Tech", icon: <BookOpen className="h-4 w-4" /> },
   ].filter(tab => tab.condition !== false);
 
   const handleTabChange = (value: string) => {
+    console.log('handleTabChange:', value);
     setActiveTab(value);
   }
+
+  console.log('GameUI Render: activeTab=', activeTab, 'isBusy=', isBusy, 'isResting=', gameState.isResting, 'isIdle=', gameState.isIdle);
 
   return (
     <div className="flex flex-col gap-4">
       <header className="flex flex-col justify-between gap-4 rounded-lg border bg-card text-card-foreground p-4 shadow-sm">
         <div className="flex flex-row justify-between items-center w-full gap-4">
-            <div className="flex flex-col gap-2">
-                <h1 className="text-xl sm:text-2xl font-bold font-headline text-primary">
-                Wasteland Automata
-                </h1>
-                <IdleTimer />
-            </div>
-            <div className="flex items-center gap-2">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                        <AlertTriangle className="h-5 w-5 text-destructive" />
-                        <span className="sr-only">Warning</span>
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle className="flex items-center gap-2"><AlertTriangle className="text-destructive" /> Important Warning</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            If your health reaches 0%, you will die and your progress for this run will be permanently reset.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogAction>Acknowledge</AlertDialogAction>
-                      </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-                <Link href="/settings">
-                    <Button variant="ghost" size="icon">
-                        <Settings className="h-5 w-5" />
-                        <span className="sr-only">Settings</span>
-                    </Button>
-                </Link>
-                 <Button variant="ghost" size="icon" onClick={handleLogout}>
-                    <LogOut className="h-5 w-5" />
-                    <span className="sr-only">Log Out</span>
+          <div className="flex flex-col gap-2">
+            <h1 className="text-xl sm:text-2xl font-bold font-headline text-primary">
+              Wasteland Automata
+            </h1>
+            <IdleTimer />
+          </div>
+          <div className="flex items-center gap-2">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                  <span className="sr-only">Warning</span>
                 </Button>
-            </div>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="flex items-center gap-2"><AlertTriangle className="text-destructive" /> Important Warning</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    If your health reaches 0%, you will die and your progress for this run will be permanently reset.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogAction>Acknowledge</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+            <Link href="/settings">
+              <Button variant="ghost" size="icon">
+                <Settings className="h-5 w-5" />
+                <span className="sr-only">Settings</span>
+              </Button>
+            </Link>
+            <Button variant="ghost" size="icon" onClick={handleLogout}>
+              <LogOut className="h-5 w-5" />
+              <span className="sr-only">Log Out</span>
+            </Button>
+          </div>
         </div>
         <div className="flex flex-col gap-2 w-full">
-            <StatsPanel />
-            <div className={cn("block sm:hidden")}>
-                <SilverCounter />
-            </div>
+          <StatsPanel />
+          <div className={cn("block sm:hidden")}>
+            <SilverCounter />
+          </div>
         </div>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         <div className={cn("lg:col-span-3 lg:order-1", isMobile ? "order-1" : "order-2")}>
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-             <TabsList className="h-auto flex-wrap justify-start">
-                {tabs.map((tab) => (
-                  <TabsTrigger key={tab.value} value={tab.value} disabled={isBusy} className="flex items-center gap-2 text-xs h-9 sm:text-sm">
-                    {tab.icon}
-                    <span>{tab.label}</span>
-                  </TabsTrigger>
-                ))}
-              </TabsList>
+            <TabsList className="h-auto flex-wrap justify-start">
+              {tabs.map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value} disabled={isBusy} className="flex items-center gap-2 text-xs h-9 sm:text-sm">
+                  {tab.icon}
+                  <span>{tab.label}</span>
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
             <TabsContent value="explore" className="mt-4"><ExplorationPanel /></TabsContent>
             <TabsContent value="community" className="mt-4"><CommunityPanel /></TabsContent>
@@ -167,6 +176,8 @@ export default function GameUI() {
             <TabsContent value="base" className="mt-4"><BasePanel /></TabsContent>
             {showFurnace && <TabsContent value="furnace" className="mt-4"><FurnacePanel /></TabsContent>}
             {showMarket && <TabsContent value="market" className="mt-4"><MarketPanel /></TabsContent>}
+            {showFarming && <TabsContent value="farming" className="mt-4"><FarmingPanel /></TabsContent>}
+            <TabsContent value="factory" className="mt-4"><FactoryPanel /></TabsContent>
             <TabsContent value="tech" className="mt-4"><TechPanel /></TabsContent>
           </Tabs>
         </div>
@@ -192,6 +203,8 @@ export default function GameUI() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+
+      <DailyRewardModal />
+    </div >
   );
 }

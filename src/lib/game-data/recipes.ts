@@ -6,7 +6,7 @@ export interface Recipe {
   name: string;
   description: string;
   creates: Item | Resource;
-  requirements: Partial<Record<Resource | 'silver', number>>;
+  requirements: Partial<Record<Resource | Item, number>>;
   unlockedBy: string[]; // Can be item IDs (e.g., 'workbench') or tech IDs
 }
 
@@ -115,4 +115,14 @@ export const recipes: Recipe[] = [
     requirements: { mutatedTwigs: 150, wood: 100 },
     unlockedBy: ['biomassCompressor'],
   },
+  {
+    id: 'recipe_appleSeeds',
+    name: 'Extract Apple Seeds',
+    description: 'Carefully extract seeds from an apple for planting.',
+    creates: 'appleSeeds',
+    requirements: { apple: 1 },
+    unlockedBy: ['hydroponicsBay'],
+  },
+  // Machine recipes - Note: These don't create items, they're handled specially in BUILD_MACHINE action
+  // Keeping them here for consistency and future UI integration
 ];

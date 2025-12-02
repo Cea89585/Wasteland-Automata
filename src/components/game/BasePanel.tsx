@@ -15,71 +15,71 @@ import { Trees } from 'lucide-react';
 
 
 const FuelSection = () => {
-    const { gameState, dispatch } = useGame();
-    const { inventory, power } = gameState;
+  const { gameState, dispatch } = useGame();
+  const { inventory, power } = gameState;
 
-    const canAddWood = inventory.wood > 0;
-    const canAddBiomass = inventory.biomass > 0;
-    const canAddCharcoal = inventory.charcoal > 0;
-    
-    const handleAddFuel = (fuelType: 'wood' | 'biomass' | 'charcoal') => {
-        dispatch({ type: 'ADD_FUEL', payload: { fuelType } });
-    }
+  const canAddWood = inventory.wood > 0;
+  const canAddBiomass = inventory.biomass > 0;
+  const canAddCharcoal = inventory.charcoal > 0;
 
-    const maxPower = 1000;
-    const powerPercentage = (power / maxPower) * 100;
+  const handleAddFuel = (fuelType: 'wood' | 'biomass' | 'charcoal') => {
+    dispatch({ type: 'ADD_FUEL', payload: { fuelType } });
+  }
 
-    return (
-        <Card className="bg-muted/50">
-            <CardHeader className="pb-4">
-                <CardTitle className="flex items-center text-lg gap-2"><Fuel /> Generator Fuel</CardTitle>
-                <CardDescription>Add fuel to the generator to power your automated systems. Biomass is a much more efficient fuel source.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="flex flex-col gap-2">
-                    <div className="flex items-center justify-between">
-                         <span className="text-sm text-muted-foreground">Power Level</span>
-                         <span className="font-mono text-primary">{power} / {maxPower}</span>
-                    </div>
-                    <Progress value={powerPercentage} />
-                </div>
-                <div className="grid grid-cols-3 gap-2">
-                    <TooltipProvider>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button variant="outline" onClick={() => handleAddFuel('wood')} disabled={!canAddWood}>
-                                    <Trees className="mr-2"/> Add Wood
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Adds 10 Power</p>
-                            </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button variant="outline" onClick={() => handleAddFuel('charcoal')} disabled={!canAddCharcoal}>
-                                    <Fuel className="mr-2"/> Add Charcoal
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Adds 50 Power</p>
-                            </TooltipContent>
-                        </Tooltip>
-                         <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button variant="outline" onClick={() => handleAddFuel('biomass')} disabled={!canAddBiomass}>
-                                    <Leaf className="mr-2"/> Add Biomass
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>Adds 250 Power</p>
-                            </TooltipContent>
-                        </Tooltip>
-                    </TooltipProvider>
-                </div>
-            </CardContent>
-        </Card>
-    )
+  const maxPower = 1000;
+  const powerPercentage = (power / maxPower) * 100;
+
+  return (
+    <Card className="bg-muted/50">
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center text-lg gap-2"><Fuel /> Generator Fuel</CardTitle>
+        <CardDescription>Add fuel to the generator to power your automated systems. Biomass is a much more efficient fuel source.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-muted-foreground">Power Level</span>
+            <span className="font-mono text-primary">{power} / {maxPower}</span>
+          </div>
+          <Progress value={powerPercentage} />
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" onClick={() => handleAddFuel('wood')} disabled={!canAddWood}>
+                  <Trees className="mr-2" /> Add Wood
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Adds 10 Power</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" onClick={() => handleAddFuel('charcoal')} disabled={!canAddCharcoal}>
+                  <Fuel className="mr-2" /> Add Charcoal
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Adds 50 Power</p>
+              </TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" onClick={() => handleAddFuel('biomass')} disabled={!canAddBiomass}>
+                  <Leaf className="mr-2" /> Add Biomass
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Adds 250 Power</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      </CardContent>
+    </Card>
+  )
 }
 
 const StructureSection = ({
@@ -139,23 +139,27 @@ const StructureSection = ({
             <div className="flex items-center font-semibold text-base mb-2">
               <Icon className="mr-2 h-5 w-5" /> {title}
             </div>
-             <p className="text-xs text-muted-foreground mb-3">{description}</p>
-            <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-              <span>Requires:</span>
+            <p className="text-xs text-muted-foreground mb-3">{description}</p>
+            <div className="flex flex-col gap-1 text-xs">
+              <span className="text-muted-foreground">Requires:</span>
               <div className="flex flex-wrap gap-x-3 gap-y-1">
-                {Object.entries(recipe.requirements).map(([resource, amount]) => (
-                  <span key={resource} className="flex items-center">
-                    {resourceIcons[resource as Resource]}
-                    {itemData[resource as Resource].name}: {amount}
-                  </span>
-                ))}
+                {Object.entries(recipe.requirements).map(([resource, amount]) => {
+                  const has = gameState.inventory[resource as Resource] || 0;
+                  const enough = has >= amount;
+                  return (
+                    <span key={resource} className={enough ? 'text-green-600' : 'text-red-600'}>
+                      {resourceIcons[resource as Resource]}
+                      {itemData[resource as Resource].name}: {has}/{amount}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           </div>
-          <Button 
+          <Button
             size="icon"
             variant={canCraft(recipeId) ? 'default' : 'outline'}
-            onClick={() => handleBuild(recipeId)} 
+            onClick={() => handleBuild(recipeId)}
             disabled={!canCraft(recipeId) || gameState.playerStats.health <= 0 || isBusy}
             aria-label={`Build ${title}`}
           >
@@ -182,8 +186,8 @@ export default function BasePanel() {
         <CardDescription>A small patch of wasteland to call your own.</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        
-        <StructureSection 
+
+        <StructureSection
           structureId="workbench"
           recipeId="recipe_workbench"
           title="Build a Workbench"
@@ -195,7 +199,7 @@ export default function BasePanel() {
 
         {isWorkbenchBuilt && (
           <>
-             <Separator />
+            <Separator />
             <StructureSection
               structureId="waterPurifier"
               recipeId="recipe_waterPurifier"
@@ -224,18 +228,18 @@ export default function BasePanel() {
               successText="Furnace built!"
               successDescription="Automated smelting is available."
             />
-             <Separator />
-             <StructureSection
-                structureId="generator"
-                recipeId="recipe_generator"
-                title="Build a Power Generator"
-                description="Consumes fuel to power your automated base systems, like the Drone Bay."
-                Icon={Power}
-                successText="Power Generator built!"
-                successDescription="You can now fuel your base."
+            <Separator />
+            <StructureSection
+              structureId="generator"
+              recipeId="recipe_generator"
+              title="Build a Power Generator"
+              description="Consumes fuel to power your automated base systems, like the Drone Bay."
+              Icon={Power}
+              successText="Power Generator built!"
+              successDescription="You can now fuel your base."
             />
             {isGeneratorBuilt && <FuelSection />}
-             <Separator />
+            <Separator />
             <StructureSection
               structureId="droneBay"
               recipeId="recipe_droneBay"

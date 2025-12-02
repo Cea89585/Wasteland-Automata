@@ -13,6 +13,7 @@ const emptyInventory = {
   lemon: 0,
   banana: 0,
   peach: 0,
+  appleSeeds: 0,
   silver: 0,
   mutatedTwigs: 0,
   ironIngot: 0,
@@ -41,6 +42,7 @@ export const initialStatistics: Statistics = {
   totalItemsGained: {
     ...emptyInventory
   },
+  itemsCrafted: {},
 };
 
 
@@ -72,13 +74,13 @@ export const initialState: GameState = {
       id: 1,
       text: 'You awaken to the grey light of a sunless sky. The world you knew is gone, replaced by ruins and silence.',
       timestamp: Date.now(),
-      type: 'event',
+      type: 'event' as const,
     },
     {
       id: 2,
       text: 'Survival is your only goal. Find resources, craft tools, and endure.',
       timestamp: Date.now() + 1,
-      type: 'info',
+      type: 'info' as const,
     },
   ],
   currentLocation: 'outskirts',
@@ -108,4 +110,11 @@ export const initialState: GameState = {
   power: 0,
   theme: 'dark',
   lastSavedTimestamp: Date.now(),
+  lastDailyRewardClaimed: 0,
+  farmPlots: [],
+  masteryClaimed: {},
+  machines: [],
+  powerCapacity: 0,
+  powerConsumption: 0,
+  skills: {},
 };

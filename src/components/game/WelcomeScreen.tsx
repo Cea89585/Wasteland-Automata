@@ -11,7 +11,7 @@ import { firstNames, surnames } from '@/lib/game-data/names';
 import filter from 'naughty-words';
 import { useFirebase } from '@/firebase/provider';
 import { useUser } from '@/hooks/use-user';
-import { doc, getDoc, writeBatch } from 'firebase/firestore';
+import { doc, getDoc, writeBatch, updateDoc } from 'firebase/firestore';
 
 export default function WelcomeScreen() {
     const { dispatch } = useGame();
@@ -32,7 +32,7 @@ export default function WelcomeScreen() {
             toast({ variant: 'destructive', title: 'Invalid Name', description: 'Name must be between 3 and 25 characters.' });
             return;
         }
-        
+
         if (!/^[a-zA-Z\s]+$/.test(trimmedName)) {
             toast({ variant: 'destructive', title: 'Invalid Name', description: 'Name can only contain letters and spaces.' });
             return;
@@ -45,40 +45,26 @@ export default function WelcomeScreen() {
             toast({ variant: 'destructive', title: 'Name Not Allowed', description: 'Please choose a more appropriate name.' });
             return;
         }
-        
-        setIsLoading(true);
 
-        const nameRef = doc(firestore, 'characterNames', sanitizedName);
+        setIsLoading(true);
         const userRef = doc(firestore, 'users', user.uid);
 
         try {
-            const nameDoc = await getDoc(nameRef);
-            if (nameDoc.exists()) {
-                toast({ variant: 'destructive', title: 'Name Taken', description: 'This name is already in use. Please choose another.' });
-                setIsLoading(false);
-                return;
-            }
+            // Optimistically update local state to ensure immediate UI feedback
+            dispatch({ type: 'SET_CHARACTER_NAME', payload: trimmedName });
 
-            // Use a batch to ensure atomicity
-            const batch = writeBatch(firestore);
-            
-            // Claim the name
-            batch.set(nameRef, { uid: user.uid });
-            
             // Update the user's character profile
-            batch.update(userRef, { characterName: trimmedName });
+            await updateDoc(userRef, { characterName: trimmedName });
 
-            await batch.commit();
-            
-            // The onSnapshot listener in GameContext will handle updating the state.
+            // The onSnapshot listener in GameContext will handle updating the rest of the state.
             toast({ title: 'Welcome to the Wasteland', description: `Your journey as ${trimmedName} begins now.` });
 
         } catch (error: any) {
-            // This is a generic catch-all for other errors (like network issues)
-            // The specific permission error will be handled by the .catch on the commit itself.
-            if (error.code !== 'permission-denied') {
-                 toast({ variant: 'destructive', title: 'Error', description: 'Could not set character name. Please try again.' });
-            }
+            console.error('WelcomeScreen: Save failed', error);
+            // Revert local state if save fails
+            dispatch({ type: 'SET_CHARACTER_NAME', payload: 'Survivor' });
+
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not set character name. Please try again.' });
         } finally {
             setIsLoading(false);
         }
@@ -92,10 +78,10 @@ export default function WelcomeScreen() {
 
     return (
         <main className="relative min-h-screen w-full flex items-center justify-center p-4">
-            <div 
+            <div
                 className="absolute inset-0 bg-background -z-10"
                 style={{
-                backgroundImage: 'radial-gradient(circle at top right, hsl(var(--primary) / 0.1), transparent 40%), radial-gradient(circle at bottom left, hsl(var(--accent) / 0.1), transparent 50%)'
+                    backgroundImage: 'radial-gradient(circle at top right, hsl(var(--primary) / 0.1), transparent 40%), radial-gradient(circle at bottom left, hsl(var(--accent) / 0.1), transparent 50%)'
                 }}
             />
             <Card className="w-full max-w-md">
@@ -108,9 +94,9 @@ export default function WelcomeScreen() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="flex items-center gap-2">
-                    <Input 
+                    <Input
                         placeholder="Enter your character's name..."
-                        value={name} 
+                        value={name}
                         onChange={(e) => setName(e.target.value)}
                         maxLength={25}
                         disabled={isLoading}

@@ -14,6 +14,7 @@ export const Resources = {
   lemon: 'Lemon',
   banana: 'Banana',
   peach: 'Peach',
+  appleSeeds: 'Apple Seeds',
   silver: 'Silver',
   mutatedTwigs: 'Mutated Twigs',
   ironIngot: 'Iron Ingot',
@@ -50,10 +51,11 @@ export interface PlayerStats {
 }
 
 export type Statistics = {
-    timesExplored: number;
-    timesScavenged: number;
-    deaths: number;
-    totalItemsGained: Partial<Record<Resource | Item, number>>;
+  timesExplored: number;
+  timesScavenged: number;
+  deaths: number;
+  totalItemsGained: Partial<Record<Resource | Item, number>>;
+  itemsCrafted: Partial<Record<Resource | Item, number>>;
 }
 
 export type LogMessage = {
@@ -83,6 +85,13 @@ export type EquipmentSlot = 'hand' | 'body';
 export type Equipment = Partial<Record<EquipmentSlot, Item | null>>;
 
 export type Theme = 'light' | 'dark' | 'system';
+
+export interface FarmPlot {
+  id: number;
+  seed: Resource | null;
+  plantedTimestamp: number | null;
+  duration: number; // ms
+}
 
 export interface GameState {
   characterName: string;
@@ -122,6 +131,28 @@ export interface GameState {
   power: number;
   theme: Theme;
   lastSavedTimestamp?: number;
+  lastDailyRewardClaimed: number; // timestamp
+  farmPlots: FarmPlot[];
+  masteryClaimed: Partial<Record<Resource | Item, number>>;
+  machines: Machine[];
+  powerCapacity: number;
+  powerConsumption: number;
+  skills: Record<string, number>; // skill ID -> level
+}
+
+export type MachineType = 'miner' | 'smelter' | 'constructor' | 'biomassBurner';
+
+export interface Machine {
+  id: string;
+  type: MachineType;
+  recipeId: string | null;
+  status: 'idle' | 'running' | 'no_power' | 'output_full' | 'input_starved' | 'no_fuel';
+  inputBuffer: Partial<Inventory>;
+  outputBuffer: Partial<Inventory>;
+  targetNodeId: string | null; // For miners, could be a resource node ID
+  connectedOutput: string | null; // ID of the machine this one pushes to
+  fuelLevel: number; // For biomass burners
+  processingProgress: number; // Ticks elapsed in current processing cycle
 }
 
 export type GameAction =
@@ -172,4 +203,15 @@ export type GameAction =
   | { type: 'QUEUE_DRONE_MISSIONS', payload: { amount: number } }
   | { type: 'ADD_FUEL', payload: { fuelType: 'wood' | 'biomass' | 'charcoal' } }
   | { type: 'SET_THEME'; payload: Theme }
-  | { type: 'CHEAT_ADD_SILVER' };
+  | { type: 'CLAIM_DAILY_REWARD' }
+  | { type: 'PLANT_SEED'; payload: { plotId: number, seed: Resource } }
+  | { type: 'HARVEST_CROP'; payload: { plotId: number } }
+  | { type: 'CHEAT_ADD_SILVER' }
+  | { type: 'CLAIM_MASTERY_REWARD'; payload: { itemId: string, tier: number } }
+  | { type: 'BUILD_MACHINE'; payload: { type: MachineType } }
+  | { type: 'CONFIGURE_MACHINE'; payload: { machineId: string, recipeId: string | null } }
+  | { type: 'CONNECT_MACHINES'; payload: { sourceId: string, targetId: string | null } }
+  | { type: 'ADD_MACHINE_FUEL'; payload: { machineId: string, fuelType: Resource } }
+  | { type: 'TRANSFER_TO_MACHINE'; payload: { machineId: string, resource: Resource | Item, amount: number } }
+  | { type: 'TRANSFER_FROM_MACHINE'; payload: { machineId: string, resource: Resource | Item, amount: number } }
+  | { type: 'UNLOCK_SKILL'; payload: { skillId: string } };
