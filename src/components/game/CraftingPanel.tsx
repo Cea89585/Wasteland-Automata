@@ -86,8 +86,11 @@ export default function CraftingPanel() {
             {availableRecipes.map(recipe => {
               const maxCraftable = calculateMaxCraftable(recipe.id);
               const isCraftable = maxCraftable > 0;
+              const hasResourceIntuition = (gameState.skills.resourceIntuition || 0) > 0;
+              const highlightClass = (hasResourceIntuition && isCraftable) ? 'border-primary border-2' : 'bg-muted/50';
+
               return (
-                <Card key={recipe.id} className="bg-muted/50">
+                <Card key={recipe.id} className={`${highlightClass}`}>
                   <CardContent className="p-4 flex flex-col gap-4">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                       <div className="flex-grow w-full">
@@ -121,27 +124,80 @@ export default function CraftingPanel() {
                           <Hammer className="h-4 w-4" />
                           Craft
                         </Button>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="flex-1">
-                                <Button
-                                  className="w-full"
-                                  variant="secondary"
-                                  onClick={() => dispatch({ type: 'CRAFT_ALL', payload: { recipeId: recipe.id, amount: maxCraftable } })}
-                                  disabled={maxCraftable < 2 || gameState.playerStats.health <= 0 || isBusy}
-                                  aria-label={`Craft all ${recipe.name}`}
-                                >
-                                  <PackageCheck className="h-4 w-4" />
-                                  Craft All ({maxCraftable})
-                                </Button>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {maxCraftable < 2 ? <p>You need enough resources for at least 2 items.</p> : <p>Craft all possible items.</p>}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+
+                        {/* Bulk Crafter Skill Buttons */}
+                        {(() => {
+                          const bulkCrafterLevel = gameState.skills.bulkCrafter || 0;
+
+                          if (bulkCrafterLevel >= 1) {
+                            const craft5Amount = Math.min(5, maxCraftable);
+                            const canCraft5 = maxCraftable >= 5;
+
+                            return (
+                              <Button
+                                className="flex-1"
+                                variant="secondary"
+                                onClick={() => dispatch({ type: 'CRAFT_ALL', payload: { recipeId: recipe.id, amount: 5 } })}
+                                disabled={!canCraft5 || gameState.playerStats.health <= 0 || isBusy}
+                              >
+                                Craft 5
+                              </Button>
+                            );
+                          }
+                          return null;
+                        })()}
+
+                        {(() => {
+                          const bulkCrafterLevel = gameState.skills.bulkCrafter || 0;
+
+                          if (bulkCrafterLevel >= 2) {
+                            const craft10Amount = Math.min(10, maxCraftable);
+                            const canCraft10 = maxCraftable >= 10;
+
+                            return (
+                              <Button
+                                className="flex-1"
+                                variant="secondary"
+                                onClick={() => dispatch({ type: 'CRAFT_ALL', payload: { recipeId: recipe.id, amount: 10 } })}
+                                disabled={!canCraft10 || gameState.playerStats.health <= 0 || isBusy}
+                              >
+                                Craft 10
+                              </Button>
+                            );
+                          }
+                          return null;
+                        })()}
+
+                        {(() => {
+                          const bulkCrafterLevel = gameState.skills.bulkCrafter || 0;
+
+                          if (bulkCrafterLevel >= 3) {
+                            return (
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <div className="flex-1">
+                                      <Button
+                                        className="w-full"
+                                        variant="secondary"
+                                        onClick={() => dispatch({ type: 'CRAFT_ALL', payload: { recipeId: recipe.id, amount: maxCraftable } })}
+                                        disabled={maxCraftable < 2 || gameState.playerStats.health <= 0 || isBusy}
+                                        aria-label={`Craft all ${recipe.name}`}
+                                      >
+                                        <PackageCheck className="h-4 w-4" />
+                                        Craft Max ({maxCraftable})
+                                      </Button>
+                                    </div>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    {maxCraftable < 2 ? <p>You need enough resources for at least 2 items.</p> : <p>Craft all possible items.</p>}
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            );
+                          }
+                          return null;
+                        })()}
                       </div>
                     </div>
 

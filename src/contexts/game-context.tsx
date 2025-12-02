@@ -15,6 +15,7 @@ import { useUser } from '@/hooks/use-user';
 import { useFirebase } from '@/firebase/provider';
 import { doc, setDoc, onSnapshot, DocumentData, writeBatch } from 'firebase/firestore';
 import { machineCosts } from '@/lib/game-data/machines';
+import { canUnlockSkill, skills } from '@/lib/game-data/skills';
 
 
 const TICK_RATE_MS = 2000;
@@ -36,6 +37,9 @@ const addResource = (inventory: GameState['inventory'], statistics: GameState['s
 const processDroneReturn = (state: GameState): { droneState: GameState, logMessage: { text: string, type: 'success' } | null } => {
   const currentLocation = locations[state.currentLocation];
   const droneBuff = 1 + (state.droneLevel * 0.1);
+  const scavengersEyeLevel = state.skills?.scavengersEye || 0;
+  const scavengerBuff = 1 + (scavengersEyeLevel * 0.1);
+
   let totalFound: Partial<Record<Resource, number>> = {};
   let finalInventory = { ...state.inventory };
   let finalStatistics = { ...state.statistics };
@@ -45,7 +49,7 @@ const processDroneReturn = (state: GameState): { droneState: GameState, logMessa
     currentLocation.resources.forEach((res) => {
       if (Math.random() < res.chance) {
         let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
-        amount = Math.ceil(amount * droneBuff);
+        amount = Math.ceil(amount * droneBuff * scavengerBuff);
         totalFound[res.resource] = (totalFound[res.resource] || 0) + amount;
       }
     });
@@ -91,7 +95,11 @@ const xpForNextLevel = (level: number): number => {
 }
 
 const reducer = (state: GameState, action: GameAction): GameState => {
-  const getInventoryCap = () => 200 + (state.storageLevel || 0) * 50;
+  const getInventoryCap = () => {
+    const baseCap = 200 + (state.storageLevel || 0) * 50;
+    const packMuleLevel = state.skills?.packMule || 0;
+    return baseCap + (packMuleLevel * 25);
+  };
   const getMaxEnergy = () => 100 + (state.energyLevel || 0) * 5;
   const getMaxHunger = () => Math.min(500, 100 + (state.hungerLevel || 0) * 25);
   const getMaxThirst = () => Math.min(500, 100 + (state.thirstLevel || 0) * 25);
@@ -189,7 +197,11 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'ADD_XP': {
       if (action.payload <= 0) return state;
 
-      let newXp = state.xp + action.payload;
+      const fastLearnerLevel = state.skills?.fastLearner || 0;
+      const xpMultiplier = 1 + (fastLearnerLevel * 0.05);
+      const xpAmount = Math.floor(action.payload * xpMultiplier);
+
+      let newXp = state.xp + xpAmount;
       let newLevel = state.level;
       let newXpToNextLevel = state.xpToNextLevel;
       let newUpgradePoints = state.upgradePoints;
@@ -266,11 +278,17 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       // If plot doesn't exist in array, we add it.
 
       const existingPlotIndex = newPlots.findIndex(p => p.id === plotId);
+
+      // Green Thumb Skill
+      const greenThumbLevel = state.skills?.greenThumb || 0;
+      const growthReduction = greenThumbLevel * 0.15; // 15% per level
+      const duration = 60000 * 5 * (1 - growthReduction);
+
       if (existingPlotIndex >= 0) {
         if (newPlots[existingPlotIndex].seed) return state; // Already planted
-        newPlots[existingPlotIndex] = { ...newPlots[existingPlotIndex], seed, plantedTimestamp: Date.now(), duration: 60000 * 5 }; // 5 minutes
+        newPlots[existingPlotIndex] = { ...newPlots[existingPlotIndex], seed, plantedTimestamp: Date.now(), duration };
       } else {
-        newPlots.push({ id: plotId, seed, plantedTimestamp: Date.now(), duration: 60000 * 5 });
+        newPlots.push({ id: plotId, seed, plantedTimestamp: Date.now(), duration });
       }
 
       newInventory[seed] -= 1;
@@ -307,6 +325,21 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (plot.seed === 'appleSeeds') {
         produce = 'apple';
         amount = Math.floor(Math.random() * 3) + 2; // 2-4 apples
+      }
+
+      // Bountiful Harvest Skill
+      const bountifulHarvestLevel = state.skills?.bountifulHarvest || 0;
+      if (bountifulHarvestLevel > 0) {
+        amount += 1;
+      }
+
+      // Seed Saver Skill
+      const seedSaverLevel = state.skills?.seedSaver || 0;
+      if (seedSaverLevel > 0 && Math.random() < 0.25) {
+        const { newInventory: seedInv, newStatistics: seedStats } = addResource(newInventory, newStatistics, plot.seed, 1, INVENTORY_CAP);
+        newInventory = seedInv;
+        newStatistics = seedStats;
+        // Log message for seed save? Maybe too spammy.
       }
 
       const res = addResource(newInventory, newStatistics, produce, amount, INVENTORY_CAP);
@@ -385,7 +418,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         if (machine.type === 'biomassBurner' && machine.status === 'running') {
           totalPowerCapacity += 10; // Each burner provides 10 power
         } else if (machine.type !== 'biomassBurner') {
-          totalPowerConsumption += 5; // Each machine consumes 5 power
+          let consumption = 5;
+          // Power Saver Skill
+          if ((currentState.skills?.powerSaver || 0) > 0) {
+            consumption = 4; // 20% reduction
+          }
+          totalPowerConsumption += consumption;
         }
       });
 
@@ -407,9 +445,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           return { ...machine, status: 'idle' as const };
         }
 
-        // Check if output buffer is full (max 10 items per resource)
+        // Check if output buffer is full
+        const largerBuffersLevel = currentState.skills?.largerBuffers || 0;
+        const bufferCap = largerBuffersLevel >= 2 ? 20 : largerBuffersLevel >= 1 ? 15 : 10;
+
         const outputFull = machineData.recipe.output && Object.entries(machineData.recipe.output).some(
-          ([resource, amount]) => (machine.outputBuffer[resource as Resource] || 0) + amount > 10
+          ([resource, amount]) => (machine.outputBuffer[resource as Resource] || 0) + amount > bufferCap
         );
         if (outputFull) {
           return { ...machine, status: 'output_full' as const };
@@ -426,7 +467,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         }
 
         // Process item
-        const newProgress = machine.processingProgress + 1;
+        const machineEfficiencyLevel = currentState.skills?.machineEfficiency || 0;
+        const speedMultiplier = 1 + (machineEfficiencyLevel * 0.05);
+        const newProgress = machine.processingProgress + (1 * speedMultiplier);
         if (newProgress >= machineData.processingSpeed) {
           // Production complete!
           const newInputBuffer = { ...machine.inputBuffer };
@@ -484,11 +527,17 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (currentState.isResting || currentState.isIdle) {
         const MAX_HEALTH = getMaxHealth();
         if (newStats.health < MAX_HEALTH) {
-          newStats.health = Math.min(MAX_HEALTH, newStats.health + 0.25);
+          const secondWindLevel = currentState.skills?.secondWind || 0;
+          const healAmount = 0.25 * (1 + (secondWindLevel * 0.5));
+          newStats.health = Math.min(MAX_HEALTH, newStats.health + healAmount);
         }
       } else {
-        newStats.thirst = Math.max(0, newStats.thirst - 0.25);
-        newStats.hunger = Math.max(0, newStats.hunger - 0.25);
+        const efficientMetabolismLevel = currentState.skills?.efficientMetabolism || 0;
+        const drainMultiplier = 1 - (efficientMetabolismLevel * 0.1);
+        const drainAmount = 0.25 * drainMultiplier;
+
+        newStats.thirst = Math.max(0, newStats.thirst - drainAmount);
+        newStats.hunger = Math.max(0, newStats.hunger - drainAmount);
 
         if (newStats.thirst === 0 || newStats.hunger === 0) {
           newStats.health = Math.max(0, newStats.health - 2);
@@ -536,10 +585,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
       if (encounter.type === 'positive' && encounter.reward) {
         const { item, amount } = encounter.reward;
-        const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(newInventory, newStatistics, item, amount, INVENTORY_CAP);
+        const scavengersEyeLevel = state.skills?.scavengersEye || 0;
+        const scavengerBuff = 1 + (scavengersEyeLevel * 0.1);
+        const finalAmount = Math.ceil(amount * scavengerBuff);
+
+        const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(newInventory, newStatistics, item, finalAmount, INVENTORY_CAP);
         newInventory = updatedInventory;
         newStatistics = updatedStatistics;
-        logText += ` You found ${amount} ${itemData[item].name}.`;
+        logText += ` You found ${finalAmount} ${itemData[item].name}.`;
       }
 
       if (encounter.type === 'negative' && encounter.penalty) {
@@ -921,7 +974,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         }
       }
 
-      const silverEarned = amount * price;
+      const silverTongueLevel = state.skills?.silverTongue || 0;
+      const priceMultiplier = 1 + (silverTongueLevel * 0.1);
+      const silverEarned = Math.floor(amount * price * priceMultiplier);
       newInventory[item] -= amount;
       newInventory.silver += silverEarned;
 
@@ -948,7 +1003,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         const itemInfo = itemData[item];
         const quantity = newInventory[item];
         if (quantity > 0 && itemInfo?.sellPrice && !state.lockedItems.includes(item)) {
-          const silverGained = quantity * itemInfo.sellPrice;
+          const silverTongueLevel = state.skills?.silverTongue || 0;
+          const priceMultiplier = 1 + (silverTongueLevel * 0.1);
+          const silverGained = Math.floor(quantity * itemInfo.sellPrice * priceMultiplier);
           totalSilverGained += silverGained;
           newInventory[item] = 0;
           itemsSold++;
@@ -1549,8 +1606,11 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       // Tier 3 (1000 crafts): 2500 Silver, 1000 XP
       // Formula: Silver = 100 * 5^(tier-1), XP = 50 * 5^(tier-1)
 
-      const silverReward = 100 * Math.pow(5, tier - 1);
-      const xpReward = 50 * Math.pow(5, tier - 1);
+      const masteryAdeptLevel = state.skills?.masteryAdept || 0;
+      const rewardMultiplier = 1 + (masteryAdeptLevel * 0.25);
+
+      const silverReward = Math.floor(100 * Math.pow(5, tier - 1) * rewardMultiplier);
+      const xpReward = Math.floor(50 * Math.pow(5, tier - 1) * rewardMultiplier);
 
       const INVENTORY_CAP = getInventoryCap();
       let newInventory = { ...state.inventory };
@@ -1635,6 +1695,32 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       };
     }
 
+    case 'UNLOCK_SKILL': {
+      const { skillId } = action.payload;
+      const { canUnlock, reason } = canUnlockSkill(state.skills, skillId, state.upgradePoints, state.builtStructures);
+
+      if (!canUnlock) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: `Cannot unlock skill: ${reason}`, type: 'danger' as const, timestamp: Date.now() }, ...state.log]
+        };
+      }
+
+      const skill = skills.find(s => s.id === skillId);
+      if (!skill) return state;
+
+      const newUpgradePoints = state.upgradePoints - skill.cost;
+      const currentLevel = state.skills[skillId] || 0;
+      const newSkills = { ...state.skills, [skillId]: currentLevel + 1 };
+
+      return {
+        ...state,
+        upgradePoints: newUpgradePoints,
+        skills: newSkills,
+        log: [{ id: generateUniqueLogId(), text: `Unlocked skill: ${skill.name} (Level ${currentLevel + 1})`, type: 'success' as const, timestamp: Date.now() }, ...state.log]
+      };
+    }
+
     case 'CONFIGURE_MACHINE': {
       const { machineId, recipeId } = action.payload;
       const updatedMachines = state.machines.map(m =>
@@ -1705,7 +1791,10 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
 
       const currentInBuffer = machine.inputBuffer[resource] || 0;
-      if (currentInBuffer + amount > 10) {
+      const largerBuffersLevel = state.skills?.largerBuffers || 0;
+      const bufferCap = largerBuffersLevel >= 2 ? 20 : largerBuffersLevel >= 1 ? 15 : 10;
+
+      if (currentInBuffer + amount > bufferCap) {
         return {
           ...state,
           log: [{ id: generateUniqueLogId(), text: `Input buffer full.`, type: 'danger' as const, timestamp: Date.now() }, ...state.log]
@@ -1723,47 +1812,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         machines: updatedMachines,
       };
     }
-
-    case 'TRANSFER_FROM_MACHINE': {
-      const { machineId, resource, amount } = action.payload;
-      const machine = state.machines.find(m => m.id === machineId);
-
-      if (!machine) return state;
-
-      const INVENTORY_CAP = getInventoryCap();
-      const newInventory = { ...state.inventory };
-      const availableInBuffer = machine.outputBuffer[resource] || 0;
-
-      if (availableInBuffer < amount) {
-        return {
-          ...state,
-          log: [{ id: generateUniqueLogId(), text: `Not enough in output buffer.`, type: 'danger' as const, timestamp: Date.now() }, ...state.log]
-        };
-      }
-
-      const currentInInventory = newInventory[resource] || 0;
-      if (currentInInventory + amount > INVENTORY_CAP) {
-        return {
-          ...state,
-          log: [{ id: generateUniqueLogId(), text: `Inventory full.`, type: 'danger' as const, timestamp: Date.now() }, ...state.log]
-        };
-      }
-
-      newInventory[resource] += amount;
-      const updatedMachines = state.machines.map(m =>
-        m.id === machineId ? { ...m, outputBuffer: { ...m.outputBuffer, [resource]: availableInBuffer - amount } } : m
-      );
-
-      return {
-        ...state,
-        inventory: newInventory,
-        machines: updatedMachines,
-      };
-    }
-
-    default:
-      return state;
   }
+  return state;
 };
 
 export const GameContext = createContext<{

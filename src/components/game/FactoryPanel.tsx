@@ -164,6 +164,63 @@ export default function FactoryPanel() {
                                                 </Badge>
                                             </div>
 
+                                            {/* Machine Buffers & Controls */}
+                                            {machine.type !== 'biomassBurner' && machineCosts[machine.type].recipe && (
+                                                <div className="mt-3 pt-3 border-t space-y-3">
+                                                    {/* Input Buffer */}
+                                                    {machineCosts[machine.type].recipe?.input && (
+                                                        <div className="space-y-1">
+                                                            <p className="text-xs font-semibold text-muted-foreground">Input</p>
+                                                            {Object.entries(machineCosts[machine.type].recipe!.input!).map(([resource, amount]) => {
+                                                                const current = machine.inputBuffer[resource as Resource] || 0;
+                                                                const playerHas = inventory[resource as Resource] || 0;
+                                                                const quickHandsLevel = gameState.skills.quickHands || 0;
+                                                                const transferAmount = quickHandsLevel > 0 ? 5 : 1;
+
+                                                                return (
+                                                                    <div key={resource} className="flex justify-between items-center text-xs">
+                                                                        <span>{itemData[resource as Resource].name}: {current}</span>
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="outline"
+                                                                            className="h-6 text-xs"
+                                                                            disabled={playerHas < transferAmount}
+                                                                            onClick={() => dispatch({
+                                                                                type: 'TRANSFER_TO_MACHINE',
+                                                                                payload: { machineId: machine.id, resource: resource as Resource, amount: transferAmount }
+                                                                            })}
+                                                                        >
+                                                                            Add {transferAmount}
+                                                                        </Button>
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+
+                                                    {/* Processing Progress */}
+                                                    {machine.status === 'running' && (
+                                                        <Progress value={(machine.processingProgress / machineCosts[machine.type].processingSpeed!) * 100} className="h-1" />
+                                                    )}
+
+                                                    {/* Output Buffer */}
+                                                    {machineCosts[machine.type].recipe?.output && (
+                                                        <div className="space-y-1">
+                                                            <p className="text-xs font-semibold text-muted-foreground">Output</p>
+                                                            {Object.entries(machineCosts[machine.type].recipe!.output!).map(([resource, amount]) => {
+                                                                const current = machine.outputBuffer[resource as Resource] || 0;
+                                                                return (
+                                                                    <div key={resource} className="flex justify-between items-center text-xs">
+                                                                        <span>{itemData[resource as Resource].name}: {current}</span>
+                                                                        {/* Add Collect Button if needed, or auto-collect? For now just display */}
+                                                                    </div>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+
                                             {/* Fuel controls for Biomass Burner */}
                                             {machine.type === 'biomassBurner' && (
                                                 <div className="space-y-2 mt-3 pt-3 border-t">
