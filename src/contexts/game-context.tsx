@@ -108,7 +108,10 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
   switch (action.type) {
     case 'INITIALIZE': {
-      const { gameState, statistics } = action.payload;
+      // Merge loaded state with initial state to ensure all fields exist (handling schema updates/missing fields)
+      const gameState = { ...initialState, ...action.payload.gameState };
+      const statistics = { ...initialStatistics, ...action.payload.statistics };
+
       if (gameState.log && gameState.log.length > 0) {
         const maxId = gameState.log.reduce((max, l) => Math.max(max, l.id), 0);
         logIdCounter = (maxId > Date.now()) ? (maxId - Date.now() + 1) : 1;
