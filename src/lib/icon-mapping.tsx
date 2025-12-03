@@ -59,6 +59,7 @@ export const ITEM_ICONS: Record<string, React.FC<{ className?: string; size?: nu
     cookedApple: CookedAppleIcon,
     cookedPeach: CookedAppleIcon, // Reuse cooked apple style
     appleSeed: AppleSeedIcon,
+    appleSeeds: AppleSeedIcon,
     peachSeed: AppleSeedIcon,
 
     // Materials
@@ -66,9 +67,25 @@ export const ITEM_ICONS: Record<string, React.FC<{ className?: string; size?: nu
     scrapMetal: ScrapMetalIcon,
     iron: IronIngotIcon,
     ironIngot: IronIngotIcon,
+    ironPlates: IronIngotIcon,
     computerComponent: ComputerComponentIcon,
     component: ComputerComponentIcon,
+    components: ComputerComponentIcon,
     charcoal: CharcoalIcon,
+    mutatedTwigs: WoodIcon,
+    biomass: GlowingAlgaeIcon,
+
+    // Machines & Structures
+    workbench: CraftIcon,
+    waterPurifier: WaterIcon,
+    furnace: FurnaceIcon,
+    radio: TechIcon,
+    generator: EnergyIcon,
+    droneBay: TechIcon,
+    hydroponicsBay: FarmingIcon,
+    miningRig: CraftIcon,
+    biomassCompressor: FactoryIcon,
+    crudeMap: ExploreIcon,
 
     // Tools
     metalDetector: MetalDetectorIcon,
