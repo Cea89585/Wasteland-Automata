@@ -129,6 +129,24 @@ export default function DronePanel() {
             <TooltipContent>
               <div className="flex flex-col gap-1 text-sm items-start">
                 {!hasPower ? (
+                  <span>Generator has no power.</span>
+                ) : maxCanQueue > 0 ? (
+                  <>
+                    <span>Queue {queueAmount} drone mission(s).</span>
+                    <span className="font-semibold text-muted-foreground">Total Cost:</span>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1">
+                      <span className="flex items-center">
+                        <GameIcon type="item" id="apple" size={16} className="mr-1" />
+                        {itemData['apple'].name}: {missionRequirements.apple * queueAmount}
+                      </span>
+                      <span className="flex items-center">
+                        <GameIcon type="item" id="water" size={16} className="mr-1" />
+                        {itemData['water'].name}: {missionRequirements.water * queueAmount}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <span>Not enough resources to queue a mission.</span>
                 )}
               </div>
             </TooltipContent>
