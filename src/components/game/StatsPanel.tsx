@@ -2,7 +2,7 @@
 'use client';
 import { useGame } from '@/hooks/use-game';
 import { Progress } from '@/components/ui/progress';
-import { statIcons } from './GameIcons';
+import { HeartIcon, EnergyIcon, FoodIcon, DrinkIcon } from '@/lib/icon-mapping';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function StatsPanel() {
@@ -15,24 +15,24 @@ export default function StatsPanel() {
   const maxHealth = Math.min(1000, 100 + (healthLevel * 25));
 
   const stats = [
-    { name: 'health' as const, label: 'Health', value: playerStats.health, max: maxHealth },
-    { name: 'hunger' as const, label: 'Hunger', value: playerStats.hunger, max: maxHunger },
-    { name: 'thirst' as const, label: 'Thirst', value: playerStats.thirst, max: maxThirst },
+    { name: 'health' as const, label: 'Health', value: playerStats.health, max: maxHealth, Icon: HeartIcon },
+    { name: 'hunger' as const, label: 'Hunger', value: playerStats.hunger, max: maxHunger, Icon: FoodIcon },
+    { name: 'thirst' as const, label: 'Thirst', value: playerStats.thirst, max: maxThirst, Icon: DrinkIcon },
   ];
 
   return (
     <TooltipProvider>
       <div className="grid grid-cols-4 gap-x-2 sm:gap-x-4 w-full sm:w-auto items-end">
-        {stats.map(({ name, label, value, max }) => (
+        {stats.map(({ name, label, value, max, Icon }) => (
           <Tooltip key={name}>
             <TooltipTrigger asChild>
               <div className="flex flex-col gap-1 w-full">
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <div className="flex items-center">
-                        {statIcons[name]}
-                        <span className="font-medium hidden sm:inline">{label}</span>
-                    </div>
-                    <span className="font-mono text-primary">{Math.round(value)}</span>
+                  <div className="flex items-center gap-1">
+                    <Icon size={16} />
+                    <span className="font-medium hidden sm:inline">{label}</span>
+                  </div>
+                  <span className="font-mono text-primary">{Math.round(value)}</span>
                 </div>
                 <Progress value={(value / max) * 100} className="h-2" indicatorClassName={
                   value < (max * 0.2) ? 'bg-destructive' : 'bg-primary'
@@ -46,23 +46,23 @@ export default function StatsPanel() {
         ))}
         {/* Energy Stat */}
         <Tooltip>
-            <TooltipTrigger asChild>
+          <TooltipTrigger asChild>
             <div className="flex flex-col gap-1 w-full">
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <div className="flex items-center">
-                        {statIcons['energy']}
-                        <span className="font-medium hidden sm:inline">Energy</span>
-                    </div>
-                    <span className="font-mono text-primary">{Math.round(playerStats['energy'])}</span>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="flex items-center gap-1">
+                  <EnergyIcon size={16} />
+                  <span className="font-medium hidden sm:inline">Energy</span>
                 </div>
-                <Progress value={(playerStats['energy'] / maxEnergy) * 100} className="h-2" indicatorClassName={
+                <span className="font-mono text-primary">{Math.round(playerStats['energy'])}</span>
+              </div>
+              <Progress value={(playerStats['energy'] / maxEnergy) * 100} className="h-2" indicatorClassName={
                 playerStats['energy'] < (maxEnergy * 0.2) ? 'bg-destructive' : 'bg-primary'
-                } />
+              } />
             </div>
-            </TooltipTrigger>
-            <TooltipContent>
+          </TooltipTrigger>
+          <TooltipContent>
             <p>Energy: {Math.round(playerStats['energy'])} / {maxEnergy}</p>
-            </TooltipContent>
+          </TooltipContent>
         </Tooltip>
       </div>
     </TooltipProvider>

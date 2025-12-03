@@ -6,19 +6,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { RotateCcw, ArrowLeft, BarChart, Package, Compass, Search, Skull, Sun, Moon, Laptop } from 'lucide-react';
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { ScrollArea } from '../ui/scroll-area';
 import { itemData } from '@/lib/game-data/items';
-import { allIcons } from './GameIcons';
+import { GameIcon } from '@/lib/icon-mapping';
 import HelpPanel from './HelpPanel';
 import type { Theme } from '@/lib/game-types';
 
@@ -28,12 +28,12 @@ export default function SettingsPage() {
     if (!gameState.isInitialized) {
         return null;
     }
-    
+
     const { statistics, theme } = gameState;
     const setTheme = (newTheme: Theme) => dispatch({ type: 'SET_THEME', payload: newTheme });
 
 
-    const totalItemsGained = statistics?.totalItemsGained 
+    const totalItemsGained = statistics?.totalItemsGained
         ? Object.entries(statistics.totalItemsGained)
             .filter(([, quantity]) => quantity > 0)
             .sort((a, b) => a[0].localeCompare(b[0]))
@@ -42,12 +42,12 @@ export default function SettingsPage() {
 
     return (
         <div className="flex flex-col gap-4">
-             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 rounded-lg border bg-card text-card-foreground p-4 shadow-sm">
+            <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 rounded-lg border bg-card text-card-foreground p-4 shadow-sm">
                 <div className="flex flex-col gap-2">
                     <h1 className="text-xl sm:text-2xl font-bold font-headline text-primary">
                         Settings & Statistics
                     </h1>
-                     <Link href="/">
+                    <Link href="/">
                         <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 bg-secondary text-secondary-foreground hover:bg-secondary/80 w-fit">
                             <ArrowLeft className="h-4 w-4" />
                             Back to Game
@@ -79,7 +79,7 @@ export default function SettingsPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                           <BarChart /> General Statistics
+                            <BarChart /> General Statistics
                         </CardTitle>
                         <CardDescription>An overview of your journey so far.</CardDescription>
                     </CardHeader>
@@ -90,13 +90,13 @@ export default function SettingsPage() {
                             </div>
                             <span className="font-mono text-lg font-semibold text-primary">{statistics?.timesExplored || 0}</span>
                         </div>
-                         <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
+                        <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
                             <div className="flex items-center gap-2 font-medium">
                                 <Search /> Times Scavenged
                             </div>
                             <span className="font-mono text-lg font-semibold text-primary">{statistics?.timesScavenged || 0}</span>
                         </div>
-                         <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
+                        <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
                             <div className="flex items-center gap-2 font-medium">
                                 <Skull /> Times Died
                             </div>
@@ -105,7 +105,7 @@ export default function SettingsPage() {
                     </CardContent>
                 </Card>
 
-                 <Card>
+                <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <Package /> Item Collection (All Time)
@@ -117,24 +117,24 @@ export default function SettingsPage() {
                             <p className="text-muted-foreground text-center flex items-center justify-center">No items gathered yet.</p>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {totalItemsGained.map(([itemId, quantity]) => {
-                                const data = itemData[itemId as keyof typeof itemData];
-                                return (
-                                    <div key={itemId} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
-                                        <div className="flex items-center gap-2">
-                                            {allIcons[itemId]}
-                                            <span className="font-medium text-sm">{data?.name}</span>
+                                {totalItemsGained.map(([itemId, quantity]) => {
+                                    const data = itemData[itemId as keyof typeof itemData];
+                                    return (
+                                        <div key={itemId} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
+                                            <div className="flex items-center gap-2">
+                                                <GameIcon type="item" id={itemId} size={20} />
+                                                <span className="font-medium text-sm">{data?.name}</span>
+                                            </div>
+                                            <span className="font-mono font-semibold text-primary">{quantity}</span>
                                         </div>
-                                        <span className="font-mono font-semibold text-primary">{quantity}</span>
-                                    </div>
-                                );
+                                    );
                                 })}
                             </div>
                         )}
                     </CardContent>
                 </Card>
             </div>
-            
+
             <HelpPanel />
 
             <Card className="border-destructive">
@@ -151,16 +151,16 @@ export default function SettingsPage() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
-                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                This will permanently delete ALL data, including your current game progress and all-time statistics. This action cannot be undone.
-                            </AlertDialogDescription>
+                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    This will permanently delete ALL data, including your current game progress and all-time statistics. This action cannot be undone.
+                                </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => dispatch({ type: 'RESET_GAME' })}>
-                                Yes, delete everything
-                            </AlertDialogAction>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => dispatch({ type: 'RESET_GAME' })}>
+                                    Yes, delete everything
+                                </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
                     </AlertDialog>

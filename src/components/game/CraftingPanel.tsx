@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { recipes as allRecipes } from '@/lib/game-data/recipes';
-import { allIcons, resourceIcons } from './GameIcons';
+import { GameIcon } from '@/lib/icon-mapping';
 import { itemData } from '@/lib/game-data/items';
 import type { Resource } from '@/lib/game-types';
 import { Hammer, PackageCheck } from 'lucide-react';
@@ -94,8 +94,8 @@ export default function CraftingPanel() {
                   <CardContent className="p-4 flex flex-col gap-4">
                     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                       <div className="flex-grow w-full">
-                        <div className="flex items-center font-semibold text-base mb-2">
-                          {allIcons[recipe.creates]} {recipe.name}
+                        <div className="flex items-center font-semibold text-base mb-2 gap-2">
+                          <GameIcon type="item" id={recipe.creates} size={20} /> {recipe.name}
                         </div>
                         <div className="flex flex-col gap-1 text-xs">
                           <span className="text-muted-foreground">Requires:</span>
@@ -105,7 +105,7 @@ export default function CraftingPanel() {
                               const enough = has >= amount;
                               return (
                                 <span key={resource} className={enough ? 'text-green-600' : 'text-red-600'}>
-                                  {allIcons[resource] || allIcons.silver}
+                                  <GameIcon type="item" id={resource} size={16} className="inline" />
                                   {itemData[resource as keyof typeof itemData].name}: {has}/{amount}
                                 </span>
                               );

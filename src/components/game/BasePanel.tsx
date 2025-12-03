@@ -6,7 +6,7 @@ import { Home, Hammer, CheckCircle, Droplets, Power, Bot, Sprout, Fuel, Leaf } f
 import { Button } from '../ui/button';
 import { recipes } from '@/lib/game-data/recipes';
 import type { Resource } from '@/lib/game-types';
-import { resourceIcons } from './GameIcons';
+import { GameIcon } from '@/lib/icon-mapping';
 import { itemData } from '@/lib/game-data/items';
 import { Separator } from '../ui/separator';
 import { Progress } from '../ui/progress';
@@ -148,7 +148,7 @@ const StructureSection = ({
                   const enough = has >= amount;
                   return (
                     <span key={resource} className={enough ? 'text-green-600' : 'text-red-600'}>
-                      {resourceIcons[resource as Resource]}
+                      <GameIcon type="item" id={resource} size={16} className="inline mr-1" />
                       {itemData[resource as Resource].name}: {has}/{amount}
                     </span>
                   );

@@ -28,7 +28,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from '../ui/button';
-import { allIcons } from './GameIcons';
+import { GameIcon } from '@/lib/icon-mapping';
 
 
 const logTypeIcons = {
@@ -44,35 +44,21 @@ const logTypeColors = {
   event: 'text-foreground',
   danger: 'text-destructive',
   success: 'text-green-400',
-  craft: 'text-accent',
-}
-
-const LogEntry = ({ message }: { message: ReturnType<typeof useGame>['gameState']['log'][0] }) => {
-    let icon = logTypeIcons[message.type];
-    
-    if (message.type === 'craft' && message.item) {
-        icon = allIcons[message.item] || logTypeIcons.craft;
-    }
-  
-    return (
-        <div className="flex items-start gap-3 text-sm animate-in fade-in-0 duration-500">
-            <div className="pt-0.5">{icon}</div>
-            <div className="flex-1">
-                <p className={cn(logTypeColors[message.type], "whitespace-pre-wrap")}>
-                    {message.text}
-                </p>
-                <div className="text-xs text-muted-foreground/50 flex items-center pt-1">
-                    <Clock className="h-3 w-3 mr-1" />
-                    {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
-                </div>
-            </div>
-        </div>
-    );
+        < p className = { cn(logTypeColors[message.type], "whitespace-pre-wrap") } >
+    { message.text }
+        </p >
+  <div className="text-xs text-muted-foreground/50 flex items-center pt-1">
+    <Clock className="h-3 w-3 mr-1" />
+    {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
+  </div>
+      </div >
+    </div >
+  );
 };
 
 export default function LogPanel() {
   const { gameState: { log }, dispatch } = useGame();
-  
+
   return (
     <Card className="flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between">
@@ -89,38 +75,38 @@ export default function LogPanel() {
               <DialogTitle>Full Event Log</DialogTitle>
             </DialogHeader>
             <div className="mt-4 h-[60vh] -mx-6 px-6 overflow-y-auto">
-                <div className="flex flex-col gap-3 pr-4">
-                    {[...log].reverse().map((message) => (
-                      <LogEntry key={message.id} message={message} />
-                    ))}
-                </div>
+              <div className="flex flex-col gap-3 pr-4">
+                {[...log].reverse().map((message) => (
+                  <LogEntry key={message.id} message={message} />
+                ))}
+              </div>
             </div>
-             <DialogFooter className="mt-4">
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive">
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Clear History
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will permanently delete your log history. This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={() => dispatch({ type: 'CLEAR_LOG' })}>
-                        Yes, clear history
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-                 <DialogClose asChild>
-                    <Button variant="outline">Close</Button>
-                 </DialogClose>
+            <DialogFooter className="mt-4">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Clear History
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will permanently delete your log history. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => dispatch({ type: 'CLEAR_LOG' })}>
+                      Yes, clear history
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              <DialogClose asChild>
+                <Button variant="outline">Close</Button>
+              </DialogClose>
             </DialogFooter>
           </DialogContent>
         </Dialog>

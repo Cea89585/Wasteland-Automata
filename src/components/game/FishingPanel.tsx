@@ -8,6 +8,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { fishingZones, getAvailableFishingZones } from '@/lib/game-data/fishing';
 import { Fish, Droplet, Zap, TrendingUp, Coins } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { GameIcon } from '@/lib/icon-mapping';
 
 export default function FishingPanel() {
     const { gameState, dispatch } = useGame();
@@ -177,7 +178,8 @@ export default function FishingPanel() {
                                         >
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="font-medium capitalize">
+                                                    <span className="font-medium capitalize flex items-center gap-2">
+                                                        <GameIcon type="item" id={fishType} size={20} />
                                                         {fishType.replace(/([A-Z])/g, ' $1').trim()}
                                                     </span>
                                                     <Badge variant="outline" className={getRarityColor(fishData.rarity)}>
@@ -216,7 +218,8 @@ export default function FishingPanel() {
                                         key={index}
                                         className="flex items-center justify-between p-2 bg-muted/50 rounded text-sm"
                                     >
-                                        <span className="capitalize">
+                                        <span className="capitalize flex items-center gap-2">
+                                            <GameIcon type="item" id={loot.item as string} size={16} />
                                             {(loot.item as string).replace(/([A-Z])/g, ' $1').trim()}
                                         </span>
                                         <Badge variant="outline" className={getRarityColor(loot.rarity)}>
