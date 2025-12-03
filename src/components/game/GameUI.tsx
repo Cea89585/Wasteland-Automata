@@ -23,8 +23,9 @@ import CommunityPanel from './CommunityPanel';
 import FarmingPanel from './FarmingPanel';
 import DailyRewardModal from './DailyRewardModal';
 import FactoryPanel from './FactoryPanel';
+import SkillsPanel from './SkillsPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Backpack, Compass, Hammer, Home, BookOpen, User, Power, AlertTriangle, Coins, Settings, Users, LogOut, Sprout, Factory } from 'lucide-react';
+import { Backpack, Compass, Hammer, Home, BookOpen, User, Power, AlertTriangle, Coins, Settings, Users, LogOut, Sprout, Factory, Zap } from 'lucide-react';
 import { GlowIcon } from '@/components/ui/glow-icon';
 import {
   AlertDialog,
@@ -97,6 +98,7 @@ export default function GameUI() {
     { value: "market", label: "Market", icon: Coins, condition: showMarket },
     { value: "farming", label: "Farming", icon: Sprout, condition: showFarming },
     { value: "factory", label: "Factory", icon: Factory },
+    { value: "skills", label: "Skills", icon: Zap },
     { value: "tech", label: "Tech", icon: BookOpen },
   ].filter(tab => tab.condition !== false);
 
@@ -184,6 +186,7 @@ export default function GameUI() {
             {showMarket && <TabsContent value="market" className="mt-4"><MarketPanel /></TabsContent>}
             {showFarming && <TabsContent value="farming" className="mt-4"><FarmingPanel /></TabsContent>}
             <TabsContent value="factory" className="mt-4"><FactoryPanel /></TabsContent>
+            <TabsContent value="skills" className="mt-4"><SkillsPanel /></TabsContent>
             <TabsContent value="tech" className="mt-4"><TechPanel /></TabsContent>
           </Tabs>
         </div>
