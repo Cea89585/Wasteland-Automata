@@ -148,6 +148,7 @@ export default function FurnacePanel() {
         <CardDescription>Smelt raw materials into advanced components.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Components */}
         <Card className="bg-muted/50 p-4 w-full">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-grow">
@@ -158,53 +159,216 @@ export default function FurnacePanel() {
                 <div className="flex flex-wrap gap-x-3 gap-y-1">
                   <span>Requires:</span>
                   <span className="flex items-center">
-                    {resourceIcons['scrap']}
+                    <GameIcon type="item" id="scrap" size={16} className="mr-1" />
                     {itemData['scrap'].name}: {componentSmeltRequirements.scrap}
                   </span>
                   <span className="flex items-center">
-                    {gameState.charcoalSmeltingQueue > 0 ? (
-                      <div className="flex flex-col gap-2 mt-4">
-                        <p className="text-sm text-muted-foreground text-center flex items-center justify-center">
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Making... ({gameState.charcoalSmeltingQueue} {gameState.charcoalSmeltingQueue > 1 ? 'batches' : 'batch'} left)
-                        </p>
-                        <Progress value={charcoalProgress} className="w-full" />
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-2 mt-4">
-                        <Button
-                          onClick={handleMakeCharcoal}
-                          disabled={maxSmeltableCharcoal < 1 || isBusy || gameState.playerStats.health <= 0}
-                          className="flex-1"
-                          variant={maxSmeltableCharcoal > 0 ? 'default' : 'outline'}
-                        >
-                          <Power className="mr-2 h-4 w-4" />
-                          Make
-                        </Button>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="flex-1">
-                                <Button
-                                  onClick={() => handleSmeltAll('charcoal')}
-                                  disabled={maxSmeltableCharcoal < 2 || isBusy || gameState.playerStats.health <= 0}
-                                  className="w-full"
-                                  variant="secondary"
-                                >
-                                  <PackageCheck className="mr-2 h-4 w-4" />
-                                  Make All ({maxSmeltableCharcoal})
-                                </Button>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              {maxSmeltableCharcoal < 2 ? <p>You need enough resources for at least 2 items.</p> : <p>Make all possible items.</p>}
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </div>
-                    )}
-                  </Card>
-                </CardContent>
-              </Card>
-              );
+                    <GameIcon type="item" id="wood" size={16} className="mr-1" />
+                    {itemData['wood'].name}: {componentSmeltRequirements.wood}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 mt-1">
+                  <span>Creates:</span>
+                  <span className="flex items-center font-medium text-primary">
+                    <GameIcon type="item" id="components" size={16} className="mr-1" />
+                    1x {itemData['components'].name}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-shrink-0 w-[180px]">
+              {gameState.smeltingQueue > 0 ? (
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm text-muted-foreground text-center flex items-center justify-center">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Smelting... ({gameState.smeltingQueue})
+                  </p>
+                  <Progress value={componentProgress} className="w-full" />
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={handleSmeltComponent}
+                    disabled={maxSmeltableComponents < 1 || isBusy || gameState.playerStats.health <= 0}
+                    className="flex-1"
+                    variant={maxSmeltableComponents > 0 ? 'default' : 'outline'}
+                  >
+                    <Power className="mr-2 h-4 w-4" />
+                    Smelt
+                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex-1">
+                          <Button
+                            onClick={() => handleSmeltAll('components')}
+                            disabled={maxSmeltableComponents < 2 || isBusy || gameState.playerStats.health <= 0}
+                            className="w-full"
+                            variant="secondary"
+                          >
+                            <PackageCheck className="mr-2 h-4 w-4" />
+                            All ({maxSmeltableComponents})
+                          </Button>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {maxSmeltableComponents < 2 ? <p>Need resources for 2+ items</p> : <p>Smelt all possible</p>}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+
+        {/* Iron Ingots */}
+        <Card className="bg-muted/50 p-4 w-full">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-grow">
+              <div className="flex items-center font-semibold text-base mb-2">
+                <Layers className="mr-2 h-5 w-5" /> Smelt Iron Ingots
+              </div>
+              <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
+                  <span>Requires:</span>
+                  <span className="flex items-center">
+                    <GameIcon type="item" id="scrap" size={16} className="mr-1" />
+                    {itemData['scrap'].name}: {ironSmeltRequirements.scrap}
+                  </span>
+                  <span className="flex items-center">
+                    <GameIcon type="item" id="wood" size={16} className="mr-1" />
+                    {itemData['wood'].name}: {ironSmeltRequirements.wood}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 mt-1">
+                  <span>Creates:</span>
+                  <span className="flex items-center font-medium text-primary">
+                    <GameIcon type="item" id="ironIngot" size={16} className="mr-1" />
+                    1x {itemData['ironIngot'].name}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-shrink-0 w-[180px]">
+              {gameState.ironIngotSmeltingQueue > 0 ? (
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm text-muted-foreground text-center flex items-center justify-center">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Smelting... ({gameState.ironIngotSmeltingQueue})
+                  </p>
+                  <Progress value={ironProgress} className="w-full" />
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={handleSmeltIron}
+                    disabled={maxSmeltableIron < 1 || isBusy || gameState.playerStats.health <= 0}
+                    className="flex-1"
+                    variant={maxSmeltableIron > 0 ? 'default' : 'outline'}
+                  >
+                    <Power className="mr-2 h-4 w-4" />
+                    Smelt
+                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex-1">
+                          <Button
+                            onClick={() => handleSmeltAll('iron')}
+                            disabled={maxSmeltableIron < 2 || isBusy || gameState.playerStats.health <= 0}
+                            className="w-full"
+                            variant="secondary"
+                          >
+                            <PackageCheck className="mr-2 h-4 w-4" />
+                            All ({maxSmeltableIron})
+                          </Button>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {maxSmeltableIron < 2 ? <p>Need resources for 2+ items</p> : <p>Smelt all possible</p>}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+
+        {/* Charcoal */}
+        <Card className="bg-muted/50 p-4 w-full">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex-grow">
+              <div className="flex items-center font-semibold text-base mb-2">
+                <Fuel className="mr-2 h-5 w-5" /> Make Charcoal
+              </div>
+              <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                <div className="flex flex-wrap gap-x-3 gap-y-1">
+                  <span>Requires:</span>
+                  <span className="flex items-center">
+                    <GameIcon type="item" id="wood" size={16} className="mr-1" />
+                    {itemData['wood'].name}: {charcoalSmeltRequirements.wood}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 mt-1">
+                  <span>Creates:</span>
+                  <span className="flex items-center font-medium text-primary">
+                    <GameIcon type="item" id="charcoal" size={16} className="mr-1" />
+                    1x {itemData['charcoal'].name}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-shrink-0 w-[180px]">
+              {gameState.charcoalSmeltingQueue > 0 ? (
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm text-muted-foreground text-center flex items-center justify-center">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Making... ({gameState.charcoalSmeltingQueue})
+                  </p>
+                  <Progress value={charcoalProgress} className="w-full" />
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Button
+                    onClick={handleMakeCharcoal}
+                    disabled={maxSmeltableCharcoal < 1 || isBusy || gameState.playerStats.health <= 0}
+                    className="flex-1"
+                    variant={maxSmeltableCharcoal > 0 ? 'default' : 'outline'}
+                  >
+                    <Power className="mr-2 h-4 w-4" />
+                    Make
+                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex-1">
+                          <Button
+                            onClick={() => handleSmeltAll('charcoal')}
+                            disabled={maxSmeltableCharcoal < 2 || isBusy || gameState.playerStats.health <= 0}
+                            className="w-full"
+                            variant="secondary"
+                          >
+                            <PackageCheck className="mr-2 h-4 w-4" />
+                            All ({maxSmeltableCharcoal})
+                          </Button>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        {maxSmeltableCharcoal < 2 ? <p>Need resources for 2+ items</p> : <p>Make all possible</p>}
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
+              )}
+            </div>
+          </div>
+        </Card>
+      </CardContent>
+    </Card>
+  );
 }
