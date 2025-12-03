@@ -117,4 +117,6 @@ export const initialState: GameState = {
   powerCapacity: 0,
   powerConsumption: 0,
   skills: {},
+  npcReputation: {},
+  unlockedLore: [],
 };

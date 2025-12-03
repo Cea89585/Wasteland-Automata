@@ -957,11 +957,32 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
       const newCompletedQuests = [...state.completedQuests, questId];
 
+      // Unlock lore entries associated with this quest
+      const loreEntries = require('@/lib/game-data/lore').loreEntries;
+      const newUnlockedLore = [...state.unlockedLore];
+      loreEntries.forEach((entry: any) => {
+        if (entry.unlockedBy === questId && !newUnlockedLore.includes(entry.id)) {
+          newUnlockedLore.push(entry.id);
+        }
+      });
+
+      // Grant reputation with NPC (determine NPC from quest ID prefix)
+      const npcReputation = { ...state.npcReputation };
+      const npcId = questId.split('_')[1]; // Extract NPC ID from quest ID (e.g., 'quest_silas_1' -> 'silas')
+      type ValidNPC = 'silas' | 'kael' | 'elara' | 'anya' | 'marcus' | 'vera' | 'rook' | 'chen';
+      const validNPCs: ValidNPC[] = ['silas', 'kael', 'elara', 'anya', 'marcus', 'vera', 'rook', 'chen'];
+      if (npcId && validNPCs.includes(npcId as ValidNPC)) {
+        const typedNpcId = npcId as ValidNPC;
+        npcReputation[typedNpcId] = (npcReputation[typedNpcId] || 0) + 10; // +10 reputation per quest
+      }
+
       let finalState = reducer({
         ...newState,
         inventory: newInventory,
         statistics: newStatistics,
         completedQuests: newCompletedQuests,
+        unlockedLore: newUnlockedLore,
+        npcReputation,
         log: [
           { id: generateUniqueLogId(), text: `Quest Complete: ${quest.title} (+${xpGained} XP)`, type: 'success', timestamp: Date.now() },
           { id: generateUniqueLogId(), text: quest.completionMessage, type: 'event', timestamp: Date.now() },

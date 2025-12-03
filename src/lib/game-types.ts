@@ -86,6 +86,16 @@ export type Equipment = Partial<Record<EquipmentSlot, Item | null>>;
 
 export type Theme = 'light' | 'dark' | 'system';
 
+export type NPCId = 'silas' | 'kael' | 'elara' | 'anya' | 'marcus' | 'vera' | 'rook' | 'chen';
+
+export interface LoreEntry {
+  id: string;
+  title: string;
+  content: string;
+  category: 'history' | 'character' | 'location' | 'technology';
+  unlockedBy?: string; // quest ID that unlocks this
+}
+
 export interface FarmPlot {
   id: number;
   seed: Resource | null;
@@ -138,6 +148,8 @@ export interface GameState {
   powerCapacity: number;
   powerConsumption: number;
   skills: Record<string, number>; // skill ID -> level
+  npcReputation: Partial<Record<NPCId, number>>; // NPC ID -> reputation (-100 to 100)
+  unlockedLore: string[]; // lore entry IDs
 }
 
 export type MachineType = 'miner' | 'smelter' | 'constructor' | 'biomassBurner';

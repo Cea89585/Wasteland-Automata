@@ -187,5 +187,218 @@ export const quests: Quest[] = [
         ],
         completionMessage: '"Here is the fee... and here is the map. A new path is open to you. Who knows what you\'ll find out there. Good luck, and thank you. You\'ve funded some very important research today."',
         dependsOn: 'quest_anya_map_2',
-    }
+    },
+
+    // Marcus Arc: The Salvage Wars
+    {
+        id: 'quest_marcus_1',
+        title: 'An Offer You Can\'t Refuse',
+        npc: 'Marcus, the Salvage King',
+        description: 'A well-dressed man with a calculating smile approaches. "You\'re making waves, friend. I\'m Marcus. I run the largest salvage operation in three sectors. You\'ve got talent—wasted on small-time scavenging. Work for me. Bring me uranium—rare, valuable, dangerous. Prove you can handle the big leagues."',
+        requirements: [
+            { type: 'item', item: 'uranium', amount: 5 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 300 },
+            { type: 'item', item: 'components', amount: 5 }
+        ],
+        completionMessage: 'Marcus weighs the uranium carefully. "Impressive. Most people wouldn\'t survive the radiation zones. You\'re either brave or stupid. Either way, you\'re useful. We\'ll talk again."',
+        dependsOn: 'quest_kael_1',
+        unlocks: 'quest_marcus_2',
+    },
+    {
+        id: 'quest_marcus_2',
+        title: 'The Price of Progress',
+        npc: 'Marcus, the Salvage King',
+        description: '"I need workers for my operation. Strong backs, sharp minds. But they need equipment. Bring me tools and materials—stone axes for cutting, iron plates for protection. Help me build my empire, and you\'ll have a place in it."',
+        requirements: [
+            { type: 'item', item: 'stoneAxe', amount: 5 },
+            { type: 'item', item: 'ironPlates', amount: 20 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 800 },
+            { type: 'item', item: 'biomass', amount: 10 }
+        ],
+        completionMessage: '"Perfect. My operation expands. Remember, {{characterName}}—in the wasteland, you\'re either building an empire or serving one. Choose wisely."',
+        dependsOn: 'quest_marcus_1',
+        unlocks: 'quest_marcus_3',
+    },
+    {
+        id: 'quest_marcus_3',
+        title: 'Consolidation of Power',
+        npc: 'Marcus, the Salvage King',
+        description: 'Marcus\'s expression is serious. "I\'m consolidating my holdings. I need advanced materials—charcoal for fuel, biomass for energy, components for automation. This is your chance to be part of something bigger than survival. Bring me what I need."',
+        requirements: [
+            { type: 'item', item: 'charcoal', amount: 30 },
+            { type: 'item', item: 'biomass', amount: 30 },
+            { type: 'item', item: 'components', amount: 15 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 1200 },
+            { type: 'item', item: 'ironIngot', amount: 20 }
+        ],
+        completionMessage: '"Excellent work. You\'ve proven yourself valuable. But remember—loyalty is rewarded, betrayal is... not forgotten. We understand each other, yes?"',
+        dependsOn: 'quest_marcus_2',
+    },
+
+    // Vera Arc: Echoes of the Past
+    {
+        id: 'quest_vera_1',
+        title: 'The Archivist\'s Request',
+        npc: 'Vera, the Archivist',
+        description: 'An elderly woman with piercing eyes beckons you to a hidden bunker filled with ancient terminals. "The ship\'s black box is still out there, in the Industrial Zone. But I need power to decrypt it. Bring me a generator, and I\'ll show you what really happened to our ancestors."',
+        requirements: [
+            { type: 'structure', structure: 'generator', amount: 1 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 500 },
+            { type: 'item', item: 'components', amount: 10 }
+        ],
+        completionMessage: 'Vera connects the generator. The screens flicker to life, showing fragmented logs. "The crash... it wasn\'t an accident. Someone sabotaged the navigation. But who? And why are they still hiding?"',
+        dependsOn: 'quest_kael_2',
+        unlocks: 'quest_vera_2',
+    },
+    {
+        id: 'quest_vera_2',
+        title: 'The Saboteur\'s Shadow',
+        npc: 'Vera, the Archivist',
+        description: 'Vera\'s hands shake as she shows you encrypted files. "I\'ve narrowed it down. The saboteur\'s descendants are still here, still working in secret. I need advanced scanning equipment to trace their signal. Bring me iron plates and components. We must expose the truth."',
+        requirements: [
+            { type: 'item', item: 'ironPlates', amount: 20 },
+            { type: 'item', item: 'components', amount: 30 }
+        ],
+        rewards: [
+            { type: 'item', item: 'biomass', amount: 15 },
+            { type: 'silver', amount: 800 }
+        ],
+        completionMessage: 'The scan reveals a hidden facility. "There. That\'s where they\'re operating from. But we can\'t go alone. We need allies. And we need to be ready for what we\'ll find. The truth is darker than I imagined."',
+        dependsOn: 'quest_vera_1',
+        unlocks: 'quest_vera_3',
+    },
+    {
+        id: 'quest_vera_3',
+        title: 'Gathering the Evidence',
+        npc: 'Vera, the Archivist',
+        description: '"I need to build a case that can\'t be denied. Physical evidence from the crash site—mutated samples that prove the sabotage, advanced materials that show the technology used. Help me gather what we need to expose this conspiracy."',
+        requirements: [
+            { type: 'item', item: 'mutatedTwigs', amount: 25 },
+            { type: 'item', item: 'uranium', amount: 10 },
+            { type: 'item', item: 'ironIngot', amount: 30 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 1500 },
+            { type: 'item', item: 'metalDetector', amount: 1 }
+        ],
+        completionMessage: '"This is it. The proof we need. The radiation signatures match the sabotage device. Someone wanted us stranded here. But why? What are they protecting? Or hiding from?"',
+        dependsOn: 'quest_vera_2',
+    },
+
+    // Rook Arc: The Outcast's Gambit
+    {
+        id: 'quest_rook_1',
+        title: 'Blood Money',
+        npc: 'Rook, the Outcast',
+        description: 'A scarred figure emerges from the shadows. "Name\'s Rook. I don\'t do pleasantries. I need someone expendable for a job. There\'s a cache of charcoal in a radiation hot zone. Everyone who\'s tried to get it has died. You look stupid enough to try. Interested?"',
+        requirements: [
+            { type: 'item', item: 'charcoal', amount: 50 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 600 },
+            { type: 'item', item: 'stoneAxe', amount: 1 }
+        ],
+        completionMessage: 'Rook actually looks impressed. "You survived. Huh. Maybe you\'re not as dumb as you look. I might have more work for you. Real work. The kind that pays well and asks no questions."',
+        unlocks: 'quest_rook_2',
+    },
+    {
+        id: 'quest_rook_2',
+        title: 'The Redemption Run',
+        npc: 'Rook, the Outcast',
+        description: 'Rook\'s usual cynicism cracks. "I was exiled for stealing medical supplies. But I was trying to save a kid. Dr. Chen can verify—if she\'ll talk to me. I need you to deliver these supplies to her clinic. Biomass for fuel, components for equipment. Maybe... maybe I can start making things right."',
+        requirements: [
+            { type: 'item', item: 'biomass', amount: 30 },
+            { type: 'item', item: 'components', amount: 20 }
+        ],
+        rewards: [
+            { type: 'item', item: 'cookedApple', amount: 10 },
+            { type: 'silver', amount: 1000 }
+        ],
+        completionMessage: 'Dr. Chen accepts the supplies with tears in her eyes. "Tell Rook... tell him I never doubted him. He\'s welcome here." Rook nods silently when you relay the message. "Thanks. I owe you one. A real one."',
+        dependsOn: 'quest_rook_1',
+        unlocks: 'quest_rook_3',
+    },
+    {
+        id: 'quest_rook_3',
+        title: 'Sins of the Past',
+        npc: 'Rook, the Outcast',
+        description: '"The kid I tried to save... she didn\'t make it. But her family is still out there, struggling. I want to help them properly this time. They need food, water, shelter materials. Help me do this right, {{characterName}}. Help me prove I\'m more than my mistakes."',
+        requirements: [
+            { type: 'item', item: 'apple', amount: 50 },
+            { type: 'item', item: 'water', amount: 50 },
+            { type: 'item', item: 'wood', amount: 100 },
+            { type: 'item', item: 'stone', amount: 100 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 1500 },
+            { type: 'item', item: 'ironPlates', amount: 10 }
+        ],
+        completionMessage: '"They have a chance now. A real chance. You helped me do something good. In this wasteland, that\'s rare. You\'re alright, {{characterName}}. If you ever need someone to watch your back, you know where to find me."',
+        dependsOn: 'quest_rook_2',
+    },
+
+    // Dr. Chen Arc: The Healer's Burden
+    {
+        id: 'quest_chen_1',
+        title: 'Medicine for the Masses',
+        npc: 'Dr. Yuki Chen',
+        description: 'An exhausted doctor approaches. "I\'m Dr. Chen. I run the clinic in Sector 7. We\'re overwhelmed—radiation sickness, malnutrition, injuries. I need food and water to keep people alive. Can you help?"',
+        requirements: [
+            { type: 'item', item: 'apple', amount: 30 },
+            { type: 'item', item: 'water', amount: 30 },
+            { type: 'item', item: 'cookedApple', amount: 10 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 400 },
+            { type: 'item', item: 'appleSeeds', amount: 5 }
+        ],
+        completionMessage: 'Dr. Chen\'s eyes well up. "Thank you. You\'ve saved lives today. Real lives. If you ever need medical supplies or just someone to talk to, come find me. We\'re all in this together."',
+        dependsOn: 'quest_silas_2',
+        unlocks: 'quest_chen_2',
+    },
+    {
+        id: 'quest_chen_2',
+        title: 'Building Hope',
+        npc: 'Dr. Yuki Chen',
+        description: '"The clinic needs expansion. More beds, better equipment, proper storage. I need construction materials and advanced components. Help me build something that will last, that will help people for years to come."',
+        requirements: [
+            { type: 'item', item: 'wood', amount: 100 },
+            { type: 'item', item: 'stone', amount: 100 },
+            { type: 'item', item: 'ironIngot', amount: 50 },
+            { type: 'item', item: 'components', amount: 25 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 1500 },
+            { type: 'item', item: 'biomass', amount: 20 }
+        ],
+        completionMessage: '"It\'s beautiful. A real medical facility. People won\'t have to suffer needlessly anymore. You\'ve given us more than supplies—you\'ve given us hope. Thank you, {{characterName}}."',
+        dependsOn: 'quest_chen_1',
+        unlocks: 'quest_chen_3',
+    },
+    {
+        id: 'quest_chen_3',
+        title: 'The Healer\'s Stand',
+        npc: 'Dr. Yuki Chen',
+        description: 'Dr. Chen\'s voice is urgent. "Marcus is demanding \'protection fees\' from my clinic. If I don\'t pay, he\'ll cut off my supply lines. But if I do, I can\'t afford medicine. I need to stockpile enough to be independent. Help me break free from his control."',
+        requirements: [
+            { type: 'item', item: 'biomass', amount: 50 },
+            { type: 'item', item: 'charcoal', amount: 40 },
+            { type: 'item', item: 'components', amount: 30 },
+            { type: 'item', item: 'ironPlates', amount: 15 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 2000 },
+            { type: 'item', item: 'cookedApple', amount: 20 }
+        ],
+        completionMessage: '"We\'re not helpless anymore. Marcus can\'t control us through fear and scarcity. You\'ve given us independence. The people won\'t forget this. Neither will I."',
+        dependsOn: 'quest_chen_2',
+    },
 ];
