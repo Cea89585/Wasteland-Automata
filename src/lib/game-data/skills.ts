@@ -187,7 +187,7 @@ export const getSkillLevel = (skills: Record<string, number>, skillId: string): 
 
 // Helper function to check if skill can be unlocked
 export const canUnlockSkill = (
-    skills: Record<string, number>,
+    playerSkills: Record<string, number>,
     skillId: string,
     upgradePoints: number,
     builtStructures: string[]
@@ -195,7 +195,7 @@ export const canUnlockSkill = (
     const skill = skills.find(s => s.id === skillId);
     if (!skill) return { canUnlock: false, reason: 'Skill not found' };
 
-    const currentLevel = getSkillLevel(skills, skillId);
+    const currentLevel = getSkillLevel(playerSkills, skillId);
     if (currentLevel >= skill.maxLevel) {
         return { canUnlock: false, reason: 'Max level reached' };
     }
@@ -206,7 +206,7 @@ export const canUnlockSkill = (
 
     if (skill.prerequisites) {
         for (const prereqId of skill.prerequisites) {
-            if (!getSkillLevel(skills, prereqId)) {
+            if (!getSkillLevel(playerSkills, prereqId)) {
                 return { canUnlock: false, reason: 'Missing prerequisites' };
             }
         }
