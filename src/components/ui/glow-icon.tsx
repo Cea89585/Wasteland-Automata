@@ -3,7 +3,7 @@ import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface GlowIconProps extends React.ComponentProps<'svg'> {
-    icon: LucideIcon;
+    icon: LucideIcon | React.FC<{ className?: string; size?: number }>;
     glowColor?: string;
     glowIntensity?: 'sm' | 'md' | 'lg';
 }

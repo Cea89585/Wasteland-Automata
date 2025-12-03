@@ -26,7 +26,8 @@ import FactoryPanel from './FactoryPanel';
 import SkillsPanel from './SkillsPanel';
 import FishingPanel from './FishingPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Backpack, Compass, Hammer, Home, BookOpen, User, Power, AlertTriangle, Coins, Settings, Users, LogOut, Sprout, Factory, Zap, Fish } from 'lucide-react';
+import { AlertTriangle, LogOut, Settings } from 'lucide-react';
+import { ExploreIcon, QuestIcon, InventoryIcon, CraftIcon, CharacterIcon, BaseIcon, FurnaceIcon, MarketIcon, FarmingIcon, FishingIcon, FactoryIcon, SkillsIcon, TechIcon } from '@/lib/icon-mapping';
 import { GlowIcon } from '@/components/ui/glow-icon';
 import {
   AlertDialog,
@@ -89,19 +90,19 @@ export default function GameUI() {
   const showFarming = gameState.builtStructures.includes('hydroponicsBay');
 
   const tabs = [
-    { value: "explore", label: "Explore", icon: Compass },
-    { value: "community", label: "Quests", icon: Users },
-    { value: "inventory", label: "Inventory", icon: Backpack },
-    { value: "craft", label: "Craft", icon: Hammer },
-    { value: "character", label: "Character", icon: User },
-    { value: "base", label: "Base", icon: Home },
-    { value: "furnace", label: "Furnace", icon: Power, condition: showFurnace },
-    { value: "market", label: "Market", icon: Coins, condition: showMarket },
-    { value: "farming", label: "Farming", icon: Sprout, condition: showFarming },
-    { value: "fishing", label: "Fishing", icon: Fish },
-    { value: "factory", label: "Factory", icon: Factory },
-    { value: "skills", label: "Skills", icon: Zap },
-    { value: "tech", label: "Tech", icon: BookOpen },
+    { value: "explore", label: "Explore", icon: ExploreIcon },
+    { value: "community", label: "Quests", icon: QuestIcon },
+    { value: "inventory", label: "Inventory", icon: InventoryIcon },
+    { value: "craft", label: "Craft", icon: CraftIcon },
+    { value: "character", label: "Character", icon: CharacterIcon },
+    { value: "base", label: "Base", icon: BaseIcon },
+    { value: "furnace", label: "Furnace", icon: FurnaceIcon, condition: showFurnace },
+    { value: "market", label: "Market", icon: MarketIcon, condition: showMarket },
+    { value: "farming", label: "Farming", icon: FarmingIcon, condition: showFarming },
+    { value: "fishing", label: "Fishing", icon: FishingIcon },
+    { value: "factory", label: "Factory", icon: FactoryIcon },
+    { value: "skills", label: "Skills", icon: SkillsIcon },
+    { value: "tech", label: "Tech", icon: TechIcon },
   ].filter(tab => tab.condition !== false);
 
   const handleTabChange = (value: string) => {

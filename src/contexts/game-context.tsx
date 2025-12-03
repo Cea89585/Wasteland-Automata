@@ -1967,8 +1967,163 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         currentFishingZone: zoneId
       };
     }
+
+    case 'UPGRADE_FARM_PLOT': {
+      const BASE_FARM_PLOT_COST = 15000;
+      const cost = calculateCost(state.farmPlotLevel, BASE_FARM_PLOT_COST, BASE_FARM_PLOT_COST / 5);
+
+      if (state.inventory.silver < cost) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: `Not enough silver. Need ${cost} silver.`, type: 'danger', timestamp: Date.now() }, ...state.log]
+        };
+      }
+
+      const newInventory = { ...state.inventory };
+      newInventory.silver -= cost;
+
+      return {
+        ...state,
+        inventory: newInventory,
+        farmPlotLevel: state.farmPlotLevel + 1,
+        log: [{ id: generateUniqueLogId(), text: `Upgraded Farm Plots! (+1 plot)`, type: 'success', timestamp: Date.now() }, ...state.log]
+      };
+    }
+
+    case 'UPGRADE_MACHINE_SLOT': {
+      const BASE_MACHINE_SLOT_COST = 20000;
+      const cost = calculateCost(state.machineSlotLevel, BASE_MACHINE_SLOT_COST, BASE_MACHINE_SLOT_COST / 5);
+
+      if (state.inventory.silver < cost) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: `Not enough silver. Need ${cost} silver.`, type: 'danger', timestamp: Date.now() }, ...state.log]
+        };
+      }
+
+      const newInventory = { ...state.inventory };
+      newInventory.silver -= cost;
+
+      return {
+        ...state,
+        inventory: newInventory,
+        machineSlotLevel: state.machineSlotLevel + 1,
+        log: [{ id: generateUniqueLogId(), text: `Upgraded Machine Slots! (+1 slot)`, type: 'success', timestamp: Date.now() }, ...state.log]
+      };
+    }
+
+    case 'UPGRADE_AUTOMATION_SPEED': {
+      const BASE_AUTO_SPEED_COST = 15000;
+      const cost = calculateCost(state.automationSpeedLevel, BASE_AUTO_SPEED_COST, BASE_AUTO_SPEED_COST / 5);
+
+      if (state.inventory.silver < cost) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: `Not enough silver. Need ${cost} silver.`, type: 'danger', timestamp: Date.now() }, ...state.log]
+        };
+      }
+
+      const newInventory = { ...state.inventory };
+      newInventory.silver -= cost;
+
+      return {
+        ...state,
+        inventory: newInventory,
+        automationSpeedLevel: state.automationSpeedLevel + 1,
+        log: [{ id: generateUniqueLogId(), text: `Upgraded Automation Speed! (-5% processing time)`, type: 'success', timestamp: Date.now() }, ...state.log]
+      };
+    }
+
+    case 'UPGRADE_EXPLORATION_EFFICIENCY': {
+      const BASE_EXPLORATION_COST = 12000;
+      const cost = calculateCost(state.explorationEfficiencyLevel, BASE_EXPLORATION_COST, BASE_EXPLORATION_COST / 5);
+
+      if (state.inventory.silver < cost) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: `Not enough silver. Need ${cost} silver.`, type: 'danger', timestamp: Date.now() }, ...state.log]
+        };
+      }
+
+      const newInventory = { ...state.inventory };
+      newInventory.silver -= cost;
+
+      return {
+        ...state,
+        inventory: newInventory,
+        explorationEfficiencyLevel: state.explorationEfficiencyLevel + 1,
+        log: [{ id: generateUniqueLogId(), text: `Upgraded Exploration Efficiency! (+10% bonus resources)`, type: 'success', timestamp: Date.now() }, ...state.log]
+      };
+    }
+
+    case 'UPGRADE_FISHING_LUCK': {
+      const FISHING_LUCK_COST = 10000;
+
+      if (state.hasFishingLuck) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: `Already purchased Fishing Luck.`, type: 'danger', timestamp: Date.now() }, ...state.log]
+        };
+      }
+
+      if (state.inventory.silver < FISHING_LUCK_COST) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: `Not enough silver. Need ${FISHING_LUCK_COST} silver.`, type: 'danger', timestamp: Date.now() }, ...state.log]
+        };
+      }
+
+      const newInventory = { ...state.inventory };
+      newInventory.silver -= FISHING_LUCK_COST;
+
+      return {
+        ...state,
+        inventory: newInventory,
+        hasFishingLuck: true,
+        log: [{ id: generateUniqueLogId(), text: `Purchased Fishing Luck! (Better rare catches)`, type: 'success', timestamp: Date.now() }, ...state.log]
+      };
+    }
+
+    case 'UPGRADE_REST_EFFICIENCY': {
+      const BASE_REST_COST = 7000;
+      const MAX_REST_LEVEL = 6; // 6 levels = 30%
+      const cost = calculateCost(state.restEfficiencyLevel, BASE_REST_COST, BASE_REST_COST / 5);
+
+      if (state.restEfficiencyLevel >= MAX_REST_LEVEL) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: `Rest Efficiency is already maxed out.`, type: 'danger', timestamp: Date.now() }, ...state.log]
+        };
+      }
+
+      if (state.inventory.silver < cost) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: `Not enough silver. Need ${cost} silver.`, type: 'danger', timestamp: Date.now() }, ...state.log]
+        };
+      }
+
+      const newInventory = { ...state.inventory };
+      newInventory.silver -= cost;
+
+      return {
+        ...state,
+        inventory: newInventory,
+        restEfficiencyLevel: state.restEfficiencyLevel + 1,
+        log: [{ id: generateUniqueLogId(), text: `Upgraded Rest Efficiency! (+5% health recovery)`, type: 'success', timestamp: Date.now() }, ...state.log]
+      };
+    }
   }
   return state;
+};
+
+const calculateCost = (level: number, baseCost: number, increment: number): number => {
+  if (level === 0) return baseCost;
+  let cost = baseCost;
+  for (let i = 1; i <= level; i++) {
+    cost = Math.floor(cost * 1.5 + increment);
+  }
+  return cost;
 };
 
 export const GameContext = createContext<{

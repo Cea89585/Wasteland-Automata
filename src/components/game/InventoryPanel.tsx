@@ -3,10 +3,10 @@
 import { useGame } from '@/hooks/use-game';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { itemData } from '@/lib/game-data/items';
-import { allIcons } from './GameIcons';
+import { GameIcon, AppleIcon, WaterIcon, CookedAppleIcon } from '@/lib/icon-mapping';
 import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
-import { Apple, GlassWater, Zap, Shirt } from 'lucide-react';
+import { Shirt } from 'lucide-react';
 import type { Item } from '@/lib/game-types';
 
 export default function InventoryPanel() {
@@ -47,7 +47,7 @@ export default function InventoryPanel() {
 
   const handleEatCookedApple = () => {
     if (inventory.cookedApple > 0) {
-        dispatch({ type: 'EAT_COOKED_APPLE' });
+      dispatch({ type: 'EAT_COOKED_APPLE' });
     }
   }
 
@@ -67,48 +67,48 @@ export default function InventoryPanel() {
         {ownedItems.length === 0 ? (
           <p className="text-muted-foreground">Your inventory is empty. Time to start scavenging.</p>
         ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {ownedItems.map((itemId) => {
-                  const data = itemData[itemId as keyof typeof itemData];
-                  const isEquippable = data && data.equipSlot; // Check if it has any equip slot
-                  const equippedItemInSlot = data.equipSlot ? equipment[data.equipSlot] : null;
-                  const isEquipped = equippedItemInSlot === itemId;
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {ownedItems.map((itemId) => {
+              const data = itemData[itemId as keyof typeof itemData];
+              const isEquippable = data && data.equipSlot;
+              const equippedItemInSlot = data.equipSlot ? equipment[data.equipSlot] : null;
+              const isEquipped = equippedItemInSlot === itemId;
 
-                  return (
-                    <div key={itemId} className="flex items-center justify-between p-3 rounded-md bg-muted/50">
-                      <div className="flex items-center">
-                        {allIcons[itemId]}
-                        <div className="flex flex-col">
-                            <span className="font-medium">{data?.name}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-lg font-semibold text-primary">{inventory[itemId as keyof typeof inventory]}</span>
-                        {itemId === 'apple' && (
-                            <Button size="icon" variant="outline" onClick={handleEat} disabled={isDead || inventory.apple === 0 || isBusy} aria-label="Eat apple">
-                                <Apple className="h-4 w-4" />
-                            </Button>
-                        )}
-                        {itemId === 'water' && (
-                            <Button size="icon" variant="outline" onClick={handleDrink} disabled={isDead || inventory.water === 0 || isBusy} aria-label="Drink water">
-                                <GlassWater className="h-4 w-4" />
-                            </Button>
-                        )}
-                        {itemId === 'cookedApple' && (
-                            <Button size="icon" variant="outline" onClick={handleEatCookedApple} disabled={isDead || inventory.cookedApple === 0 || isBusy} aria-label="Eat Cooked Apple">
-                                <Zap className="h-4 w-4" />
-                            </Button>
-                        )}
-                        {isEquippable && !isEquipped &&(
-                             <Button size="icon" variant="outline" onClick={() => handleEquip(itemId as Item)} disabled={isDead || isBusy} aria-label={`Equip ${data.name}`}>
-                                <Shirt className="h-4 w-4" />
-                            </Button>
-                        )}
-                      </div>
+              return (
+                <div key={itemId} className="flex items-center justify-between p-3 rounded-md bg-muted/50">
+                  <div className="flex items-center gap-3">
+                    <GameIcon type="item" id={itemId} size={24} className="flex-shrink-0" />
+                    <div className="flex flex-col">
+                      <span className="font-medium">{data?.name}</span>
                     </div>
-                  );
-                })}
-            </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-lg font-semibold text-primary">{inventory[itemId as keyof typeof inventory]}</span>
+                    {itemId === 'apple' && (
+                      <Button size="icon" variant="outline" onClick={handleEat} disabled={isDead || inventory.apple === 0 || isBusy} aria-label="Eat apple">
+                        <AppleIcon size={16} />
+                      </Button>
+                    )}
+                    {itemId === 'water' && (
+                      <Button size="icon" variant="outline" onClick={handleDrink} disabled={isDead || inventory.water === 0 || isBusy} aria-label="Drink water">
+                        <WaterIcon size={16} />
+                      </Button>
+                    )}
+                    {itemId === 'cookedApple' && (
+                      <Button size="icon" variant="outline" onClick={handleEatCookedApple} disabled={isDead || inventory.cookedApple === 0 || isBusy} aria-label="Eat Cooked Apple">
+                        <CookedAppleIcon size={16} />
+                      </Button>
+                    )}
+                    {isEquippable && !isEquipped && (
+                      <Button size="icon" variant="outline" onClick={() => handleEquip(itemId as Item)} disabled={isDead || isBusy} aria-label={`Equip ${data.name}`}>
+                        <Shirt className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </CardContent>
     </Card>

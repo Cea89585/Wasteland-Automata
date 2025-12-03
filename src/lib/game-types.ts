@@ -128,6 +128,12 @@ export interface GameState {
   thirstLevel: number;
   healthLevel: number;
   droneLevel: number;
+  farmPlotLevel: number; // Additional farm plots
+  machineSlotLevel: number; // Additional machine slots
+  automationSpeedLevel: number; // Faster machine processing
+  explorationEfficiencyLevel: number; // Better exploration loot
+  hasFishingLuck: boolean; // One-time fishing luck boost
+  restEfficiencyLevel: number; // Better health recovery when resting (max 6 levels = 30%)
   isInitialized: boolean;
   gameTick: number;
   isResting: boolean;
@@ -213,6 +219,12 @@ export type GameAction =
   | { type: 'UPGRADE_THIRST' }
   | { type: 'UPGRADE_HEALTH' }
   | { type: 'UPGRADE_DRONE' }
+  | { type: 'UPGRADE_FARM_PLOT' }
+  | { type: 'UPGRADE_MACHINE_SLOT' }
+  | { type: 'UPGRADE_AUTOMATION_SPEED' }
+  | { type: 'UPGRADE_EXPLORATION_EFFICIENCY' }
+  | { type: 'UPGRADE_FISHING_LUCK' }
+  | { type: 'UPGRADE_REST_EFFICIENCY' }
   | { type: 'TRAVEL'; payload: { locationId: LocationId } }
   | { type: 'QUEUE_DRONE_MISSIONS', payload: { amount: number } }
   | { type: 'ADD_FUEL', payload: { fuelType: 'wood' | 'biomass' | 'charcoal' } }
