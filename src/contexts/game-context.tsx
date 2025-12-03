@@ -1850,6 +1850,123 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         machines: updatedMachines,
       };
     }
+
+    case 'FISH': {
+      const { zoneId } = action.payload;
+      const { getFishingZoneById, rollFishingLoot } = require('@/lib/game-data/fishing');
+      const zone = getFishingZoneById(zoneId);
+
+      if (!zone) return state;
+
+      // Check level requirement
+      if (state.level < zone.levelRequirement) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: `You need to be level ${zone.levelRequirement} to fish here.`, type: 'danger', timestamp: Date.now() }, ...state.log]
+        };
+      }
+
+      // Check energy
+      const MAX_ENERGY = getMaxEnergy();
+      if (state.playerStats.energy < zone.energyCost) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: `Not enough energy. Need ${zone.energyCost} energy.`, type: 'danger', timestamp: Date.now() }, ...state.log]
+        };
+      }
+
+      // Roll for loot
+      const loot = rollFishingLoot(zone.lootTable);
+
+      let newInventory = { ...state.inventory };
+      let newCaughtFish = { ...state.caughtFish };
+      let newStatistics = { ...state.statistics };
+      let logMessage = '';
+
+      // Handle the catch
+      if (loot.isFish) {
+        // It's a fish - add to caught fish inventory
+        newCaughtFish[loot.item as string] = (newCaughtFish[loot.item as string] || 0) + 1;
+        logMessage = `You caught a ${loot.item}! (${loot.rarity})`;
+      } else {
+        // It's a resource/item - add to inventory
+        const INVENTORY_CAP = getInventoryCap();
+        const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(newInventory, newStatistics, loot.item as any, 1, INVENTORY_CAP);
+        newInventory = updatedInventory;
+        newStatistics = updatedStatistics;
+        const itemName = (loot.item in itemData) ? itemData[loot.item as keyof typeof itemData]?.name : loot.item;
+        logMessage = `You found ${itemName}! (${loot.rarity})`;
+      }
+
+      // Consume energy
+      const newPlayerStats = {
+        ...state.playerStats,
+        energy: state.playerStats.energy - zone.energyCost
+      };
+
+      return {
+        ...state,
+        playerStats: newPlayerStats,
+        inventory: newInventory,
+        caughtFish: newCaughtFish,
+        statistics: newStatistics,
+        log: [{ id: generateUniqueLogId(), text: logMessage, type: 'success', timestamp: Date.now() }, ...state.log]
+      };
+    }
+
+    case 'SELL_ALL_FISH': {
+      const { fishingZones } = require('@/lib/game-data/fishing');
+      let totalSilver = 0;
+      let fishSold = 0;
+
+      // Calculate total value of all caught fish
+      const allLoot: any[] = [];
+      fishingZones.forEach((zone: any) => {
+        allLoot.push(...zone.lootTable);
+      });
+
+      const newCaughtFish = { ...state.caughtFish };
+
+      Object.entries(newCaughtFish).forEach(([fishType, count]) => {
+        if (count && count > 0) {
+          const fishData = allLoot.find((loot: any) => loot.item === fishType && loot.isFish);
+          if (fishData && fishData.silverValue) {
+            totalSilver += fishData.silverValue * count;
+            fishSold += count;
+            delete newCaughtFish[fishType];
+          }
+        }
+      });
+
+      if (fishSold === 0) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: `You have no fish to sell.`, type: 'danger', timestamp: Date.now() }, ...state.log]
+        };
+      }
+
+      const newInventory = { ...state.inventory };
+      newInventory.silver += totalSilver;
+
+      const newStatistics = { ...state.statistics };
+      newStatistics.totalItemsGained.silver = (newStatistics.totalItemsGained.silver || 0) + totalSilver;
+
+      return {
+        ...state,
+        inventory: newInventory,
+        caughtFish: newCaughtFish,
+        statistics: newStatistics,
+        log: [{ id: generateUniqueLogId(), text: `Sold ${fishSold} fish for ${totalSilver} silver!`, type: 'success', timestamp: Date.now() }, ...state.log]
+      };
+    }
+
+    case 'SET_FISHING_ZONE': {
+      const { zoneId } = action.payload;
+      return {
+        ...state,
+        currentFishingZone: zoneId
+      };
+    }
   }
   return state;
 };

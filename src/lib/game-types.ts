@@ -150,6 +150,8 @@ export interface GameState {
   skills: Record<string, number>; // skill ID -> level
   npcReputation: Partial<Record<NPCId, number>>; // NPC ID -> reputation (-100 to 100)
   unlockedLore: string[]; // lore entry IDs
+  currentFishingZone: string; // current fishing zone ID
+  caughtFish: Partial<Record<string, number>>; // fish type -> count
 }
 
 export type MachineType = 'miner' | 'smelter' | 'constructor' | 'biomassBurner';
@@ -226,4 +228,7 @@ export type GameAction =
   | { type: 'ADD_MACHINE_FUEL'; payload: { machineId: string, fuelType: Resource } }
   | { type: 'TRANSFER_TO_MACHINE'; payload: { machineId: string, resource: Resource | Item, amount: number } }
   | { type: 'TRANSFER_FROM_MACHINE'; payload: { machineId: string, resource: Resource | Item, amount: number } }
-  | { type: 'UNLOCK_SKILL'; payload: { skillId: string } };
+  | { type: 'UNLOCK_SKILL'; payload: { skillId: string } }
+  | { type: 'FISH'; payload: { zoneId: string } }
+  | { type: 'SELL_ALL_FISH' }
+  | { type: 'SET_FISHING_ZONE'; payload: { zoneId: string } };

@@ -119,4 +119,6 @@ export const initialState: GameState = {
   skills: {},
   npcReputation: {},
   unlockedLore: [],
+  currentFishingZone: 'toxic_puddle',
+  caughtFish: {},
 };
