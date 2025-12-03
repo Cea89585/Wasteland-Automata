@@ -1,4 +1,3 @@
-
 // src/components/game/LogPanel.tsx
 'use client';
 import { useGame } from '@/hooks/use-game';
@@ -44,15 +43,29 @@ const logTypeColors = {
   event: 'text-foreground',
   danger: 'text-destructive',
   success: 'text-green-400',
-        < p className = { cn(logTypeColors[message.type], "whitespace-pre-wrap") } >
-    { message.text }
-        </p >
-  <div className="text-xs text-muted-foreground/50 flex items-center pt-1">
-    <Clock className="h-3 w-3 mr-1" />
-    {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
-  </div>
-      </div >
-    </div >
+  craft: 'text-accent',
+}
+
+const LogEntry = ({ message }: { message: ReturnType<typeof useGame>['gameState']['log'][0] }) => {
+  let icon = logTypeIcons[message.type];
+
+  if (message.type === 'craft' && message.item) {
+    icon = <GameIcon type="item" id={message.item} size={16} fallback={logTypeIcons.craft} />;
+  }
+
+  return (
+    <div className="flex items-start gap-3 text-sm animate-in fade-in-0 duration-500">
+      <div className="pt-0.5">{icon}</div>
+      <div className="flex-1">
+        <p className={cn(logTypeColors[message.type], "whitespace-pre-wrap")}>
+          {message.text}
+        </p>
+        <div className="text-xs text-muted-foreground/50 flex items-center pt-1">
+          <Clock className="h-3 w-3 mr-1" />
+          {formatDistanceToNow(new Date(message.timestamp), { addSuffix: true })}
+        </div>
+      </div>
+    </div>
   );
 };
 

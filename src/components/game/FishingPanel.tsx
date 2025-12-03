@@ -55,12 +55,12 @@ export default function FishingPanel() {
 
     const getRarityColor = (rarity: string) => {
         switch (rarity) {
-            case 'veryCommon': return 'text-gray-500';
+            case 'very common': return 'text-gray-500';
             case 'common': return 'text-green-600';
             case 'uncommon': return 'text-blue-600';
             case 'rare': return 'text-purple-600';
-            case 'veryRare': return 'text-yellow-600';
-            case 'superRare': return 'text-red-600';
+            case 'very rare': return 'text-yellow-600';
+            case 'super rare': return 'text-red-600';
             default: return 'text-gray-500';
         }
     };
