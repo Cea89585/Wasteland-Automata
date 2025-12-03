@@ -105,7 +105,7 @@ export default function CraftingPanel() {
                               const enough = has >= amount;
                               return (
                                 <span key={resource} className={enough ? 'text-green-600' : 'text-red-600'}>
-                                  {resourceIcons[resource as Resource] || allIcons.silver}
+                                  {allIcons[resource] || allIcons.silver}
                                   {itemData[resource as keyof typeof itemData].name}: {has}/{amount}
                                 </span>
                               );

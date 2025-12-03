@@ -120,7 +120,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let offlineLogMessages: LogMessage[] = [];
       let newInventory = { ...gameState.inventory };
       let newStatistics = { ...statistics };
+      let newPlayerStats = { ...gameState.playerStats };
       const INVENTORY_CAP = 200 + (gameState.storageLevel || 0) * 50;
+      const MAX_ENERGY = 100 + (gameState.energyLevel || 0) * 5;
 
       if (gameState.lastSavedTimestamp) {
         const timeDiff = Date.now() - gameState.lastSavedTimestamp;
@@ -128,10 +130,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
         if (ticksPassed > 10) { // Only calculate if away for more than ~20 seconds
           let waterGained = 0;
-          let applesGained = 0; // Legacy passive gain, keep for now or remove? Plan said remove passive.
-          // Actually, plan says "Hydroponics Bay currently provides passive apples. This will be changed... to active".
-          // So I should NOT give offline apples if I'm removing passive apples.
-          // But Water Purifier is still passive.
 
           if (gameState.builtStructures.includes('waterPurifier') && newInventory.water < INVENTORY_CAP) {
             // 1 water every 2 ticks
@@ -142,6 +140,22 @@ const reducer = (state: GameState, action: GameAction): GameState => {
               const res = addResource(newInventory, newStatistics, 'water', waterGained, INVENTORY_CAP);
               newInventory = res.newInventory;
               newStatistics = res.newStatistics;
+            }
+          }
+
+          // Energy Regeneration
+          if (newPlayerStats.energy < MAX_ENERGY) {
+            const energyRegenPerTick = 0.25;
+            const energyGained = Math.min(MAX_ENERGY - newPlayerStats.energy, ticksPassed * energyRegenPerTick);
+
+            if (energyGained > 0) {
+              newPlayerStats.energy += energyGained;
+              offlineLogMessages.push({
+                id: generateUniqueLogId(),
+                text: `You feel rested. (+${Math.floor(energyGained)} Energy)`,
+                type: 'success',
+                timestamp: Date.now()
+              });
             }
           }
 
@@ -156,7 +170,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         }
       }
 
-      return { ...gameState, inventory: newInventory, statistics: newStatistics, log: [...offlineLogMessages, ...gameState.log], isInitialized: true };
+      return { ...gameState, inventory: newInventory, playerStats: newPlayerStats, statistics: newStatistics, log: [...offlineLogMessages, ...gameState.log], isInitialized: true };
     }
 
     case 'SET_GAME_STATE': {

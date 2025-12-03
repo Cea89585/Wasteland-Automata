@@ -35,4 +35,5 @@ export const itemData: Record<Resource | Item, { name: string; description: stri
   crudeMap: { name: Items.crudeMap, description: 'Unlocks the ability to travel to new locations.' },
   ironPlates: { name: Items.ironPlates, description: 'Reinforced plates of solid iron. Used for heavy construction.', sellPrice: 160 },
   biomassCompressor: { name: Items.biomassCompressor, description: 'A machine that unlocks the ability to create biomass.' },
+  appleSeeds: { name: Resources.appleSeeds, description: 'Seeds extracted from an apple. Can be planted in a Hydroponics Bay.' },
 };
