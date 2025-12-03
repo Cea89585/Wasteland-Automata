@@ -1842,6 +1842,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const { firestore } = useFirebase();
   const isSavingRef = useRef(false);
 
+  const isFirstLoad = useRef(true);
+
   const { idleProgress, resetTimer } = useInactivityTimer({
     onIdle: () => dispatch({ type: 'SET_IDLE', payload: true }),
     onActive: () => dispatch({ type: 'SET_IDLE', payload: false }),
@@ -1854,9 +1856,20 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const userDocRef = doc(firestore, 'users', user.uid);
       const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
         if (docSnap.exists()) {
-          const data = docSnap.data() as DocumentData;
-          if (!isSavingRef.current) {
-            dispatch({ type: 'SET_GAME_STATE', payload: data as GameState });
+          const data = docSnap.data() as GameState;
+          if (isFirstLoad.current) {
+            isFirstLoad.current = false;
+            // Separate statistics from gameState for INITIALIZE payload
+            const { statistics, ...restGameState } = data;
+            dispatch({
+              type: 'INITIALIZE',
+              payload: {
+                gameState: restGameState as Omit<GameState, 'statistics'>,
+                statistics: statistics || initialStatistics
+              }
+            });
+          } else if (!isSavingRef.current) {
+            dispatch({ type: 'SET_GAME_STATE', payload: data });
           }
         } else {
           // New user, create initial state in Firestore

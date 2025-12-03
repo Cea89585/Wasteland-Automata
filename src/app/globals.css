@@ -4,54 +4,75 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    /* Light Mode: Space Station Clean */
+    --background: 210 40% 96%; /* Cool Light Gray */
+    --foreground: 222 47% 11%; /* Dark Slate */
+    
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 222 47% 11%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 27 52% 52%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 41 54% 60%;
-    --accent-foreground: 0 0% 15%;
+    --popover-foreground: 222 47% 11%;
+    
+    --primary: 221 83% 53%; /* Deep Tech Blue */
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 210 40% 90%;
+    --secondary-foreground: 222 47% 11%;
+    
+    --muted: 210 40% 90%;
+    --muted-foreground: 215 16% 47%;
+    
+    --accent: 32 95% 44%; /* Industrial Orange */
+    --accent-foreground: 210 40% 98%;
+    
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 27 52% 52%;
-    --chart-1: 12 76% 61%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221 83% 53%;
+    
+    --radius: 0.5rem;
+    
+    --chart-1: 221 83% 53%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
   }
 
   .dark {
-    --background: 0 0% 20%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 15%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 15%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 27 52% 52%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 25%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 25%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 41 54% 60%;
-    --accent-foreground: 0 0% 15%;
+    /* Dark Mode: Deep Space */
+    --background: 222 47% 11%; /* Deep Space Blue */
+    --foreground: 210 40% 98%; /* Starlight White */
+    
+    --card: 217 33% 17%; /* Hull Gray */
+    --card-foreground: 210 40% 98%;
+    
+    --popover: 217 33% 17%;
+    --popover-foreground: 210 40% 98%;
+    
+    --primary: 199 89% 48%; /* Neon Cyan */
+    --primary-foreground: 222 47% 11%;
+    
+    --secondary: 217 33% 25%;
+    --secondary-foreground: 210 40% 98%;
+    
+    --muted: 217 33% 25%;
+    --muted-foreground: 215 20.2% 65.1%;
+    
+    --accent: 32 95% 44%; /* Industrial Warning Orange */
+    --accent-foreground: 210 40% 98%;
+    
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 30%;
-    --input: 0 0% 30%;
-    --ring: 27 52% 52%;
-    --chart-1: 220 70% 50%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 217 33% 25%;
+    --input: 217 33% 25%;
+    --ring: 199 89% 48%;
+    
+    --chart-1: 199 89% 48%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;

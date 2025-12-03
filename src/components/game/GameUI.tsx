@@ -25,6 +25,7 @@ import DailyRewardModal from './DailyRewardModal';
 import FactoryPanel from './FactoryPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Backpack, Compass, Hammer, Home, BookOpen, User, Power, AlertTriangle, Coins, Settings, Users, LogOut, Sprout, Factory } from 'lucide-react';
+import { GlowIcon } from '@/components/ui/glow-icon';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -86,17 +87,17 @@ export default function GameUI() {
   const showFarming = gameState.builtStructures.includes('hydroponicsBay');
 
   const tabs = [
-    { value: "explore", label: "Explore", icon: <Compass className="h-4 w-4" /> },
-    { value: "community", label: "Quests", icon: <Users className="h-4 w-4" /> },
-    { value: "inventory", label: "Inventory", icon: <Backpack className="h-4 w-4" /> },
-    { value: "craft", label: "Craft", icon: <Hammer className="h-4 w-4" /> },
-    { value: "character", label: "Character", icon: <User className="h-4 w-4" /> },
-    { value: "base", label: "Base", icon: <Home className="h-4 w-4" /> },
-    { value: "furnace", label: "Furnace", icon: <Power className="h-4 w-4" />, condition: showFurnace },
-    { value: "market", label: "Market", icon: <Coins className="h-4 w-4" />, condition: showMarket },
-    { value: "farming", label: "Farming", icon: <Sprout className="h-4 w-4" />, condition: showFarming },
-    { value: "factory", label: "Factory", icon: <Factory className="h-4 w-4" /> },
-    { value: "tech", label: "Tech", icon: <BookOpen className="h-4 w-4" /> },
+    { value: "explore", label: "Explore", icon: Compass },
+    { value: "community", label: "Quests", icon: Users },
+    { value: "inventory", label: "Inventory", icon: Backpack },
+    { value: "craft", label: "Craft", icon: Hammer },
+    { value: "character", label: "Character", icon: User },
+    { value: "base", label: "Base", icon: Home },
+    { value: "furnace", label: "Furnace", icon: Power, condition: showFurnace },
+    { value: "market", label: "Market", icon: Coins, condition: showMarket },
+    { value: "farming", label: "Farming", icon: Sprout, condition: showFarming },
+    { value: "factory", label: "Factory", icon: Factory },
+    { value: "tech", label: "Tech", icon: BookOpen },
   ].filter(tab => tab.condition !== false);
 
   const handleTabChange = (value: string) => {
@@ -108,7 +109,7 @@ export default function GameUI() {
 
   return (
     <div className="flex flex-col gap-4">
-      <header className="flex flex-col justify-between gap-4 rounded-lg border bg-card text-card-foreground p-4 shadow-sm">
+      <header className="flex flex-col justify-between gap-4 rounded-lg border border-primary/20 bg-card/50 backdrop-blur-sm text-card-foreground p-4 shadow-lg shadow-primary/5">
         <div className="flex flex-row justify-between items-center w-full gap-4">
           <div className="flex flex-col gap-2">
             <h1 className="text-xl sm:text-2xl font-bold font-headline text-primary">
@@ -159,11 +160,16 @@ export default function GameUI() {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
         <div className={cn("lg:col-span-3 lg:order-1", isMobile ? "order-1" : "order-2")}>
           <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-            <TabsList className="h-auto flex-wrap justify-start">
+            <TabsList className="h-auto flex-wrap justify-start gap-2 bg-muted/50 p-2 rounded-lg border border-white/5">
               {tabs.map((tab) => (
-                <TabsTrigger key={tab.value} value={tab.value} disabled={isBusy} className="flex items-center gap-2 text-xs h-9 sm:text-sm">
-                  {tab.icon}
-                  <span>{tab.label}</span>
+                <TabsTrigger
+                  key={tab.value}
+                  value={tab.value}
+                  disabled={isBusy}
+                  className="flex items-center justify-center gap-2 text-xs h-9 sm:text-sm px-3 data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:border-primary/50 border border-transparent transition-all duration-300"
+                >
+                  <GlowIcon icon={tab.icon} className="h-4 w-4" />
+                  <span className="flex items-center leading-none font-medium tracking-wide">{tab.label}</span>
                 </TabsTrigger>
               ))}
             </TabsList>
