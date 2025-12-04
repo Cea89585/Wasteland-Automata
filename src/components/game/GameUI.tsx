@@ -90,7 +90,8 @@ export default function GameUI() {
   };
 
   const isGameOver = gameState.playerStats.health <= 0;
-  const isBusy = gameState.isResting || gameState.smeltingQueue > 0 || gameState.ironIngotSmeltingQueue > 0 || gameState.charcoalSmeltingQueue > 0;
+  // Smelting should be a background process and not lock the UI
+  const isBusy = gameState.isResting;
 
   const showFurnace = gameState.builtStructures?.includes('furnace') ?? false;
   const showMarket = gameState.builtStructures?.includes('workbench') ?? false;
