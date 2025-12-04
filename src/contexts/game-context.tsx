@@ -199,6 +199,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (!newState.farmPlots) {
         newState.farmPlots = [];
       }
+
+      // Migration: Unlock Forest for players who completed quest_anya_1 before the fix
+      if (newState.completedQuests?.includes('quest_anya_1') && !newState.unlockedLocations?.includes('forest')) {
+        newState.unlockedLocations = [...(newState.unlockedLocations || []), 'forest'];
+      }
+
       return { ...newState, isInitialized: true };
     }
 
