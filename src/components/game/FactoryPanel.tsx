@@ -84,7 +84,7 @@ export default function FactoryPanel() {
 
                             return (
                                 <div key={machineData.type} className="border rounded-lg p-3 space-y-2">
-                                    <div className="flex items-start justify-between">
+                                    <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2">
                                                 <h4 className="font-medium">{machineData.name}</h4>
@@ -96,6 +96,7 @@ export default function FactoryPanel() {
                                             size="sm"
                                             onClick={() => handleBuildMachine(machineData.type)}
                                             disabled={!canBuild}
+                                            className="w-full sm:w-auto"
                                         >
                                             Build
                                         </Button>
@@ -229,7 +230,7 @@ export default function FactoryPanel() {
                                                         <span>{machine.fuelLevel} ticks</span>
                                                     </div>
                                                     <Progress value={Math.min(100, (machine.fuelLevel / 100) * 100)} className="h-2" />
-                                                    <div className="flex gap-1">
+                                                    <div className="flex flex-col sm:flex-row gap-1">
                                                         <Button
                                                             size="sm"
                                                             variant="outline"

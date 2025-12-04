@@ -193,7 +193,7 @@ export type GameAction =
   | { type: 'CRAFT_ALL', payload: { recipeId: string; amount: number } }
   | { type: 'BUILD_STRUCTURE'; payload: { recipeId: string } }
   | { type: 'COMPLETE_QUEST'; payload: { questId: string } }
-  | { type: 'SELL_ITEM'; payload: { item: Resource, amount: number, price: number } }
+  | { type: 'SELL_ITEM'; payload: { itemId: string; amount: number } }
   | { type: 'SELL_ALL_UNLOCKED' }
   | { type: 'TOGGLE_LOCK_ITEM'; payload: { item: Resource } }
   | { type: 'CONSUME'; payload: { stat: keyof PlayerStats, resource?: Resource, amount: number } }

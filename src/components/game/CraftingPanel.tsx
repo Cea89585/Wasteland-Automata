@@ -113,7 +113,7 @@ export default function CraftingPanel() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2 w-full sm:w-auto">
+                      <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
                         <Button
                           className="flex-1"
                           variant={isCraftable ? 'default' : 'outline'}

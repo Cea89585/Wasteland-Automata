@@ -1913,12 +1913,41 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         inventory: newInventory,
         caughtFish: newCaughtFish,
         statistics: newStatistics,
-        log: [{ id: generateUniqueLogId(), text: logMessage, type: 'success', timestamp: Date.now() }, ...state.log]
+        log: [
+          { id: generateUniqueLogId(), text: logMessage, type: 'success' as const, timestamp: Date.now() },
+          { id: generateUniqueLogId(), text: `You gained ${zone.energyCost} XP from fishing.`, type: 'info' as const, timestamp: Date.now() },
+          ...state.log
+        ]
       };
 
       // Add XP based on zone energy cost
       const xpGained = zone.energyCost;
       return reducer(updatedState, { type: 'ADD_XP', payload: xpGained });
+    }
+
+    case 'SELL_ITEM': {
+      const { itemId, amount } = action.payload;
+      const item = itemData[itemId as keyof typeof itemData];
+      if (!item || !item.sellPrice) return state;
+
+      const resourceId = itemId as keyof GameState['inventory'];
+      const currentAmount = state.inventory[resourceId] || 0;
+      if (currentAmount < amount) return state;
+
+      const totalValue = item.sellPrice * amount;
+      const newInventory = { ...state.inventory };
+      newInventory[resourceId] -= amount;
+      newInventory.silver += totalValue;
+
+      const newStatistics = { ...state.statistics };
+      newStatistics.totalItemsGained.silver = (newStatistics.totalItemsGained.silver || 0) + totalValue;
+
+      return {
+        ...state,
+        inventory: newInventory,
+        statistics: newStatistics,
+        log: [{ id: generateUniqueLogId(), text: `Sold ${amount} ${item.name} for ${totalValue} silver.`, type: 'success', timestamp: Date.now() }, ...state.log]
+      };
     }
 
     case 'SELL_ALL_FISH': {

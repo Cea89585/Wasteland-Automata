@@ -177,7 +177,7 @@ export default function FurnacePanel() {
               </div>
             </div>
 
-            <div className="flex-shrink-0 w-[180px]">
+            <div className="flex-shrink-0 w-full sm:w-auto sm:min-w-[200px]">
               {gameState.smeltingQueue > 0 ? (
                 <div className="flex flex-col gap-2">
                   <p className="text-sm text-muted-foreground text-center flex items-center justify-center">
@@ -187,7 +187,7 @@ export default function FurnacePanel() {
                   <Progress value={componentProgress} className="w-full" />
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch gap-2">
                   <Button
                     onClick={handleSmeltComponent}
                     disabled={maxSmeltableComponents < 1 || isBusy || gameState.playerStats.health <= 0}
@@ -252,7 +252,7 @@ export default function FurnacePanel() {
               </div>
             </div>
 
-            <div className="flex-shrink-0 w-[180px]">
+            <div className="flex-shrink-0 w-full sm:w-auto sm:min-w-[200px]">
               {gameState.ironIngotSmeltingQueue > 0 ? (
                 <div className="flex flex-col gap-2">
                   <p className="text-sm text-muted-foreground text-center flex items-center justify-center">
@@ -262,7 +262,7 @@ export default function FurnacePanel() {
                   <Progress value={ironProgress} className="w-full" />
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch gap-2">
                   <Button
                     onClick={handleSmeltIron}
                     disabled={maxSmeltableIron < 1 || isBusy || gameState.playerStats.health <= 0}
@@ -323,7 +323,7 @@ export default function FurnacePanel() {
               </div>
             </div>
 
-            <div className="flex-shrink-0 w-[180px]">
+            <div className="flex-shrink-0 w-full sm:w-auto sm:min-w-[200px]">
               {gameState.charcoalSmeltingQueue > 0 ? (
                 <div className="flex flex-col gap-2">
                   <p className="text-sm text-muted-foreground text-center flex items-center justify-center">
@@ -333,7 +333,7 @@ export default function FurnacePanel() {
                   <Progress value={charcoalProgress} className="w-full" />
                 </div>
               ) : (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch gap-2">
                   <Button
                     onClick={handleMakeCharcoal}
                     disabled={maxSmeltableCharcoal < 1 || isBusy || gameState.playerStats.health <= 0}

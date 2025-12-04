@@ -111,12 +111,12 @@ export default function MarketPanel() {
 
   return (
     <Card>
-      <CardHeader className="flex-row items-center justify-between">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <CardTitle>Wandering Trader</CardTitle>
           <CardDescription>Sell your excess goods and fish for silver.</CardDescription>
         </div>
-        <Button onClick={handleSellAll} disabled={isDead || isBusy}>
+        <Button onClick={handleSellAll} disabled={isDead || isBusy} className="w-full sm:w-auto">
           <ShoppingBag className="mr-2" />
           Sell All Unlocked
         </Button>

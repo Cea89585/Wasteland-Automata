@@ -77,7 +77,7 @@ export default function FishingPanel() {
                                 <p className="text-sm text-muted-foreground">{currentZone.description}</p>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-2 text-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
                                 <div className="flex items-center gap-1">
                                     <TrendingUp className="h-4 w-4 text-primary" />
                                     <span>Level {currentZone.levelRequirement}</span>
