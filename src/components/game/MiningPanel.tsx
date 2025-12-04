@@ -15,6 +15,8 @@ export default function MiningPanel() {
     const [restingProgress, setRestingProgress] = useState(0);
 
     const handleMine = () => {
+        console.log('handleMine called - dispatching MINE action');
+        console.log('hasPickaxe:', hasPickaxe, 'energy:', playerStats.energy);
         dispatch({ type: 'MINE' });
     };
 

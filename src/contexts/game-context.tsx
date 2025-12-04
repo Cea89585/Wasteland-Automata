@@ -2121,6 +2121,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'MINE': {
+      console.log('MINE action received in reducer', { equipment: state.equipment, energy: state.playerStats.energy });
       if (state.equipment.hand !== 'pickaxe') {
         return {
           ...state,
