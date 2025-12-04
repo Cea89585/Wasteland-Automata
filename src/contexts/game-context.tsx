@@ -1888,7 +1888,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         // It's a fish - add to caught fish inventory
         newCaughtFish[loot.item as string] = (newCaughtFish[loot.item as string] || 0) + 1;
         // Track fish in statistics
-        newStatistics.totalItemsGained[loot.item as string] = (newStatistics.totalItemsGained[loot.item as string] || 0) + 1;
+        newStatistics.totalItemsGained[loot.item as keyof typeof newStatistics.totalItemsGained] = (newStatistics.totalItemsGained[loot.item as keyof typeof newStatistics.totalItemsGained] || 0) + 1;
         logMessage = `You caught a ${loot.item}! (${loot.rarity})`;
       } else {
         // It's a resource/item - add to inventory
@@ -1914,8 +1914,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         caughtFish: newCaughtFish,
         statistics: newStatistics,
         log: [
-          { id: generateUniqueLogId(), text: logMessage, type: 'success' as const, timestamp: Date.now() },
-          { id: generateUniqueLogId(), text: `You gained ${zone.energyCost} XP from fishing.`, type: 'info' as const, timestamp: Date.now() },
+          { id: generateUniqueLogId(), text: `${logMessage} (+${zone.energyCost} XP)`, type: 'success' as const, timestamp: Date.now() },
           ...state.log
         ]
       };
