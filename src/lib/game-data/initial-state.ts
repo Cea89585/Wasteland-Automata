@@ -33,11 +33,14 @@ const emptyInventory = {
   crudeMap: 0,
   ironPlates: 0,
   biomassCompressor: 0,
+  pickaxe: 0,
 };
 
 export const initialStatistics: Statistics = {
   timesExplored: 0,
   timesScavenged: 0,
+  timesFished: 0,
+  timesMined: 0,
   deaths: 0,
   totalItemsGained: {
     ...emptyInventory

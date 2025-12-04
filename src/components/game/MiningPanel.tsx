@@ -140,17 +140,17 @@ export default function MiningPanel() {
                         <div className="p-3 border rounded-lg bg-card flex flex-col items-center text-center gap-2">
                             <GameIcon type="item" id="stone" size={32} />
                             <span className="font-medium">Stone</span>
-                            <span className="text-xs text-muted-foreground">Common (40%)</span>
+                            <span className="text-xs text-muted-foreground">Common</span>
                         </div>
                         <div className="p-3 border rounded-lg bg-card flex flex-col items-center text-center gap-2">
                             <GameIcon type="item" id="scrap" size={32} />
                             <span className="font-medium">Scrap Metal</span>
-                            <span className="text-xs text-muted-foreground">Uncommon (30%)</span>
+                            <span className="text-xs text-muted-foreground">Uncommon</span>
                         </div>
                         <div className="p-3 border rounded-lg bg-card flex flex-col items-center text-center gap-2">
                             <GameIcon type="item" id="ironIngot" size={32} />
                             <span className="font-medium">Iron Ingot</span>
-                            <span className="text-xs text-muted-foreground">Uncommon (30%)</span>
+                            <span className="text-xs text-muted-foreground">Uncommon</span>
                         </div>
                     </div>
                 </CardContent>

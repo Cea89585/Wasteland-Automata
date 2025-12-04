@@ -54,6 +54,8 @@ export interface PlayerStats {
 export type Statistics = {
   timesExplored: number;
   timesScavenged: number;
+  timesFished: number;
+  timesMined: number;
   deaths: number;
   totalItemsGained: Partial<Record<Resource | Item, number>>;
   itemsCrafted: Partial<Record<Resource | Item, number>>;

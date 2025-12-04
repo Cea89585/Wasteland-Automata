@@ -102,6 +102,18 @@ export default function SettingsPage() {
                             </div>
                             <span className="font-mono text-lg font-semibold text-primary">{statistics?.deaths || 0}</span>
                         </div>
+                        <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
+                            <div className="flex items-center gap-2 font-medium">
+                                <GameIcon type="nav" id="fishing" className="h-4 w-4" /> Times Fished
+                            </div>
+                            <span className="font-mono text-lg font-semibold text-primary">{statistics?.timesFished || 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-md bg-muted/50">
+                            <div className="flex items-center gap-2 font-medium">
+                                <GameIcon type="nav" id="mining" className="h-4 w-4" /> Times Mined
+                            </div>
+                            <span className="font-mono text-lg font-semibold text-primary">{statistics?.timesMined || 0}</span>
+                        </div>
                     </CardContent>
                 </Card>
 

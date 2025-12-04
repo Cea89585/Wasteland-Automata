@@ -24,7 +24,11 @@ let logIdCounter = 0;
 
 const addResource = (inventory: GameState['inventory'], statistics: GameState['statistics'], resource: Resource | Item, amount: number, cap: number) => {
   const newInventory = { ...inventory };
-  newInventory[resource] = Math.min(cap, (newInventory[resource] || 0) + amount);
+  if (resource === 'silver') {
+    newInventory[resource] = (newInventory[resource] || 0) + amount;
+  } else {
+    newInventory[resource] = Math.min(cap, (newInventory[resource] || 0) + amount);
+  }
 
   const newStatistics = { ...statistics };
   const newTotalItemsGained = { ...newStatistics.totalItemsGained };
@@ -993,43 +997,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       return finalState;
     }
 
-    case 'SELL_ITEM': {
-      const { item, amount, price } = action.payload;
-      const newInventory = { ...state.inventory };
-      let newStatistics = { ...state.statistics };
 
-      if (state.lockedItems.includes(item)) {
-        return {
-          ...state,
-          log: [{ id: generateUniqueLogId(), text: `${itemData[item].name} is locked and cannot be sold.`, type: 'danger', timestamp: Date.now() }, ...state.log],
-        }
-      }
-
-      if (newInventory[item] < amount) {
-        return {
-          ...state,
-          log: [{ id: generateUniqueLogId(), text: `Not enough ${itemData[item].name} to sell.`, type: 'danger', timestamp: Date.now() }, ...state.log],
-        }
-      }
-
-      const silverTongueLevel = state.skills?.silverTongue || 0;
-      const priceMultiplier = 1 + (silverTongueLevel * 0.1);
-      const silverEarned = Math.floor(amount * price * priceMultiplier);
-      newInventory[item] -= amount;
-      newInventory.silver += silverEarned;
-
-      const newTotalItemsGained = { ...newStatistics.totalItemsGained };
-      newTotalItemsGained.silver = (newTotalItemsGained.silver || 0) + silverEarned;
-      newStatistics = { ...newStatistics, totalItemsGained: newTotalItemsGained };
-
-
-      return {
-        ...state,
-        inventory: newInventory,
-        statistics: newStatistics,
-        log: [{ id: generateUniqueLogId(), text: `Sold ${amount} ${itemData[item].name} for ${silverEarned} silver.`, type: 'success', timestamp: Date.now() }, ...state.log],
-      }
-    }
 
     case 'SELL_ALL_UNLOCKED': {
       const newInventory = { ...state.inventory };
@@ -1912,7 +1880,10 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         playerStats: newPlayerStats,
         inventory: newInventory,
         caughtFish: newCaughtFish,
-        statistics: newStatistics,
+        statistics: {
+          ...newStatistics,
+          timesFished: (newStatistics.timesFished || 0) + 1
+        },
         log: [
           { id: generateUniqueLogId(), text: `${logMessage} (+${zone.energyCost} XP)`, type: 'success' as const, timestamp: Date.now() },
           ...state.log
@@ -2147,6 +2118,59 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         restEfficiencyLevel: state.restEfficiencyLevel + 1,
         log: [{ id: generateUniqueLogId(), text: `Upgraded Rest Efficiency! (+5% health recovery)`, type: 'success', timestamp: Date.now() }, ...state.log]
       };
+    }
+
+    case 'MINE': {
+      if (state.equipment.hand !== 'pickaxe') {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: "You need a pickaxe to mine.", type: 'danger', timestamp: Date.now() }, ...state.log]
+        };
+      }
+
+      const energyCost = 10;
+      if (state.playerStats.energy < energyCost) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: "Not enough energy to mine.", type: 'danger', timestamp: Date.now() }, ...state.log]
+        };
+      }
+
+      const newStats = { ...state.playerStats };
+      newStats.energy -= energyCost;
+
+      const rand = Math.random();
+      let item: Resource = 'stone';
+      let amount = 1;
+
+      if (rand < 0.4) {
+        item = 'stone';
+        amount = Math.floor(Math.random() * 3) + 2; // 2-4 stone
+      } else if (rand < 0.7) {
+        item = 'scrap';
+        amount = Math.floor(Math.random() * 2) + 1; // 1-2 scrap
+      } else {
+        item = 'ironIngot';
+        amount = 1;
+      }
+
+      const INVENTORY_CAP = getInventoryCap();
+      const { newInventory, newStatistics } = addResource(state.inventory, state.statistics, item, amount, INVENTORY_CAP);
+
+      const xpAmount = 15;
+
+      let withXpState = reducer({
+        ...state,
+        playerStats: newStats,
+        inventory: newInventory,
+        statistics: {
+          ...newStatistics,
+          timesMined: (newStatistics.timesMined || 0) + 1
+        },
+        log: [{ id: generateUniqueLogId(), text: `You mined ${amount} ${itemData[item].name}. (+${xpAmount} XP)`, type: 'success', timestamp: Date.now() }, ...state.log]
+      }, { type: 'ADD_XP', payload: xpAmount });
+
+      return withXpState;
     }
   }
   return state;
