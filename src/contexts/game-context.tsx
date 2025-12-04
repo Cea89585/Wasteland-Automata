@@ -2142,6 +2142,17 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       };
     }
 
+    case 'UNLOCK_FOREST': {
+      if (!state.unlockedLocations.includes('forest')) {
+        return {
+          ...state,
+          unlockedLocations: [...state.unlockedLocations, 'forest'],
+          log: [{ id: generateUniqueLogId(), text: "The Mutated Forest location has been unlocked!", type: 'success', timestamp: Date.now() }, ...state.log]
+        };
+      }
+      return state;
+    }
+
     case 'MINE': {
       if (state.equipment.hand !== 'pickaxe') {
         return {

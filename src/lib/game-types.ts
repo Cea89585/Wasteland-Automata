@@ -247,4 +247,5 @@ export type GameAction =
   | { type: 'FISH'; payload: { zoneId: string } }
   | { type: 'SELL_ALL_FISH' }
   | { type: 'SET_FISHING_ZONE'; payload: { zoneId: string } }
+  | { type: 'UNLOCK_FOREST' }
   | { type: 'MINE' };
