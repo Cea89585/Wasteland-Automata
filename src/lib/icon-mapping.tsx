@@ -20,6 +20,7 @@ const ITEM_ICON_MAP: Record<string, string> = {
     appleSeed: 'appleSeeds',
     appleSeeds: 'appleSeeds',
     peachSeed: 'appleSeeds',
+    banana: 'banana',
 
     // Materials
     scrap: 'scrap',
@@ -31,7 +32,7 @@ const ITEM_ICON_MAP: Record<string, string> = {
     component: 'components',
     components: 'components',
     charcoal: 'charcoal',
-    mutatedTwigs: 'wood',
+    mutatedTwigs: 'mutatedTwigs',
     biomass: 'glowingAlgae',
 
     // Machines & Structures
@@ -49,6 +50,7 @@ const ITEM_ICON_MAP: Record<string, string> = {
     // Tools
     metalDetector: 'metalDetector',
     stoneAxe: 'stoneAxe',
+    pickaxe: 'pickaxe',
     axe: 'stoneAxe',
 
     // Junk/Misc
