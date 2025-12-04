@@ -32,20 +32,6 @@ export default function WelcomeScreen() {
             toast({ variant: 'destructive', title: 'Invalid Name', description: 'Name must be between 3 and 25 characters.' });
             return;
         }
-
-        if (!/^[a-zA-Z\s]+$/.test(trimmedName)) {
-            toast({ variant: 'destructive', title: 'Invalid Name', description: 'Name can only contain letters and spaces.' });
-            return;
-        }
-
-        const sanitizedName = trimmedName.replace(/\s+/g, ' ').toLowerCase();
-        const isProfane = filter.en.some((word: string) => sanitizedName.includes(word.toLowerCase()));
-
-        if (isProfane) {
-            toast({ variant: 'destructive', title: 'Name Not Allowed', description: 'Please choose a more appropriate name.' });
-            return;
-        }
-
         setIsLoading(true);
         const userRef = doc(firestore, 'users', user.uid);
 
