@@ -92,15 +92,15 @@ export default function GameUI() {
   const isGameOver = gameState.playerStats.health <= 0;
   const isBusy = gameState.isResting || gameState.smeltingQueue > 0 || gameState.ironIngotSmeltingQueue > 0 || gameState.charcoalSmeltingQueue > 0;
 
-  const showFurnace = gameState.builtStructures.includes('furnace');
-  const showMarket = gameState.builtStructures.includes('workbench');
-  const showFarming = gameState.builtStructures.includes('hydroponicsBay');
-  const showMining = gameState.completedQuests.includes('quest_kael_mining');
+  const showFurnace = gameState.builtStructures?.includes('furnace') ?? false;
+  const showMarket = gameState.builtStructures?.includes('workbench') ?? false;
+  const showFarming = gameState.builtStructures?.includes('hydroponicsBay') ?? false;
+  const showMining = gameState.completedQuests?.includes('quest_kael_mining') ?? false;
 
   const hasReadyCrops = gameState.farmPlots?.some(plot => {
     if (!plot.seed || !plot.plantedTimestamp) return false;
     return now >= plot.plantedTimestamp + plot.duration;
-  });
+  }) ?? false;
 
   const tabs = [
     { value: "explore", label: "Explore", icon: ExploreIcon },

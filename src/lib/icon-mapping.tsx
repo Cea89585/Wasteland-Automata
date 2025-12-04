@@ -247,4 +247,5 @@ export const TechIcon: React.FC<{ className?: string; size?: number }> = (props)
     <SpriteIcon name="tech" {...props} />;
 export const WastelandAutomataIcon: React.FC<{ className?: string; size?: number }> = (props) =>
     <SpriteIcon name="default" {...props} />;
-export const MiningIcon = () => <GameIcon type="nav" id="mining" />;
+export const MiningIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <GameIcon type="nav" id="mining" {...props} />;
