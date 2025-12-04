@@ -15,8 +15,6 @@ export default function MiningPanel() {
     const [restingProgress, setRestingProgress] = useState(0);
 
     const handleMine = () => {
-        console.log('handleMine called - dispatching MINE action');
-        console.log('hasPickaxe:', hasPickaxe, 'energy:', playerStats.energy);
         dispatch({ type: 'MINE' });
     };
 
@@ -137,8 +135,8 @@ export default function MiningPanel() {
                         )}
                     </div>
 
-                    {/* Loot Table Info */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+                    {/* Loot Table Info - Hidden on mobile to save space */}
+                    <div className="hidden sm:grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
                         <div className="p-3 border rounded-lg bg-card flex flex-col items-center text-center gap-2">
                             <GameIcon type="item" id="stone" size={32} />
                             <span className="font-medium">Stone</span>

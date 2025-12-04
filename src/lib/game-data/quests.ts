@@ -152,8 +152,9 @@ export const quests: Quest[] = [
         rewards: [
             { type: 'silver', amount: 150 },
         ],
-        completionMessage: 'Anya takes the twigs, her eyes alight with scientific curiosity. "Incredible! The cellular structure is unlike anything I\'ve seen. This is a major breakthrough. Your efforts have been invaluable. Please, take this for your troubles."',
+        completionMessage: 'Anya takes the twigs, her eyes alight with scientific curiosity. "Incredible! The cellular structure is unlike anything I\'ve seen. This is a major breakthrough. Your efforts have been invaluable. Please, take this for your troubles. Oh, and I\'ve marked the location of the mutated forest on your map - you should explore it further!"',
         dependsOn: 'quest_silas_3',
+        unlocks: 'forest',
     },
     {
         id: 'quest_anya_map_1',

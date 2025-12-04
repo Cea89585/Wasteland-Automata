@@ -980,12 +980,21 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         npcReputation[typedNpcId] = (npcReputation[typedNpcId] || 0) + 10; // +10 reputation per quest
       }
 
+      // Check if quest unlocks a location
+      let newUnlockedLocations = [...newState.unlockedLocations];
+      if (quest.unlocks && locationOrder.includes(quest.unlocks as any)) {
+        if (!newUnlockedLocations.includes(quest.unlocks as any)) {
+          newUnlockedLocations.push(quest.unlocks as any);
+        }
+      }
+
       let finalState = reducer({
         ...newState,
         inventory: newInventory,
         statistics: newStatistics,
         completedQuests: newCompletedQuests,
         unlockedLore: newUnlockedLore,
+        unlockedLocations: newUnlockedLocations,
         npcReputation,
         log: [
           { id: generateUniqueLogId(), text: `Quest Complete: ${quest.title} (+${xpGained} XP)`, type: 'success', timestamp: Date.now() },
@@ -2121,7 +2130,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'MINE': {
-      console.log('MINE action received in reducer', { equipment: state.equipment, energy: state.playerStats.energy });
       if (state.equipment.hand !== 'pickaxe') {
         return {
           ...state,
@@ -2144,15 +2152,29 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let item: Resource = 'stone';
       let amount = 1;
 
-      if (rand < 0.4) {
+      // 5% chance for jackpot (10 items)
+      if (rand < 0.05) {
+        const jackpotRand = Math.random();
+        if (jackpotRand < 0.5) {
+          item = 'stone';
+        } else if (jackpotRand < 0.8) {
+          item = 'scrap';
+        } else {
+          item = 'ironIngot';
+        }
+        amount = 10;
+      } else if (rand < 0.45) {
+        // 40% chance for stone (3-6 items)
         item = 'stone';
-        amount = Math.floor(Math.random() * 3) + 2; // 2-4 stone
-      } else if (rand < 0.7) {
+        amount = Math.floor(Math.random() * 4) + 3;
+      } else if (rand < 0.75) {
+        // 30% chance for scrap (2-4 items)
         item = 'scrap';
-        amount = Math.floor(Math.random() * 2) + 1; // 1-2 scrap
+        amount = Math.floor(Math.random() * 3) + 2;
       } else {
+        // 25% chance for iron ingot (1-2 items)
         item = 'ironIngot';
-        amount = 1;
+        amount = Math.floor(Math.random() * 2) + 1;
       }
 
       const INVENTORY_CAP = getInventoryCap();
