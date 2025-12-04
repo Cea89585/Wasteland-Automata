@@ -201,14 +201,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
 
       // Migration: Unlock Forest for players who completed quest_anya_1 before the fix
-      console.log('Migration check:', {
-        hasCompletedQuest: newState.completedQuests?.includes('quest_anya_1'),
-        hasForestUnlocked: newState.unlockedLocations?.includes('forest'),
-        completedQuests: newState.completedQuests,
-        unlockedLocations: newState.unlockedLocations
-      });
       if (newState.completedQuests?.includes('quest_anya_1') && !newState.unlockedLocations?.includes('forest')) {
-        console.log('Unlocking Forest for existing player');
         newState.unlockedLocations = [...(newState.unlockedLocations || []), 'forest'];
       }
 
@@ -2140,17 +2133,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         restEfficiencyLevel: state.restEfficiencyLevel + 1,
         log: [{ id: generateUniqueLogId(), text: `Upgraded Rest Efficiency! (+5% health recovery)`, type: 'success', timestamp: Date.now() }, ...state.log]
       };
-    }
-
-    case 'UNLOCK_FOREST': {
-      if (!state.unlockedLocations.includes('forest')) {
-        return {
-          ...state,
-          unlockedLocations: [...state.unlockedLocations, 'forest'],
-          log: [{ id: generateUniqueLogId(), text: "The Mutated Forest location has been unlocked!", type: 'success', timestamp: Date.now() }, ...state.log]
-        };
-      }
-      return state;
     }
 
     case 'MINE': {
