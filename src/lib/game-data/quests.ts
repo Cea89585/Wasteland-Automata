@@ -92,7 +92,7 @@ export const quests: Quest[] = [
         ],
         completionMessage: 'Kael takes the ingots, weighing them in his hand. "Good quality. This will work for the primary supports. It seems your reputation is well-earned. I have another, more lucrative, proposal for you if you\'re interested."',
         dependsOn: 'quest_silas_3',
-        unlocks: 'quest_kael_2'
+        unlocks: 'quest_kael_mining'
     },
     {
         id: 'quest_kael_2',
@@ -108,8 +108,8 @@ export const quests: Quest[] = [
             { type: 'silver', amount: 500 },
         ],
         completionMessage: 'Kael expertly fits the plates onto his device. "Perfect. The signal will be clean. You\'ve done well. This old metal detector is surplus to my needs; it should serve you better. We\'re close to finishing this project."',
-        dependsOn: 'quest_kael_1',
-        unlocks: 'quest_kael_mining'
+        dependsOn: 'quest_kael_mining',
+        unlocks: 'quest_marcus_1' // Marcus arc starts after proving yourself with advanced tech
     },
     {
         id: 'quest_kael_mining',
@@ -123,7 +123,8 @@ export const quests: Quest[] = [
             { type: 'silver', amount: 100 }
         ],
         completionMessage: '"Good tool. Solid. The mine entrance is to the north. Be careful, the supports are old. But the haul will be worth it."',
-        dependsOn: 'quest_kael_2',
+        dependsOn: 'quest_kael_1',
+        unlocks: 'quest_kael_2'
     },
     {
         id: 'quest_elara_1',

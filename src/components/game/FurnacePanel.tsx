@@ -150,7 +150,7 @@ export default function FurnacePanel() {
       <CardContent className="space-y-4">
         {/* Components */}
         <Card className="bg-muted/50 p-4 w-full">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex-grow">
               <div className="flex items-center font-semibold text-base mb-2">
                 <Cpu className="mr-2 h-5 w-5" /> Smelt Components
@@ -225,7 +225,7 @@ export default function FurnacePanel() {
 
         {/* Iron Ingots */}
         <Card className="bg-muted/50 p-4 w-full">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex-grow">
               <div className="flex items-center font-semibold text-base mb-2">
                 <Layers className="mr-2 h-5 w-5" /> Smelt Iron Ingots
@@ -300,7 +300,7 @@ export default function FurnacePanel() {
 
         {/* Charcoal */}
         <Card className="bg-muted/50 p-4 w-full">
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex-grow">
               <div className="flex items-center font-semibold text-base mb-2">
                 <Fuel className="mr-2 h-5 w-5" /> Make Charcoal

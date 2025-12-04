@@ -26,6 +26,7 @@ export const locations: Record<LocationId, LocationData> = {
       { resource: 'stone', min: 2, max: 4, chance: 0.8 },
       { resource: 'scrap', min: 1, max: 2, chance: 0.4 },
       { resource: 'apple', min: 1, max: 1, chance: 0.1 },
+      { resource: 'mutatedTwigs', min: 1, max: 2, chance: 0.05 },
     ],
     flavorText: [
       'A rusted car sits silently, its doors creaking in the wind.',
@@ -80,27 +81,27 @@ export const locations: Record<LocationId, LocationData> = {
     id: 'bunker',
     name: 'Underground Bunker',
     description: 'A sealed metal door leads into a pre-apocalypse fallout shelter.',
-     resources: [
+    resources: [
       { resource: 'apple', min: 2, max: 5, chance: 0.5 },
       { resource: 'water', min: 2, max: 5, chance: 0.5 },
       { resource: 'components', min: 1, max: 3, chance: 0.2 },
     ],
     flavorText: [
-        'The air inside is stale and smells of ozone.',
-        'Emergency lights flicker ominously.'
+      'The air inside is stale and smells of ozone.',
+      'Emergency lights flicker ominously.'
     ],
   },
   industrial: {
     id: 'industrial',
     name: 'Old Industrial Zone',
     description: 'A maze of rusting factories and silent machinery.',
-     resources: [
+    resources: [
       { resource: 'scrap', min: 5, max: 10, chance: 0.8 },
       { resource: 'components', min: 2, max: 4, chance: 0.3 },
     ],
     flavorText: [
-        'The smell of oil and rust hangs heavy in the air.',
-        'A factory whistle moans as the wind blows through it.'
+      'The smell of oil and rust hangs heavy in the air.',
+      'A factory whistle moans as the wind blows through it.'
     ],
   },
 };

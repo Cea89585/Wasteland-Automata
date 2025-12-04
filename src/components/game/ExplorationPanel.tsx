@@ -273,7 +273,7 @@ export default function ExplorationPanel() {
             ) : (
               <Bed className="mr-2 h-4 w-4" />
             )}
-            {gameState.isResting ? 'Resting...' : 'Rest'}
+            {gameState.isResting ? 'Resting...' : 'Rest (+15 Energy)'}
           </Button>
         </div>
         <div className="flex items-center gap-2">
@@ -310,7 +310,7 @@ export default function ExplorationPanel() {
 
         {gameState.isResting && (
           <div className="flex flex-col gap-2">
-            <p className="text-sm text-muted-foreground text-center">Recovering energy...</p>
+            <p className="text-sm text-muted-foreground text-center">Resting... {Math.floor(restingProgress)}%</p>
             <Progress value={restingProgress} className="w-full" />
           </div>
         )}

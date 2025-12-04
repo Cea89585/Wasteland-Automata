@@ -36,6 +36,14 @@ export default function WelcomeScreen() {
         const userRef = doc(firestore, 'users', user.uid);
 
         try {
+            // Normalize name for profanity check: remove spaces and non-alphanumeric characters
+            const normalizedName = trimmedName.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+            if (filter.check(normalizedName)) {
+                toast({ variant: 'destructive', title: 'Invalid Name', description: 'Please choose a different name.' });
+                return;
+            }
+
             // Optimistically update local state to ensure immediate UI feedback
             dispatch({ type: 'SET_CHARACTER_NAME', payload: trimmedName });
 
