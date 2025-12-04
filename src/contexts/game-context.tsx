@@ -1887,6 +1887,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (loot.isFish) {
         // It's a fish - add to caught fish inventory
         newCaughtFish[loot.item as string] = (newCaughtFish[loot.item as string] || 0) + 1;
+        // Track fish in statistics
+        newStatistics.totalItemsGained[loot.item as string] = (newStatistics.totalItemsGained[loot.item as string] || 0) + 1;
         logMessage = `You caught a ${loot.item}! (${loot.rarity})`;
       } else {
         // It's a resource/item - add to inventory
@@ -1904,7 +1906,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         energy: state.playerStats.energy - zone.energyCost
       };
 
-      return {
+      // Create new state with updated values
+      let updatedState = {
         ...state,
         playerStats: newPlayerStats,
         inventory: newInventory,
@@ -1912,6 +1915,10 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         statistics: newStatistics,
         log: [{ id: generateUniqueLogId(), text: logMessage, type: 'success', timestamp: Date.now() }, ...state.log]
       };
+
+      // Add XP based on zone energy cost
+      const xpGained = zone.energyCost;
+      return reducer(updatedState, { type: 'ADD_XP', payload: xpGained });
     }
 
     case 'SELL_ALL_FISH': {

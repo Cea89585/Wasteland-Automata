@@ -1,170 +1,145 @@
 // Icon Mapping System for Wasteland Automata
-// Maps game items, resources, and UI elements to custom SVG icons
+// Maps game items, resources, and UI elements to sprite icon names
 
 import React from 'react';
-import {
-    WoodIcon,
-    RockIcon,
-    WaterIcon,
-    AppleIcon,
-    PeachIcon,
-    CookedAppleIcon,
-    ScrapMetalIcon,
-    IronIngotIcon,
-    ComputerComponentIcon,
-    AppleSeedIcon,
-    CharcoalIcon,
-    MetalDetectorIcon,
-    StoneAxeIcon,
-    RustyCanIcon,
-    MutantMinnowIcon,
-    RadPerchIcon,
-    GoldenMinnowIcon,
-    GlowingAlgaeIcon,
-    ScrapIcon,
-    FoodIcon,
-    DrinkIcon,
-    EnergyIcon,
-    SilverIcon,
-    HeartIcon,
-    ExploreIcon,
-    QuestIcon,
-    InventoryIcon,
-    CraftIcon,
-    CharacterIcon,
-    BaseIcon,
-    FurnaceIcon,
-    MarketIcon,
-    FarmingIcon,
-    FishingIcon,
-    FactoryIcon,
-    SkillsIcon,
-    TechIcon,
-    WastelandAutomataIcon,
-} from '@/components/icons/CustomIcons';
+import { SpriteIcon } from '@/components/ui/sprite-icon';
 
-// Resource and Item Icon Mapping
-export const ITEM_ICONS: Record<string, React.FC<{ className?: string; size?: number }>> & {
-    [key: string]: React.FC<{ className?: string; size?: number }>;
-} = {
+// Map item IDs to sprite icon names
+const ITEM_ICON_MAP: Record<string, string> = {
     // Basic Resources
-    wood: WoodIcon,
-    rock: RockIcon,
-    stone: RockIcon,
-    water: WaterIcon,
+    wood: 'wood',
+    rock: 'stone',
+    stone: 'stone',
+    water: 'water',
 
     // Food Items
-    apple: AppleIcon,
-    peach: PeachIcon,
-    cookedApple: CookedAppleIcon,
-    cookedPeach: CookedAppleIcon, // Reuse cooked apple style
-    appleSeed: AppleSeedIcon,
-    appleSeeds: AppleSeedIcon,
-    peachSeed: AppleSeedIcon,
+    apple: 'apple',
+    peach: 'peach',
+    cookedApple: 'cookedApple',
+    cookedPeach: 'cookedApple',
+    appleSeed: 'appleSeeds',
+    appleSeeds: 'appleSeeds',
+    peachSeed: 'appleSeeds',
 
     // Materials
-    scrap: ScrapMetalIcon,
-    scrapMetal: ScrapMetalIcon,
-    iron: IronIngotIcon,
-    ironIngot: IronIngotIcon,
-    ironPlates: IronIngotIcon,
-    computerComponent: ComputerComponentIcon,
-    component: ComputerComponentIcon,
-    components: ComputerComponentIcon,
-    charcoal: CharcoalIcon,
-    mutatedTwigs: WoodIcon,
-    biomass: GlowingAlgaeIcon,
+    scrap: 'scrap',
+    scrapMetal: 'scrap',
+    iron: 'ironIngot',
+    ironIngot: 'ironIngot',
+    ironPlates: 'ironIngot',
+    computerComponent: 'components',
+    component: 'components',
+    components: 'components',
+    charcoal: 'charcoal',
+    mutatedTwigs: 'wood',
+    biomass: 'glowingAlgae',
 
     // Machines & Structures
-    workbench: CraftIcon,
-    waterPurifier: WaterIcon,
-    furnace: FurnaceIcon,
-    radio: TechIcon,
-    generator: EnergyIcon,
-    droneBay: TechIcon,
-    hydroponicsBay: FarmingIcon,
-    miningRig: CraftIcon,
-    biomassCompressor: FactoryIcon,
-    crudeMap: ExploreIcon,
+    workbench: 'craft',
+    waterPurifier: 'water',
+    furnace: 'furnace',
+    radio: 'default',
+    generator: 'energy',
+    droneBay: 'default',
+    hydroponicsBay: 'default',
+    miningRig: 'craft',
+    biomassCompressor: 'default',
+    crudeMap: 'explore',
 
     // Tools
-    metalDetector: MetalDetectorIcon,
-    stoneAxe: StoneAxeIcon,
-    axe: StoneAxeIcon,
+    metalDetector: 'metalDetector',
+    stoneAxe: 'stoneAxe',
+    axe: 'stoneAxe',
 
     // Junk/Misc
-    rustyCan: RustyCanIcon,
-    can: RustyCanIcon,
+    rustyCan: 'rustyCan',
+    can: 'rustyCan',
 
-    // Fish
-    mutantMinnow: MutantMinnowIcon,
-    radPerch: RadPerchIcon,
-    goldenMinnow: GoldenMinnowIcon,
-    glowingAlgae: GlowingAlgaeIcon,
-    algae: GlowingAlgaeIcon,
-
-    // Generic
-    scrapItem: ScrapIcon,
-    junk: ScrapIcon,
-
-    // Consumables
-    food: FoodIcon,
-    cannedFood: FoodIcon,
-    drink: DrinkIcon,
-    water_bottle: DrinkIcon,
+    // Fish - all map to generic fish icon or specific ones
+    mutantMinnow: 'mutantMinnow',
+    radPerch: 'radPerch',
+    goldenMinnow: 'goldenMinnow',
+    glowingAlgae: 'glowingAlgae',
+    algae: 'glowingAlgae',
+    sludgeBass: 'fish',
+    irradiatedCarp: 'fish',
+    bioLuminescentMoss: 'glowingAlgae',
+    oldBoot: 'junk',
+    goldenBass: 'goldenMinnow',
+    glowfish: 'fish',
+    mutantCatfish: 'fish',
+    reactorCoreShard: 'junk',
+    goldenGlowfish: 'goldenMinnow',
+    bunkerCarp: 'fish',
+    caveEel: 'fish',
+    armoredFish: 'fish',
+    militaryRation: 'junk',
+    waterloggedDataChip: 'junk',
+    goldenEel: 'goldenMinnow',
+    preWarTech: 'junk',
+    acidSwimmer: 'fish',
+    toxicTrout: 'fish',
+    chemicalCarp: 'fish',
+    strangeCrystal: 'junk',
+    chemicalSample: 'junk',
+    goldenSwimmer: 'goldenMinnow',
+    experimentalCompound: 'junk',
+    craterDweller: 'fish',
+    depthFish: 'fish',
+    meteorFragment: 'junk',
+    cosmicDebris: 'junk',
+    goldenCraterFish: 'goldenMinnow',
+    meteoriteShard: 'junk',
+    ancientArtifact: 'junk',
+    urbanScavengerFish: 'fish',
+    rubbleSwimmer: 'fish',
+    buildingMaterial: 'junk',
+    preWarCurrency: 'junk',
+    glassShard: 'junk',
+    goldenCityFish: 'goldenMinnow',
+    pristinePreWarItem: 'junk',
+    treasureCache: 'junk',
 
     // Stats
-    energy: EnergyIcon,
-    silver: SilverIcon,
-    money: SilverIcon,
-    health: HeartIcon,
-    hp: HeartIcon,
+    energy: 'energy',
+    silver: 'silver',
+    money: 'silver',
+    health: 'health',
+    hp: 'health',
 };
 
-// UI Navigation Icon Mapping
-export const NAV_ICONS: Record<string, React.FC<{ className?: string; size?: number }>> & {
-    [key: string]: React.FC<{ className?: string; size?: number }>;
-} = {
-    explore: ExploreIcon,
-    exploration: ExploreIcon,
-    quests: QuestIcon,
-    quest: QuestIcon,
-    inventory: InventoryIcon,
-    bag: InventoryIcon,
-    craft: CraftIcon,
-    crafting: CraftIcon,
-    character: CharacterIcon,
-    player: CharacterIcon,
-    base: BaseIcon,
-    home: BaseIcon,
-    furnace: FurnaceIcon,
-    smelting: FurnaceIcon,
-    market: MarketIcon,
-    shop: MarketIcon,
-    farming: FarmingIcon,
-    farm: FarmingIcon,
-    hydroponics: FarmingIcon,
-    fishing: FishingIcon,
-    fish: FishingIcon,
-    factory: FactoryIcon,
-    machines: FactoryIcon,
-    skills: SkillsIcon,
-    skillTree: SkillsIcon,
-    tech: TechIcon,
-    technology: TechIcon,
-    upgrades: TechIcon,
-    logo: WastelandAutomataIcon,
-    wasteland: WastelandAutomataIcon,
-};
-
-// Helper function to get icon by item ID
-export const getItemIcon = (itemId: string): React.FC<{ className?: string; size?: number }> | null => {
-    return ITEM_ICONS[itemId] || null;
-};
-
-// Helper function to get icon by navigation key
-export const getNavIcon = (navKey: string): React.FC<{ className?: string; size?: number }> | null => {
-    return NAV_ICONS[navKey] || null;
+// Map navigation keys to sprite icon names
+const NAV_ICON_MAP: Record<string, string> = {
+    explore: 'explore',
+    exploration: 'explore',
+    quests: 'default',
+    quest: 'default',
+    inventory: 'default',
+    bag: 'default',
+    craft: 'craft',
+    crafting: 'craft',
+    character: 'default',
+    player: 'default',
+    base: 'default',
+    home: 'default',
+    furnace: 'furnace',
+    smelting: 'furnace',
+    market: 'market',
+    shop: 'market',
+    farming: 'default',
+    farm: 'default',
+    hydroponics: 'default',
+    fishing: 'fishing',
+    fish: 'fish',
+    factory: 'default',
+    machines: 'default',
+    skills: 'default',
+    skillTree: 'default',
+    tech: 'default',
+    technology: 'default',
+    upgrades: 'default',
+    logo: 'default',
+    wasteland: 'default',
 };
 
 // Component wrapper for easy icon rendering
@@ -176,54 +151,98 @@ interface GameIconProps {
     fallback?: React.ReactNode;
 }
 
-export const GameIcon: React.FC<GameIconProps> = ({ type, id, size = 24, className = '', fallback = null }) => {
-    const Icon = type === 'item' ? getItemIcon(id) : getNavIcon(id);
+export const GameIcon: React.FC<GameIconProps> = ({
+    type,
+    id,
+    size = 24,
+    className = '',
+    fallback = null
+}) => {
+    const iconMap = type === 'item' ? ITEM_ICON_MAP : NAV_ICON_MAP;
+    const iconName = iconMap[id] || 'default';
 
-    if (!Icon) {
+    if (!iconName && fallback) {
         return <>{fallback}</>;
     }
 
-    return <Icon size={size} className={className} />;
+    return <SpriteIcon name={iconName} size={size} className={className} />;
 };
 
-// Export all icons for direct use
-export {
-    WoodIcon,
-    RockIcon,
-    WaterIcon,
-    AppleIcon,
-    PeachIcon,
-    CookedAppleIcon,
-    ScrapMetalIcon,
-    IronIngotIcon,
-    ComputerComponentIcon,
-    AppleSeedIcon,
-    CharcoalIcon,
-    MetalDetectorIcon,
-    StoneAxeIcon,
-    RustyCanIcon,
-    MutantMinnowIcon,
-    RadPerchIcon,
-    GoldenMinnowIcon,
-    GlowingAlgaeIcon,
-    ScrapIcon,
-    FoodIcon,
-    DrinkIcon,
-    EnergyIcon,
-    SilverIcon,
-    HeartIcon,
-    ExploreIcon,
-    QuestIcon,
-    InventoryIcon,
-    CraftIcon,
-    CharacterIcon,
-    BaseIcon,
-    FurnaceIcon,
-    MarketIcon,
-    FarmingIcon,
-    FishingIcon,
-    FactoryIcon,
-    SkillsIcon,
-    TechIcon,
-    WastelandAutomataIcon,
-};
+// Export individual icon components for backward compatibility
+// These now use the sprite system under the hood
+export const WoodIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="wood" {...props} />;
+export const RockIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="stone" {...props} />;
+export const WaterIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="water" {...props} />;
+export const AppleIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="apple" {...props} />;
+export const PeachIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="peach" {...props} />;
+export const CookedAppleIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="cookedApple" {...props} />;
+export const ScrapMetalIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="scrap" {...props} />;
+export const IronIngotIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="ironIngot" {...props} />;
+export const ComputerComponentIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="components" {...props} />;
+export const AppleSeedIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="appleSeeds" {...props} />;
+export const CharcoalIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="charcoal" {...props} />;
+export const MetalDetectorIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="metalDetector" {...props} />;
+export const StoneAxeIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="stoneAxe" {...props} />;
+export const RustyCanIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="rustyCan" {...props} />;
+export const MutantMinnowIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="mutantMinnow" {...props} />;
+export const RadPerchIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="radPerch" {...props} />;
+export const GoldenMinnowIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="goldenMinnow" {...props} />;
+export const GlowingAlgaeIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="glowingAlgae" {...props} />;
+export const ScrapIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="junk" {...props} />;
+export const FoodIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="apple" {...props} />;
+export const DrinkIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="water" {...props} />;
+export const EnergyIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="energy" {...props} />;
+export const SilverIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="silver" {...props} />;
+export const HeartIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="health" {...props} />;
+export const ExploreIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="explore" {...props} />;
+export const QuestIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="default" {...props} />;
+export const InventoryIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="default" {...props} />;
+export const CraftIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="craft" {...props} />;
+export const CharacterIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="default" {...props} />;
+export const BaseIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="default" {...props} />;
+export const FurnaceIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="furnace" {...props} />;
+export const MarketIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="market" {...props} />;
+export const FarmingIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="default" {...props} />;
+export const FishingIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="fishing" {...props} />;
+export const FactoryIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="default" {...props} />;
+export const SkillsIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="default" {...props} />;
+export const TechIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="default" {...props} />;
+export const WastelandAutomataIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="default" {...props} />;

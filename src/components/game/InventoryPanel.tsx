@@ -4,31 +4,41 @@ import { useGame } from '@/hooks/use-game';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { itemData } from '@/lib/game-data/items';
 import { GameIcon, AppleIcon, WaterIcon, CookedAppleIcon } from '@/lib/icon-mapping';
-import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
 import { Shirt } from 'lucide-react';
 import type { Item } from '@/lib/game-types';
 
 export default function InventoryPanel() {
   const { gameState, dispatch } = useGame();
-  const { inventory, equipment } = gameState;
+  const { inventory, equipment, caughtFish } = gameState;
 
   const consumableSortOrder = ['apple', 'water', 'cookedApple'];
 
-  const ownedItems = Object.entries(inventory)
+  // Get owned inventory items
+  const ownedInventoryItems = Object.entries(inventory)
     .filter(([id, quantity]) => quantity > 0 && id !== 'silver')
-    .map(([id]) => id)
-    .sort((a, b) => {
-      const aIndex = consumableSortOrder.indexOf(a);
-      const bIndex = consumableSortOrder.indexOf(b);
+    .map(([id]) => id);
 
-      if (aIndex !== -1 && bIndex !== -1) {
-        return aIndex - bIndex;
-      }
-      if (aIndex !== -1) return -1;
-      if (bIndex !== -1) return 1;
-      return a.localeCompare(b);
-    });
+  // Get owned fish
+  const ownedFish = Object.entries(caughtFish || {})
+    .filter(([_, quantity]) => quantity && quantity > 0)
+    .map(([id]) => id);
+
+  // Combine all items
+  const allOwnedItems = [...ownedInventoryItems, ...ownedFish];
+
+  // Sort items
+  const ownedItems = allOwnedItems.sort((a, b) => {
+    const aIndex = consumableSortOrder.indexOf(a);
+    const bIndex = consumableSortOrder.indexOf(b);
+
+    if (aIndex !== -1 && bIndex !== -1) {
+      return aIndex - bIndex;
+    }
+    if (aIndex !== -1) return -1;
+    if (bIndex !== -1) return 1;
+    return a.localeCompare(b);
+  });
 
   const isDead = gameState.playerStats.health <= 0;
   const isBusy = gameState.isResting;
@@ -58,6 +68,17 @@ export default function InventoryPanel() {
     }
   }
 
+  // Helper to get quantity for an item (from inventory or caughtFish)
+  const getItemQuantity = (itemId: string): number => {
+    if (inventory[itemId as keyof typeof inventory]) {
+      return inventory[itemId as keyof typeof inventory];
+    }
+    if (caughtFish && caughtFish[itemId]) {
+      return caughtFish[itemId] || 0;
+    }
+    return 0;
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -71,8 +92,9 @@ export default function InventoryPanel() {
             {ownedItems.map((itemId) => {
               const data = itemData[itemId as keyof typeof itemData];
               const isEquippable = data && data.equipSlot;
-              const equippedItemInSlot = data.equipSlot ? equipment[data.equipSlot] : null;
+              const equippedItemInSlot = data?.equipSlot ? equipment[data.equipSlot] : null;
               const isEquipped = equippedItemInSlot === itemId;
+              const quantity = getItemQuantity(itemId);
 
               return (
                 <div key={itemId} className="flex items-center justify-between p-3 rounded-md bg-muted/50">
@@ -83,7 +105,7 @@ export default function InventoryPanel() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-lg font-semibold text-primary">{inventory[itemId as keyof typeof inventory]}</span>
+                    <span className="font-mono text-lg font-semibold text-primary">{quantity}</span>
                     {itemId === 'apple' && (
                       <Button size="icon" variant="outline" onClick={handleEat} disabled={isDead || inventory.apple === 0 || isBusy} aria-label="Eat apple">
                         <AppleIcon size={16} />

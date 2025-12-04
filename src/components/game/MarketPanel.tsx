@@ -11,9 +11,10 @@ import type { Resource } from '@/lib/game-types';
 
 export default function MarketPanel() {
   const { gameState, dispatch } = useGame();
-  const { inventory, lockedItems } = gameState;
+  const { inventory, lockedItems, caughtFish } = gameState;
 
-  const sellableItems = Object.entries(inventory)
+  // Combine regular inventory items with caught fish
+  const inventoryItems = Object.entries(inventory)
     .filter(([itemId, quantity]) => {
       const data = itemData[itemId as keyof typeof itemData];
       return quantity > 0 && data?.sellPrice;
@@ -21,21 +22,45 @@ export default function MarketPanel() {
     .map(([itemId, quantity]) => ({
       id: itemId as Resource,
       quantity,
+      isFish: false,
       ...itemData[itemId as keyof typeof itemData]
     }));
+
+  const fishItems = Object.entries(caughtFish || {})
+    .filter(([fishId, quantity]) => {
+      const data = itemData[fishId];
+      return quantity && quantity > 0 && data?.sellPrice;
+    })
+    .map(([fishId, quantity]) => ({
+      id: fishId as Resource,
+      quantity: quantity!,
+      isFish: true,
+      ...itemData[fishId]
+    }));
+
+  const sellableItems = [...inventoryItems, ...fishItems];
 
   const unlockedSellableItems = sellableItems.filter(item => !lockedItems.includes(item.id));
   const lockedSellableItems = sellableItems.filter(item => lockedItems.includes(item.id));
 
 
-  const handleSell = (item: Resource, amount: number) => {
+  const handleSell = (item: Resource, amount: number, isFish: boolean) => {
     const price = itemData[item]?.sellPrice;
     if (price === undefined) return;
-    dispatch({ type: 'SELL_ITEM', payload: { item, amount, price } });
+
+    if (isFish) {
+      // Sell fish using SELL_ALL_FISH action (we'll need to modify this to sell individual fish)
+      // For now, we'll use the same SELL_ITEM action
+      dispatch({ type: 'SELL_ITEM', payload: { item, amount, price } });
+    } else {
+      dispatch({ type: 'SELL_ITEM', payload: { item, amount, price } });
+    }
   }
 
   const handleSellAll = () => {
     dispatch({ type: 'SELL_ALL_UNLOCKED' });
+    // Also sell all unlocked fish
+    dispatch({ type: 'SELL_ALL_FISH' });
   }
 
   const toggleLockItem = (item: Resource) => {
@@ -64,7 +89,7 @@ export default function MarketPanel() {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => handleSell(item.id, 1)}
+            onClick={() => handleSell(item.id, 1, item.isFish)}
             disabled={isDead || isBusy || isLocked}
             aria-label={`Sell 1 ${item.name}`}
           >
@@ -89,7 +114,7 @@ export default function MarketPanel() {
       <CardHeader className="flex-row items-center justify-between">
         <div>
           <CardTitle>Wandering Trader</CardTitle>
-          <CardDescription>Sell your excess goods for silver.</CardDescription>
+          <CardDescription>Sell your excess goods and fish for silver.</CardDescription>
         </div>
         <Button onClick={handleSellAll} disabled={isDead || isBusy}>
           <ShoppingBag className="mr-2" />

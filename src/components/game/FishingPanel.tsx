@@ -6,13 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '../ui/scroll-area';
 import { fishingZones, getAvailableFishingZones } from '@/lib/game-data/fishing';
-import { Fish, Droplet, Zap, TrendingUp, Coins } from 'lucide-react';
+import { Fish, Droplet, Zap, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { GameIcon } from '@/lib/icon-mapping';
 
 export default function FishingPanel() {
     const { gameState, dispatch } = useGame();
-    const { currentFishingZone, caughtFish, level, playerStats, isResting, smeltingQueue } = gameState;
+    const { currentFishingZone, level, playerStats, isResting, smeltingQueue } = gameState;
 
     const availableZones = getAvailableFishingZones(level);
     const currentZone = fishingZones.find(z => z.id === currentFishingZone);
@@ -27,31 +27,9 @@ export default function FishingPanel() {
         }
     };
 
-    const handleSellAllFish = () => {
-        dispatch({ type: 'SELL_ALL_FISH' });
-    };
-
     const handleZoneChange = (zoneId: string) => {
         dispatch({ type: 'SET_FISHING_ZONE', payload: { zoneId } });
     };
-
-    // Calculate total fish count and value
-    const totalFishCount = Object.values(caughtFish).reduce((sum, count) => sum + (count || 0), 0);
-
-    let totalFishValue = 0;
-    const allLoot: any[] = [];
-    fishingZones.forEach(zone => {
-        allLoot.push(...zone.lootTable);
-    });
-
-    Object.entries(caughtFish).forEach(([fishType, count]) => {
-        if (count && count > 0) {
-            const fishData = allLoot.find((loot: any) => loot.item === fishType && loot.isFish);
-            if (fishData && fishData.silverValue) {
-                totalFishValue += fishData.silverValue * count;
-            }
-        }
-    });
 
     const getRarityColor = (rarity: string) => {
         switch (rarity) {
@@ -131,75 +109,6 @@ export default function FishingPanel() {
                             )}
                         </div>
                     )}
-                </CardContent>
-            </Card>
-
-            {/* Caught Fish Inventory */}
-            <Card>
-                <CardHeader>
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <CardTitle>Caught Fish</CardTitle>
-                            <CardDescription>
-                                {totalFishCount} fish worth {totalFishValue} silver
-                            </CardDescription>
-                        </div>
-                        <Button
-                            onClick={handleSellAllFish}
-                            disabled={totalFishCount === 0}
-                            variant="outline"
-                        >
-                            <Coins className="mr-2 h-4 w-4" />
-                            Sell All ({totalFishValue} Silver)
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <ScrollArea className="h-[300px]">
-                        {totalFishCount === 0 ? (
-                            <div className="text-center text-muted-foreground py-8">
-                                <Fish className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                                <p>No fish caught yet. Start fishing to build your collection!</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-2">
-                                {Object.entries(caughtFish).map(([fishType, count]) => {
-                                    if (!count || count === 0) return null;
-
-                                    const fishData = allLoot.find((loot: any) => loot.item === fishType && loot.isFish);
-                                    if (!fishData) return null;
-
-                                    const totalValue = (fishData.silverValue || 0) * count;
-
-                                    return (
-                                        <div
-                                            key={fishType}
-                                            className="flex items-center justify-between p-3 bg-muted rounded-md"
-                                        >
-                                            <div className="flex-1">
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-medium capitalize flex items-center gap-2">
-                                                        <GameIcon type="item" id={fishType} size={20} />
-                                                        {fishType.replace(/([A-Z])/g, ' $1').trim()}
-                                                    </span>
-                                                    <Badge variant="outline" className={getRarityColor(fishData.rarity)}>
-                                                        {fishData.rarity}
-                                                    </Badge>
-                                                </div>
-                                                <p className="text-sm text-muted-foreground">
-                                                    {fishData.silverValue} silver each
-                                                </p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="font-bold">{count}x</p>
-                                                <p className="text-sm text-muted-foreground">{totalValue} silver</p>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
-                    </ScrollArea>
                 </CardContent>
             </Card>
 

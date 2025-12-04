@@ -1,0 +1,128 @@
+{
+    "wood": {
+        "id": "wood",
+        "type": "resource",
+        "name": "Wood",
+        "description": "A sturdy piece of wood. Useful for building and fuel.",
+        "icon": "wood",
+        "sellPrice": 1
+    },
+    "stone": {
+        "id": "stone",
+        "type": "resource",
+        "name": "Stone",
+        "description": "A chunk of rock. Good for basic tools and structures.",
+        "icon": "stone",
+        "sellPrice": 1
+    },
+    "scrap": {
+        "id": "scrap",
+        "type": "resource",
+        "name": "Scrap Metal",
+        "description": "Twisted metal from the old world. Can be smelted and repurposed.",
+        "icon": "scrap",
+        "sellPrice": 3
+    },
+    "apple": {
+        "id": "apple",
+        "type": "resource",
+        "name": "Apple",
+        "description": "A tough, slightly mutated apple. Keeps hunger at bay.",
+        "icon": "apple",
+        "sellPrice": 4
+    },
+    "water": {
+        "id": "water",
+        "type": "resource",
+        "name": "Water",
+        "description": "Purified water, safe to drink.",
+        "icon": "water",
+        "sellPrice": 4
+    },
+    "components": {
+        "id": "components",
+        "type": "resource",
+        "name": "Components",
+        "description": "Advanced electronic parts. Key to automation.",
+        "icon": "components",
+        "sellPrice": 20
+    },
+    "uranium": {
+        "id": "uranium",
+        "type": "resource",
+        "name": "Uranium",
+        "description": "A rare, radioactive element needed for high-tier power.",
+        "icon": "uranium",
+        "sellPrice": 100
+    },
+    "lemon": {
+        "id": "lemon",
+        "type": "resource",
+        "name": "Lemon",
+        "description": "A sour, yellow fruit.",
+        "icon": "lemon",
+        "sellPrice": 5
+    },
+    "banana": {
+        "id": "banana",
+        "type": "resource",
+        "name": "Banana",
+        "description": "A yellow fruit.",
+        "icon": "banana",
+        "sellPrice": 5
+    },
+    "peach": {
+        "id": "peach",
+        "type": "resource",
+        "name": "Peach",
+        "description": "A fuzzy fruit.",
+        "icon": "peach",
+        "sellPrice": 5
+    },
+    "silver": {
+        "id": "silver",
+        "type": "resource",
+        "name": "Silver",
+        "description": "An old-world currency, still valued by traders.",
+        "icon": "silver"
+    },
+    "mutatedTwigs": {
+        "id": "mutatedTwigs",
+        "type": "resource",
+        "name": "Mutated Twigs",
+        "description": "Flexible, oddly colored twigs from the mutated forest. They hum with a faint energy.",
+        "icon": "mutatedTwigs",
+        "sellPrice": 8
+    },
+    "ironIngot": {
+        "id": "ironIngot",
+        "type": "resource",
+        "name": "Iron Ingot",
+        "description": "A bar of refined iron, ready for advanced crafting.",
+        "icon": "ironIngot",
+        "sellPrice": 30
+    },
+    "biomass": {
+        "id": "biomass",
+        "type": "resource",
+        "name": "Biomass",
+        "description": "Dense, energy-rich organic matter.",
+        "icon": "biomass",
+        "sellPrice": 250
+    },
+    "charcoal": {
+        "id": "charcoal",
+        "type": "resource",
+        "name": "Charcoal",
+        "description": "A block of concentrated carbon. A decent fuel source.",
+        "icon": "charcoal",
+        "sellPrice": 5
+    },
+    "appleSeeds": {
+        "id": "appleSeeds",
+        "type": "resource",
+        "name": "Apple Seeds",
+        "description": "Seeds extracted from an apple. Can be planted in a Hydroponics Bay.",
+        "icon": "appleSeeds"
+    }
+}

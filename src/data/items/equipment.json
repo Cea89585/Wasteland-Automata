@@ -1,0 +1,106 @@
+{
+    "stoneAxe": {
+        "id": "stoneAxe",
+        "type": "equipment",
+        "name": "Stone Axe",
+        "description": "A simple axe. Increases wood gathering by 50%.",
+        "icon": "stoneAxe",
+        "equipSlot": "hand",
+        "sellPrice": 25
+    },
+    "metalDetector": {
+        "id": "metalDetector",
+        "type": "equipment",
+        "name": "Metal Detector",
+        "description": "A device that helps find metal. Increases scrap finding by 20%.",
+        "icon": "metalDetector",
+        "equipSlot": "hand",
+        "sellPrice": 50
+    },
+    "workbench": {
+        "id": "workbench",
+        "type": "structure",
+        "name": "Workbench",
+        "description": "Unlocks more complex crafting recipes.",
+        "icon": "workbench"
+    },
+    "waterPurifier": {
+        "id": "waterPurifier",
+        "type": "structure",
+        "name": "Water Purifier",
+        "description": "A device to turn contaminated water into a drinkable resource.",
+        "icon": "waterPurifier"
+    },
+    "furnace": {
+        "id": "furnace",
+        "type": "structure",
+        "name": "Furnace",
+        "description": "Used to smelt ores and scrap metal into ingots.",
+        "icon": "furnace"
+    },
+    "radio": {
+        "id": "radio",
+        "type": "structure",
+        "name": "Radio",
+        "description": "Can pick up strange signals and story fragments.",
+        "icon": "radio"
+    },
+    "generator": {
+        "id": "generator",
+        "type": "structure",
+        "name": "Generator",
+        "description": "Provides power to your automated systems.",
+        "icon": "generator"
+    },
+    "droneBay": {
+        "id": "droneBay",
+        "type": "structure",
+        "name": "Drone Bay",
+        "description": "Launches scavenger drones to automatically find resources.",
+        "icon": "droneBay"
+    },
+    "hydroponicsBay": {
+        "id": "hydroponicsBay",
+        "type": "structure",
+        "name": "Hydroponics Bay",
+        "description": "An automated bay that grows edible plants.",
+        "icon": "hydroponicsBay"
+    },
+    "miningRig": {
+        "id": "miningRig",
+        "type": "structure",
+        "name": "Mining Rig",
+        "description": "An automated rig that extracts resources from the earth.",
+        "icon": "miningRig"
+    },
+    "cookedApple": {
+        "id": "cookedApple",
+        "type": "consumable",
+        "name": "Cooked Apple",
+        "description": "A cooked apple that restores some energy.",
+        "icon": "cookedApple",
+        "sellPrice": 8
+    },
+    "crudeMap": {
+        "id": "crudeMap",
+        "type": "item",
+        "name": "Crude Map",
+        "description": "Unlocks the ability to travel to new locations.",
+        "icon": "crudeMap"
+    },
+    "ironPlates": {
+        "id": "ironPlates",
+        "type": "resource",
+        "name": "Iron Plates",
+        "description": "Reinforced plates of solid iron. Used for heavy construction.",
+        "icon": "ironPlates",
+        "sellPrice": 160
+    },
+    "biomassCompressor": {
+        "id": "biomassCompressor",
+        "type": "structure",
+        "name": "Biomass Compressor",
+        "description": "A machine that unlocks the ability to create biomass.",
+        "icon": "biomassCompressor"
+    }
+}

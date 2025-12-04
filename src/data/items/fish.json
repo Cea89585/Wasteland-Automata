@@ -1,0 +1,346 @@
+{
+    "mutantMinnow": {
+        "id": "mutantMinnow",
+        "type": "fish",
+        "name": "Mutant Minnow",
+        "description": "A small, glowing fish from toxic waters.",
+        "icon": "mutantMinnow",
+        "sellPrice": 5
+    },
+    "rustyCan": {
+        "id": "rustyCan",
+        "type": "junk",
+        "name": "Rusty Can",
+        "description": "An old can pulled from the water.",
+        "icon": "rustyCan",
+        "sellPrice": 2
+    },
+    "radPerch": {
+        "id": "radPerch",
+        "type": "fish",
+        "name": "Rad Perch",
+        "description": "A perch that glows faintly with radiation.",
+        "icon": "radPerch",
+        "sellPrice": 10
+    },
+    "glowingAlgae": {
+        "id": "glowingAlgae",
+        "type": "fish",
+        "name": "Glowing Algae",
+        "description": "Bioluminescent algae from toxic puddles.",
+        "icon": "glowingAlgae",
+        "sellPrice": 15
+    },
+    "goldenMinnow": {
+        "id": "goldenMinnow",
+        "type": "fish",
+        "name": "Golden Minnow",
+        "description": "A rare, shimmering golden fish.",
+        "icon": "goldenMinnow",
+        "sellPrice": 100
+    },
+    "sludgeBass": {
+        "id": "sludgeBass",
+        "type": "fish",
+        "name": "Sludge Bass",
+        "description": "A bass adapted to murky, contaminated waters.",
+        "icon": "fish",
+        "sellPrice": 15
+    },
+    "irradiatedCarp": {
+        "id": "irradiatedCarp",
+        "type": "fish",
+        "name": "Irradiated Carp",
+        "description": "A carp that survived heavy radiation.",
+        "icon": "fish",
+        "sellPrice": 12
+    },
+    "bioLuminescentMoss": {
+        "id": "bioLuminescentMoss",
+        "type": "fish",
+        "name": "Bio-Luminescent Moss",
+        "description": "Moss that glows in the dark.",
+        "icon": "glowingAlgae",
+        "sellPrice": 20
+    },
+    "oldBoot": {
+        "id": "oldBoot",
+        "type": "junk",
+        "name": "Old Boot",
+        "description": "A waterlogged boot from the old world.",
+        "icon": "junk",
+        "sellPrice": 3
+    },
+    "goldenBass": {
+        "id": "goldenBass",
+        "type": "fish",
+        "name": "Golden Bass",
+        "description": "A rare golden bass worth a fortune.",
+        "icon": "goldenMinnow",
+        "sellPrice": 200
+    },
+    "glowfish": {
+        "id": "glowfish",
+        "type": "fish",
+        "name": "Glowfish",
+        "description": "A fish that pulses with eerie light.",
+        "icon": "fish",
+        "sellPrice": 20
+    },
+    "mutantCatfish": {
+        "id": "mutantCatfish",
+        "type": "fish",
+        "name": "Mutant Catfish",
+        "description": "A large catfish with strange mutations.",
+        "icon": "fish",
+        "sellPrice": 25
+    },
+    "reactorCoreShard": {
+        "id": "reactorCoreShard",
+        "type": "junk",
+        "name": "Reactor Core Shard",
+        "description": "A fragment from an old reactor core.",
+        "icon": "junk",
+        "sellPrice": 30
+    },
+    "goldenGlowfish": {
+        "id": "goldenGlowfish",
+        "type": "fish",
+        "name": "Golden Glowfish",
+        "description": "A rare glowing fish with golden scales.",
+        "icon": "goldenMinnow",
+        "sellPrice": 300
+    },
+    "bunkerCarp": {
+        "id": "bunkerCarp",
+        "type": "fish",
+        "name": "Bunker Carp",
+        "description": "A carp found in flooded bunkers.",
+        "icon": "fish",
+        "sellPrice": 25
+    },
+    "caveEel": {
+        "id": "caveEel",
+        "type": "fish",
+        "name": "Cave Eel",
+        "description": "A slippery eel from dark waters.",
+        "icon": "fish",
+        "sellPrice": 28
+    },
+    "armoredFish": {
+        "id": "armoredFish",
+        "type": "fish",
+        "name": "Armored Fish",
+        "description": "A fish with thick, protective scales.",
+        "icon": "fish",
+        "sellPrice": 30
+    },
+    "militaryRation": {
+        "id": "militaryRation",
+        "type": "junk",
+        "name": "Military Ration",
+        "description": "A sealed ration from the old military.",
+        "icon": "junk",
+        "sellPrice": 40
+    },
+    "waterloggedDataChip": {
+        "id": "waterloggedDataChip",
+        "type": "junk",
+        "name": "Waterlogged Data Chip",
+        "description": "A damaged data chip from the bunker.",
+        "icon": "junk",
+        "sellPrice": 35
+    },
+    "goldenEel": {
+        "id": "goldenEel",
+        "type": "fish",
+        "name": "Golden Eel",
+        "description": "A rare golden eel.",
+        "icon": "goldenMinnow",
+        "sellPrice": 400
+    },
+    "preWarTech": {
+        "id": "preWarTech",
+        "type": "junk",
+        "name": "Pre-War Tech",
+        "description": "Advanced technology from before the war.",
+        "icon": "junk",
+        "sellPrice": 150
+    },
+    "acidSwimmer": {
+        "id": "acidSwimmer",
+        "type": "fish",
+        "name": "Acid Swimmer",
+        "description": "A fish adapted to acidic waters.",
+        "icon": "fish",
+        "sellPrice": 35
+    },
+    "toxicTrout": {
+        "id": "toxicTrout",
+        "type": "fish",
+        "name": "Toxic Trout",
+        "description": "A trout that thrives in toxic environments.",
+        "icon": "fish",
+        "sellPrice": 32
+    },
+    "chemicalCarp": {
+        "id": "chemicalCarp",
+        "type": "fish",
+        "name": "Chemical Carp",
+        "description": "A carp mutated by chemical exposure.",
+        "icon": "fish",
+        "sellPrice": 38
+    },
+    "strangeCrystal": {
+        "id": "strangeCrystal",
+        "type": "junk",
+        "name": "Strange Crystal",
+        "description": "A mysterious crystal found in chemical lakes.",
+        "icon": "junk",
+        "sellPrice": 50
+    },
+    "chemicalSample": {
+        "id": "chemicalSample",
+        "type": "junk",
+        "name": "Chemical Sample",
+        "description": "A sample of unknown chemicals.",
+        "icon": "junk",
+        "sellPrice": 60
+    },
+    "goldenSwimmer": {
+        "id": "goldenSwimmer",
+        "type": "fish",
+        "name": "Golden Swimmer",
+        "description": "A rare golden fish from chemical lakes.",
+        "icon": "goldenMinnow",
+        "sellPrice": 500
+    },
+    "experimentalCompound": {
+        "id": "experimentalCompound",
+        "type": "junk",
+        "name": "Experimental Compound",
+        "description": "A pre-war experimental substance.",
+        "icon": "junk",
+        "sellPrice": 200
+    },
+    "craterDweller": {
+        "id": "craterDweller",
+        "type": "fish",
+        "name": "Crater Dweller",
+        "description": "A fish that lives in impact craters.",
+        "icon": "fish",
+        "sellPrice": 40
+    },
+    "depthFish": {
+        "id": "depthFish",
+        "type": "fish",
+        "name": "Depth Fish",
+        "description": "A fish from the deepest waters.",
+        "icon": "fish",
+        "sellPrice": 42
+    },
+    "meteorFragment": {
+        "id": "meteorFragment",
+        "type": "junk",
+        "name": "Meteor Fragment",
+        "description": "A piece of a fallen meteor.",
+        "icon": "junk",
+        "sellPrice": 55
+    },
+    "cosmicDebris": {
+        "id": "cosmicDebris",
+        "type": "junk",
+        "name": "Cosmic Debris",
+        "description": "Debris from outer space.",
+        "icon": "junk",
+        "sellPrice": 70
+    },
+    "goldenCraterFish": {
+        "id": "goldenCraterFish",
+        "type": "fish",
+        "name": "Golden Crater Fish",
+        "description": "A rare fish from crater depths.",
+        "icon": "goldenMinnow",
+        "sellPrice": 600
+    },
+    "meteoriteShard": {
+        "id": "meteoriteShard",
+        "type": "junk",
+        "name": "Meteorite Shard",
+        "description": "A shard of a meteorite.",
+        "icon": "junk",
+        "sellPrice": 250
+    },
+    "ancientArtifact": {
+        "id": "ancientArtifact",
+        "type": "junk",
+        "name": "Ancient Artifact",
+        "description": "A mysterious artifact from ancient times.",
+        "icon": "junk",
+        "sellPrice": 500
+    },
+    "urbanScavengerFish": {
+        "id": "urbanScavengerFish",
+        "type": "fish",
+        "name": "Urban Scavenger Fish",
+        "description": "A fish that scavenges in sunken cities.",
+        "icon": "fish",
+        "sellPrice": 50
+    },
+    "rubbleSwimmer": {
+        "id": "rubbleSwimmer",
+        "type": "fish",
+        "name": "Rubble Swimmer",
+        "description": "A fish that navigates through rubble.",
+        "icon": "fish",
+        "sellPrice": 48
+    },
+    "buildingMaterial": {
+        "id": "buildingMaterial",
+        "type": "junk",
+        "name": "Building Material",
+        "description": "Salvaged construction materials.",
+        "icon": "junk",
+        "sellPrice": 25
+    },
+    "preWarCurrency": {
+        "id": "preWarCurrency",
+        "type": "junk",
+        "name": "Pre-War Currency",
+        "description": "Old money from before the war.",
+        "icon": "junk",
+        "sellPrice": 80
+    },
+    "glassShard": {
+        "id": "glassShard",
+        "type": "junk",
+        "name": "Glass Shard",
+        "description": "Sharp glass from broken windows.",
+        "icon": "junk",
+        "sellPrice": 30
+    },
+    "goldenCityFish": {
+        "id": "goldenCityFish",
+        "type": "fish",
+        "name": "Golden City Fish",
+        "description": "A rare fish from the sunken city.",
+        "icon": "goldenMinnow",
+        "sellPrice": 800
+    },
+    "pristinePreWarItem": {
+        "id": "pristinePreWarItem",
+        "type": "junk",
+        "name": "Pristine Pre-War Item",
+        "description": "A well-preserved item from before the war.",
+        "icon": "junk",
+        "sellPrice": 300
+    },
+    "treasureCache": {
+        "id": "treasureCache",
+        "type": "junk",
+        "name": "Treasure Cache",
+        "description": "A hidden cache of valuable items.",
+        "icon": "junk",
+        "sellPrice": 1000
+    }
+}
