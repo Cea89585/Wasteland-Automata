@@ -47,6 +47,7 @@ export default function CraftingPanel() {
     r.id !== 'recipe_waterPurifier' &&
     r.id !== 'recipe_furnace' &&
     r.id !== 'recipe_droneBay' &&
+    r.id !== 'recipe_generator' &&
     r.id !== 'recipe_hydroponicsBay' &&
     !(r.id === 'recipe_biomassCompressor' && inv.biomassCompressor > 0) &&
     r.id !== 'recipe_crudeMap' && // Hide the old map recipe

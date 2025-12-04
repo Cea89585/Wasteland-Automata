@@ -62,6 +62,12 @@ export default function GameUI() {
   const router = useRouter();
   const isMobile = useBreakpoint('sm');
   const [activeTab, setActiveTab] = useState('explore');
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -91,6 +97,11 @@ export default function GameUI() {
   const showFarming = gameState.builtStructures.includes('hydroponicsBay');
   const showMining = gameState.completedQuests.includes('quest_kael_mining');
 
+  const hasReadyCrops = gameState.farmPlots?.some(plot => {
+    if (!plot.seed || !plot.plantedTimestamp) return false;
+    return now >= plot.plantedTimestamp + plot.duration;
+  });
+
   const tabs = [
     { value: "explore", label: "Explore", icon: ExploreIcon },
     { value: "community", label: "Quests", icon: QuestIcon },
@@ -100,7 +111,7 @@ export default function GameUI() {
     { value: "base", label: "Base", icon: BaseIcon },
     { value: "furnace", label: "Furnace", icon: FurnaceIcon, condition: showFurnace },
     { value: "market", label: "Market", icon: MarketIcon, condition: showMarket },
-    { value: "farming", label: "Farming", icon: FarmingIcon, condition: showFarming },
+    { value: "farming", label: "Farming", icon: FarmingIcon, condition: showFarming, badge: hasReadyCrops },
     { value: "fishing", label: "Fishing", icon: FishingIcon },
     { value: "mining", label: "Mining", icon: MiningIcon, condition: showMining },
     { value: "factory", label: "Factory", icon: FactoryIcon },
@@ -176,8 +187,13 @@ export default function GameUI() {
                   disabled={isBusy}
                   className="flex items-center justify-center gap-2 text-xs h-9 sm:text-sm px-3 data-[state=active]:bg-primary/20 data-[state=active]:text-primary data-[state=active]:border-primary/50 border border-transparent transition-all duration-300"
                 >
-                  <GlowIcon icon={tab.icon} className="h-4 w-4" />
-                  <span className="flex items-center leading-none font-medium tracking-wide">{tab.label}</span>
+                  <div className="relative flex items-center gap-2">
+                    <GlowIcon icon={tab.icon} className="h-4 w-4" />
+                    {tab.badge && (
+                      <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
+                    )}
+                    <span className="leading-none font-medium tracking-wide">{tab.label}</span>
+                  </div>
                 </TabsTrigger>
               ))}
             </TabsList>
