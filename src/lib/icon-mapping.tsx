@@ -140,6 +140,7 @@ const NAV_ICON_MAP: Record<string, string> = {
     upgrades: 'default',
     logo: 'default',
     wasteland: 'default',
+    mining: 'mining',
 };
 
 // Component wrapper for easy icon rendering
@@ -246,3 +247,4 @@ export const TechIcon: React.FC<{ className?: string; size?: number }> = (props)
     <SpriteIcon name="default" {...props} />;
 export const WastelandAutomataIcon: React.FC<{ className?: string; size?: number }> = (props) =>
     <SpriteIcon name="default" {...props} />;
+export const MiningIcon = () => <GameIcon type="nav" id="mining" />;

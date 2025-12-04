@@ -102,5 +102,14 @@
         "name": "Biomass Compressor",
         "description": "A machine that unlocks the ability to create biomass.",
         "icon": "biomassCompressor"
+    },
+    "pickaxe": {
+        "id": "pickaxe",
+        "type": "equipment",
+        "name": "Pickaxe",
+        "description": "A sturdy tool for breaking rocks and finding ore.",
+        "icon": "pickaxe",
+        "equipSlot": "hand",
+        "sellPrice": 40
     }
 }

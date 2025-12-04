@@ -84,6 +84,35 @@
     <circle cx="40" cy="32" r="4" fill="#78350F"/>
   </symbol>
 
+  <symbol id="icon-uranium" viewBox="0 0 64 64">
+    <!-- Radioactive crystal -->
+    <path d="M32 8 L52 20 L52 44 L32 56 L12 44 L12 20 Z" fill="#10B981" stroke="#047857" stroke-width="2"/>
+    <circle cx="32" cy="32" r="12" fill="none" stroke="#FCD34D" stroke-width="2"/>
+    <path d="M32 20 L32 44 M20 32 L44 32 M26 26 L38 38 M38 26 L26 38" stroke="#FCD34D" stroke-width="1" opacity="0.5"/>
+  </symbol>
+
+  <symbol id="icon-lemon" viewBox="0 0 64 64">
+    <!-- Lemon shape -->
+    <ellipse cx="32" cy="32" rx="14" ry="18" fill="#FDE047" stroke="#CA8A04" stroke-width="2"/>
+    <path d="M32 14 L32 8 L36 6" stroke="#166534" stroke-width="2" fill="none"/>
+    <path d="M28 28 Q32 32 28 36" stroke="#CA8A04" stroke-width="1" opacity="0.3"/>
+  </symbol>
+
+  <symbol id="icon-banana" viewBox="0 0 64 64">
+    <!-- Banana curve -->
+    <path d="M20 20 Q32 16 44 24 Q48 32 44 40 Q32 48 20 44" fill="#FDE047" stroke="#CA8A04" stroke-width="2"/>
+    <path d="M20 20 L20 44" stroke="#CA8A04" stroke-width="1"/>
+  </symbol>
+
+  <symbol id="icon-mutatedTwigs" viewBox="0 0 64 64">
+    <!-- Glowing twisted branches -->
+    <path d="M32 52 L32 32 M32 32 L20 20 M32 32 L44 20 M32 32 L24 44" stroke="#A855F7" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="20" cy="20" r="3" fill="#C084FC"/>
+    <circle cx="44" cy="20" r="3" fill="#C084FC"/>
+    <circle cx="24" cy="44" r="3" fill="#C084FC"/>
+    <circle cx="32" cy="52" r="3" fill="#C084FC"/>
+  </symbol>
+
   <!-- TOOLS -->
   <symbol id="icon-stoneAxe" viewBox="0 0 64 64">
     <!-- Modern Axe -->
@@ -189,6 +218,19 @@
     <path d="M16 48 L12 52" stroke="#94A3B8" stroke-width="3"/>
   </symbol>
   
+  <symbol id="icon-pickaxe" viewBox="0 0 64 64">
+    <!-- Heavy Pickaxe -->
+    <path d="M12 12 L52 12 Q56 12 56 16 L52 24 Q40 20 32 24 Q24 20 12 24 L8 16 Q8 12 12 12 Z" fill="#475569" stroke="#1E293B" stroke-width="2"/>
+    <rect x="28" y="24" width="8" height="36" fill="#78350F" stroke="#451A03" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="icon-mining" viewBox="0 0 64 64">
+    <!-- Mining Drill/Cave -->
+    <path d="M8 60 L24 20 L40 60" fill="#1E293B" stroke="#334155" stroke-width="2"/>
+    <path d="M24 60 L40 20 L56 60" fill="#334155" stroke="#475569" stroke-width="2"/>
+    <circle cx="32" cy="40" r="12" fill="none" stroke="#F59E0B" stroke-width="2" stroke-dasharray="4 4"/>
+  </symbol>
+
   <symbol id="icon-default" viewBox="0 0 64 64">
     <rect x="8" y="8" width="48" height="48" rx="8" fill="#374151" stroke="#4B5563" stroke-width="2"/>
     <text x="32" y="42" font-family="monospace" font-size="32" text-anchor="middle" fill="#9CA3AF">?</text>

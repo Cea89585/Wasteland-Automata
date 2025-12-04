@@ -123,6 +123,14 @@ export const recipes: Recipe[] = [
     requirements: { apple: 1 },
     unlockedBy: ['hydroponicsBay'],
   },
+  {
+    id: 'recipe_pickaxe',
+    name: 'Craft Pickaxe',
+    description: 'A sturdy tool for breaking rocks and finding ore.',
+    creates: 'pickaxe',
+    requirements: { ironIngot: 2, wood: 1 },
+    unlockedBy: ['workbench'],
+  },
   // Machine recipes - Note: These don't create items, they're handled specially in BUILD_MACHINE action
   // Keeping them here for consistency and future UI integration
 ];

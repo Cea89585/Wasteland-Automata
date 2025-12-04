@@ -38,6 +38,7 @@ export const Items = {
   crudeMap: 'Crude Map',
   ironPlates: 'Iron Plates',
   biomassCompressor: 'Biomass Compressor',
+  pickaxe: 'Pickaxe',
 } as const;
 export type Item = keyof typeof Items;
 
@@ -243,4 +244,5 @@ export type GameAction =
   | { type: 'UNLOCK_SKILL'; payload: { skillId: string } }
   | { type: 'FISH'; payload: { zoneId: string } }
   | { type: 'SELL_ALL_FISH' }
-  | { type: 'SET_FISHING_ZONE'; payload: { zoneId: string } };
+  | { type: 'SET_FISHING_ZONE'; payload: { zoneId: string } }
+  | { type: 'MINE' };

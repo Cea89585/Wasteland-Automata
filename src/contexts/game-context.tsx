@@ -1218,7 +1218,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'FINISH_RESTING': {
       const newStats = { ...state.playerStats };
       const MAX_ENERGY = getMaxEnergy();
-      newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 10);
+      newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 15);
       return { ...state, isResting: false, playerStats: newStats };
     }
 

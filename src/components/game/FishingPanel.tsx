@@ -6,13 +6,18 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '../ui/scroll-area';
 import { fishingZones, getAvailableFishingZones } from '@/lib/game-data/fishing';
-import { Fish, Droplet, Zap, TrendingUp } from 'lucide-react';
+import { Fish, Droplet, Zap, TrendingUp, Bed, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { GameIcon } from '@/lib/icon-mapping';
+import { useState, useEffect, useCallback } from 'react';
+import { Progress } from '../ui/progress';
+
+const REST_DURATION_SECONDS = 10;
 
 export default function FishingPanel() {
     const { gameState, dispatch } = useGame();
     const { currentFishingZone, level, playerStats, isResting, smeltingQueue } = gameState;
+    const [restingProgress, setRestingProgress] = useState(0);
 
     const availableZones = getAvailableFishingZones(level);
     const currentZone = fishingZones.find(z => z.id === currentFishingZone);
@@ -29,6 +34,40 @@ export default function FishingPanel() {
 
     const handleZoneChange = (zoneId: string) => {
         dispatch({ type: 'SET_FISHING_ZONE', payload: { zoneId } });
+    };
+
+    const finishResting = useCallback(() => {
+        dispatch({ type: 'FINISH_RESTING' });
+        dispatch({ type: 'ADD_LOG', payload: { text: "You feel rested and ready for action.", type: 'success' } });
+        setRestingProgress(0);
+    }, [dispatch]);
+
+    useEffect(() => {
+        let interval: NodeJS.Timeout | undefined;
+        if (isResting) {
+            interval = setInterval(() => {
+                setRestingProgress(prev => prev + (100 / REST_DURATION_SECONDS));
+            }, 1000);
+        }
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [isResting]);
+
+    useEffect(() => {
+        if (restingProgress >= 100) {
+            finishResting();
+        }
+    }, [restingProgress, finishResting]);
+
+    const handleRest = () => {
+        if (playerStats.energy >= 100) {
+            dispatch({ type: 'ADD_LOG', payload: { text: "You are already fully rested.", type: 'info' } });
+            return;
+        }
+        dispatch({ type: 'START_RESTING' });
+        setRestingProgress(0);
+        dispatch({ type: 'ADD_LOG', payload: { text: "You find a relatively safe spot to rest your eyes for a moment...", type: 'info' } });
     };
 
     const getRarityColor = (rarity: string) => {
@@ -101,6 +140,30 @@ export default function FishingPanel() {
                                 <Fish className="mr-2 h-4 w-4" />
                                 Cast Line ({currentZone.energyCost} Energy)
                             </Button>
+
+                            <Button
+                                variant="outline"
+                                onClick={handleRest}
+                                disabled={isResting || playerStats.health <= 0}
+                                className="w-full"
+                                size="lg"
+                            >
+                                {isResting ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Bed className="mr-2 h-4 w-4" />
+                                )}
+                                {isResting ? 'Resting...' : 'Rest (+15 Energy)'}
+                            </Button>
+
+                            {isResting && (
+                                <div className="space-y-2">
+                                    <Progress value={restingProgress} className="w-full" />
+                                    <p className="text-sm text-center text-muted-foreground">
+                                        Resting... {Math.floor(restingProgress)}%
+                                    </p>
+                                </div>
+                            )}
 
                             {!hasEnoughEnergy && (
                                 <p className="text-sm text-destructive text-center">

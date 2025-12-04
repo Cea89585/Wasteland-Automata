@@ -109,6 +109,21 @@ export const quests: Quest[] = [
         ],
         completionMessage: 'Kael expertly fits the plates onto his device. "Perfect. The signal will be clean. You\'ve done well. This old metal detector is surplus to my needs; it should serve you better. We\'re close to finishing this project."',
         dependsOn: 'quest_kael_1',
+        unlocks: 'quest_kael_mining'
+    },
+    {
+        id: 'quest_kael_mining',
+        title: 'The Old Mines',
+        npc: 'Kael, the Engineer',
+        description: '"I\'ve located an old mining site. It\'s rich in resources, but you\'ll need the right tool to work it. Craft a pickaxe, and I\'ll show you where it is. We can get good iron and scrap from there."',
+        requirements: [
+            { type: 'item', item: 'pickaxe', amount: 1 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 100 }
+        ],
+        completionMessage: '"Good tool. Solid. The mine entrance is to the north. Be careful, the supports are old. But the haul will be worth it."',
+        dependsOn: 'quest_kael_2',
     },
     {
         id: 'quest_elara_1',
