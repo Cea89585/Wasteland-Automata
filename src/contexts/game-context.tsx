@@ -201,7 +201,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
 
       // Migration: Unlock Forest for players who completed quest_anya_1 before the fix
+      console.log('Migration check:', {
+        hasCompletedQuest: newState.completedQuests?.includes('quest_anya_1'),
+        hasForestUnlocked: newState.unlockedLocations?.includes('forest'),
+        completedQuests: newState.completedQuests,
+        unlockedLocations: newState.unlockedLocations
+      });
       if (newState.completedQuests?.includes('quest_anya_1') && !newState.unlockedLocations?.includes('forest')) {
+        console.log('Unlocking Forest for existing player');
         newState.unlockedLocations = [...(newState.unlockedLocations || []), 'forest'];
       }
 
