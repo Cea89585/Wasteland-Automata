@@ -1440,8 +1440,10 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         return { ...state, inventory: newInventory, charcoalSmeltingQueue: state.charcoalSmeltingQueue + amount, smeltingTimestamps: newTimestamps, log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log] }
       } else if (type === 'glass') {
         const totalSandNeeded = 5 * amount;
-        if (newInventory.sand < totalSandNeeded) return state;
+        const totalWoodNeeded = 5 * amount;
+        if (newInventory.sand < totalSandNeeded || newInventory.wood < totalWoodNeeded) return state;
         newInventory.sand -= totalSandNeeded;
+        newInventory.wood -= totalWoodNeeded;
         logText = `Queued ${amount} glass tubes for smelting.`;
         if (state.glassSmeltingQueue === 0) newTimestamps.glass = Date.now();
         return { ...state, inventory: newInventory, glassSmeltingQueue: state.glassSmeltingQueue + amount, smeltingTimestamps: newTimestamps, log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log] }
@@ -1561,25 +1563,26 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         inventory: newInventory,
         statistics: newStatistics,
         charcoalSmeltingQueue: newSmeltingQueue,
-        smeltingTimestamps: newTimestamps,
         log: [{ id: generateUniqueLogId(), text: logMessage, type: 'craft', item: 'charcoal', timestamp: Date.now() }, ...state.log],
       };
     }
 
     case 'START_SMELTING_GLASS': {
-      const newInventory = { ...state.inventory };
-      const totalSandNeeded = 5;
-
-      if (newInventory.sand < totalSandNeeded) {
+      const SAND_COST = 5;
+      const WOOD_COST = 5;
+      if (state.inventory.sand < SAND_COST || state.inventory.wood < WOOD_COST) {
         return {
           ...state,
-          log: [{ id: generateUniqueLogId(), text: "Not enough sand to smelt glass.", type: 'danger', timestamp: Date.now() }, ...state.log],
+          log: [{ id: generateUniqueLogId(), text: "Not enough resources (Need 5 Sand, 5 Wood).", type: 'danger', timestamp: Date.now() }, ...state.log]
         };
       }
 
-      newInventory.sand -= totalSandNeeded;
+      const newInventory = { ...state.inventory };
+      newInventory.sand -= SAND_COST;
+      newInventory.wood -= WOOD_COST;
 
       const newTimestamps = { ...state.smeltingTimestamps };
+      // Only set timestamp if queue was empty
       if (state.glassSmeltingQueue === 0) {
         newTimestamps.glass = Date.now();
       }
@@ -1589,7 +1592,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         inventory: newInventory,
         glassSmeltingQueue: state.glassSmeltingQueue + 1,
         smeltingTimestamps: newTimestamps,
-        log: [{ id: generateUniqueLogId(), text: `The furnace melts the sand...`, type: 'info', timestamp: Date.now() }, ...state.log],
+        log: [{ id: generateUniqueLogId(), text: "Started making glass tube...", type: 'info', timestamp: Date.now() }, ...state.log]
       };
     }
 
@@ -2606,27 +2609,28 @@ export function GameProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
+      const currentState = gameStateRef.current;
 
-      if (gameState.smeltingQueue > 0 && gameState.smeltingTimestamps?.components) {
-        if (now - gameState.smeltingTimestamps.components >= 10000) {
+      if (currentState.smeltingQueue > 0 && currentState.smeltingTimestamps?.components) {
+        if (now - currentState.smeltingTimestamps.components >= 10000) {
           dispatch({ type: 'FINISH_SMELTING' });
         }
       }
 
-      if (gameState.ironIngotSmeltingQueue > 0 && gameState.smeltingTimestamps?.iron) {
-        if (now - gameState.smeltingTimestamps.iron >= 20000) {
+      if (currentState.ironIngotSmeltingQueue > 0 && currentState.smeltingTimestamps?.iron) {
+        if (now - currentState.smeltingTimestamps.iron >= 20000) {
           dispatch({ type: 'FINISH_SMELTING_IRON' });
         }
       }
 
-      if (gameState.charcoalSmeltingQueue > 0 && gameState.smeltingTimestamps?.charcoal) {
-        if (now - gameState.smeltingTimestamps.charcoal >= 5000) {
+      if (currentState.charcoalSmeltingQueue > 0 && currentState.smeltingTimestamps?.charcoal) {
+        if (now - currentState.smeltingTimestamps.charcoal >= 5000) {
           dispatch({ type: 'FINISH_SMELTING_CHARCOAL' });
         }
       }
 
-      if (gameState.glassSmeltingQueue > 0 && gameState.smeltingTimestamps?.glass) {
-        if (now - gameState.smeltingTimestamps.glass >= 10000) {
+      if (currentState.glassSmeltingQueue > 0 && currentState.smeltingTimestamps?.glass) {
+        if (now - currentState.smeltingTimestamps.glass >= 10000) {
           dispatch({ type: 'FINISH_SMELTING_GLASS' });
         }
       }
@@ -2636,7 +2640,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, gameState.glassSmeltingQueue, gameState.smeltingTimestamps]);
+  }, []); // Ref dependency allows empty array here, preventing interval recreation
 
   // Effect for saving game state to Firestore
   useEffect(() => {
