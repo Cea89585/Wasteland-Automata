@@ -44,65 +44,35 @@ export default function FurnacePanel() {
 
   const isBusy = gameState.isResting;
 
-  // Component smelting progress
+  // Update progress based on timestamps
   useEffect(() => {
-    let interval: NodeJS.Timeout | undefined;
-    if (gameState.smeltingQueue > 0 && componentProgress < 100) {
-      interval = setInterval(() => {
-        setComponentProgress(prev => Math.min(100, prev + (100 / SMELT_DURATION)));
-      }, 1000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [gameState.smeltingQueue, componentProgress]);
+    const interval = setInterval(() => {
+      const now = Date.now();
 
-  useEffect(() => {
-    if (componentProgress >= 100 && gameState.smeltingQueue > 0) {
-      dispatch({ type: 'FINISH_SMELTING' });
-      setComponentProgress(0); // Reset for the next item in the queue
-    }
-  }, [componentProgress, gameState.smeltingQueue, dispatch]);
+      if (gameState.smeltingQueue > 0 && gameState.smeltingTimestamps?.components) {
+        const elapsed = now - gameState.smeltingTimestamps.components;
+        setComponentProgress(Math.min(100, (elapsed / 10000) * 100));
+      } else {
+        setComponentProgress(0);
+      }
 
-  // Iron Ingot smelting progress
-  useEffect(() => {
-    let interval: NodeJS.Timeout | undefined;
-    if (gameState.ironIngotSmeltingQueue > 0 && ironProgress < 100) {
-      interval = setInterval(() => {
-        setIronProgress(prev => Math.min(100, prev + (100 / SMELT_DURATION)));
-      }, 1000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [gameState.ironIngotSmeltingQueue, ironProgress]);
+      if (gameState.ironIngotSmeltingQueue > 0 && gameState.smeltingTimestamps?.iron) {
+        const elapsed = now - gameState.smeltingTimestamps.iron;
+        setIronProgress(Math.min(100, (elapsed / 20000) * 100));
+      } else {
+        setIronProgress(0);
+      }
 
-  useEffect(() => {
-    if (ironProgress >= 100 && gameState.ironIngotSmeltingQueue > 0) {
-      dispatch({ type: 'FINISH_SMELTING_IRON' });
-      setIronProgress(0); // Reset for the next item in the queue
-    }
-  }, [ironProgress, gameState.ironIngotSmeltingQueue, dispatch]);
+      if (gameState.charcoalSmeltingQueue > 0 && gameState.smeltingTimestamps?.charcoal) {
+        const elapsed = now - gameState.smeltingTimestamps.charcoal;
+        setCharcoalProgress(Math.min(100, (elapsed / 5000) * 100));
+      } else {
+        setCharcoalProgress(0);
+      }
+    }, 100);
 
-  // Charcoal smelting progress
-  useEffect(() => {
-    let interval: NodeJS.Timeout | undefined;
-    if (gameState.charcoalSmeltingQueue > 0 && charcoalProgress < 100) {
-      interval = setInterval(() => {
-        setCharcoalProgress(prev => Math.min(100, prev + (100 / SMELT_DURATION)));
-      }, 1000);
-    }
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [gameState.charcoalSmeltingQueue, charcoalProgress]);
-
-  useEffect(() => {
-    if (charcoalProgress >= 100 && gameState.charcoalSmeltingQueue > 0) {
-      dispatch({ type: 'FINISH_SMELTING_CHARCOAL' });
-      setCharcoalProgress(0); // Reset for the next item in the queue
-    }
-  }, [charcoalProgress, gameState.charcoalSmeltingQueue, dispatch]);
+    return () => clearInterval(interval);
+  }, [gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, gameState.smeltingTimestamps]);
 
   // Handler for components
   const handleSmeltComponent = () => {

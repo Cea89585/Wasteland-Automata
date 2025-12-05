@@ -130,20 +130,6 @@ export interface GameState {
   lockedItems: Resource[];
   completedQuests: string[];
   storageLevel: number;
-  energyLevel: number;
-  hungerLevel: number;
-  thirstLevel: number;
-  healthLevel: number;
-  droneLevel: number;
-  farmPlotLevel: number; // Additional farm plots
-  machineSlotLevel: number; // Additional machine slots
-  automationSpeedLevel: number; // Faster machine processing
-  explorationEfficiencyLevel: number; // Better exploration loot
-  hasFishingLuck: boolean; // One-time fishing luck boost
-  restEfficiencyLevel: number; // Better health recovery when resting (max 6 levels = 30%)
-  isInitialized: boolean;
-  gameTick: number;
-  isResting: boolean;
   isIdle: boolean;
   smeltingQueue: number;
   ironIngotSmeltingQueue: number;

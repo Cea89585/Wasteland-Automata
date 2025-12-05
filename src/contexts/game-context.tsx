@@ -1230,10 +1230,16 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       newInventory.scrap -= totalScrapNeeded;
       newInventory.wood -= totalWoodNeeded;
 
+      const newTimestamps = { ...state.smeltingTimestamps };
+      if (state.smeltingQueue === 0) {
+        newTimestamps.components = Date.now();
+      }
+
       return {
         ...state,
         inventory: newInventory,
         smeltingQueue: state.smeltingQueue + 1,
+        smeltingTimestamps: newTimestamps,
         log: [{ id: generateUniqueLogId(), text: `The furnace roars to life...`, type: 'info', timestamp: Date.now() }, ...state.log],
       };
     }
@@ -1245,6 +1251,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let { newInventory, newStatistics } = addResource(state.inventory, state.statistics, 'components', 1, INVENTORY_CAP);
 
       const newSmeltingQueue = state.smeltingQueue - 1;
+      const newTimestamps = { ...state.smeltingTimestamps };
+
+      if (newSmeltingQueue > 0) {
+        newTimestamps.components = Date.now();
+      } else {
+        newTimestamps.components = null;
+      }
 
       let logMessage = `The furnace cools. You retrieve 1 Component.\n${itemData['components'].description}`;
       if (newSmeltingQueue === 0) {
@@ -1256,6 +1269,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         inventory: newInventory,
         statistics: newStatistics,
         smeltingQueue: newSmeltingQueue,
+        smeltingTimestamps: newTimestamps,
         log: [{ id: generateUniqueLogId(), text: logMessage, type: 'craft', item: 'components', timestamp: Date.now() }, ...state.log],
       };
     }
@@ -1265,6 +1279,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (amount <= 0) return state;
 
       const newInventory = { ...state.inventory };
+      const newTimestamps = { ...state.smeltingTimestamps };
       let logText = '';
 
       if (type === 'components') {
@@ -1274,7 +1289,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         newInventory.scrap -= totalScrapNeeded;
         newInventory.wood -= totalWoodNeeded;
         logText = `Queued ${amount} components for smelting.`;
-        return { ...state, inventory: newInventory, smeltingQueue: state.smeltingQueue + amount, log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log] }
+        if (state.smeltingQueue === 0) newTimestamps.components = Date.now();
+        return { ...state, inventory: newInventory, smeltingQueue: state.smeltingQueue + amount, smeltingTimestamps: newTimestamps, log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log] }
       } else if (type === 'iron') {
         const totalScrapNeeded = 20 * amount;
         const totalWoodNeeded = 10 * amount;
@@ -1282,13 +1298,15 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         newInventory.scrap -= totalScrapNeeded;
         newInventory.wood -= totalWoodNeeded;
         logText = `Queued ${amount} iron ingots for smelting.`;
-        return { ...state, inventory: newInventory, ironIngotSmeltingQueue: state.ironIngotSmeltingQueue + amount, log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log] }
+        if (state.ironIngotSmeltingQueue === 0) newTimestamps.iron = Date.now();
+        return { ...state, inventory: newInventory, ironIngotSmeltingQueue: state.ironIngotSmeltingQueue + amount, smeltingTimestamps: newTimestamps, log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log] }
       } else if (type === 'charcoal') {
         const totalWoodNeeded = 5 * amount;
         if (newInventory.wood < totalWoodNeeded) return state;
         newInventory.wood -= totalWoodNeeded;
         logText = `Queued ${amount} charcoal for making.`;
-        return { ...state, inventory: newInventory, charcoalSmeltingQueue: state.charcoalSmeltingQueue + amount, log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log] }
+        if (state.charcoalSmeltingQueue === 0) newTimestamps.charcoal = Date.now();
+        return { ...state, inventory: newInventory, charcoalSmeltingQueue: state.charcoalSmeltingQueue + amount, smeltingTimestamps: newTimestamps, log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log] }
       }
       return state;
     }
@@ -1308,10 +1326,16 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       newInventory.scrap -= totalScrapNeeded;
       newInventory.wood -= totalWoodNeeded;
 
+      const newTimestamps = { ...state.smeltingTimestamps };
+      if (state.ironIngotSmeltingQueue === 0) {
+        newTimestamps.iron = Date.now();
+      }
+
       return {
         ...state,
         inventory: newInventory,
         ironIngotSmeltingQueue: state.ironIngotSmeltingQueue + 1,
+        smeltingTimestamps: newTimestamps,
         log: [{ id: generateUniqueLogId(), text: `The furnace burns hotter...`, type: 'info', timestamp: Date.now() }, ...state.log],
       };
     }
@@ -1323,6 +1347,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let { newInventory, newStatistics } = addResource(state.inventory, state.statistics, 'ironIngot', 1, INVENTORY_CAP);
 
       const newSmeltingQueue = state.ironIngotSmeltingQueue - 1;
+      const newTimestamps = { ...state.smeltingTimestamps };
+
+      if (newSmeltingQueue > 0) {
+        newTimestamps.iron = Date.now();
+      } else {
+        newTimestamps.iron = null;
+      }
 
       let logMessage = `You pull a glowing Iron Ingot from the furnace.\n${itemData['ironIngot'].description}`;
       if (newSmeltingQueue === 0) {
@@ -1334,6 +1365,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         inventory: newInventory,
         statistics: newStatistics,
         ironIngotSmeltingQueue: newSmeltingQueue,
+        smeltingTimestamps: newTimestamps,
         log: [{ id: generateUniqueLogId(), text: logMessage, type: 'craft', item: 'ironIngot', timestamp: Date.now() }, ...state.log],
       };
     }
@@ -1351,10 +1383,16 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
       newInventory.wood -= totalWoodNeeded;
 
+      const newTimestamps = { ...state.smeltingTimestamps };
+      if (state.charcoalSmeltingQueue === 0) {
+        newTimestamps.charcoal = Date.now();
+      }
+
       return {
         ...state,
         inventory: newInventory,
         charcoalSmeltingQueue: state.charcoalSmeltingQueue + 1,
+        smeltingTimestamps: newTimestamps,
         log: [{ id: generateUniqueLogId(), text: `The furnace begins to smolder...`, type: 'info', timestamp: Date.now() }, ...state.log],
       };
     }
@@ -1366,6 +1404,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let { newInventory, newStatistics } = addResource(state.inventory, state.statistics, 'charcoal', 1, INVENTORY_CAP);
 
       const newSmeltingQueue = state.charcoalSmeltingQueue - 1;
+      const newTimestamps = { ...state.smeltingTimestamps };
+
+      if (newSmeltingQueue > 0) {
+        newTimestamps.charcoal = Date.now();
+      } else {
+        newTimestamps.charcoal = null;
+      }
 
       let logMessage = `You retrieve a block of charcoal.\n${itemData['charcoal'].description}`;
       if (newSmeltingQueue === 0) {
@@ -1377,6 +1422,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         inventory: newInventory,
         statistics: newStatistics,
         charcoalSmeltingQueue: newSmeltingQueue,
+        smeltingTimestamps: newTimestamps,
         log: [{ id: generateUniqueLogId(), text: logMessage, type: 'craft', item: 'charcoal', timestamp: Date.now() }, ...state.log],
       };
     }
@@ -2283,6 +2329,33 @@ export function GameProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'RESET_GAME_NO_LOCALSTORAGE' });
     }
   }, [user, firestore]);
+
+  // Effect for smelting persistence
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const now = Date.now();
+
+      if (gameState.smeltingQueue > 0 && gameState.smeltingTimestamps?.components) {
+        if (now - gameState.smeltingTimestamps.components >= 10000) {
+          dispatch({ type: 'FINISH_SMELTING' });
+        }
+      }
+
+      if (gameState.ironIngotSmeltingQueue > 0 && gameState.smeltingTimestamps?.iron) {
+        if (now - gameState.smeltingTimestamps.iron >= 20000) {
+          dispatch({ type: 'FINISH_SMELTING_IRON' });
+        }
+      }
+
+      if (gameState.charcoalSmeltingQueue > 0 && gameState.smeltingTimestamps?.charcoal) {
+        if (now - gameState.smeltingTimestamps.charcoal >= 5000) {
+          dispatch({ type: 'FINISH_SMELTING_CHARCOAL' });
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, gameState.smeltingTimestamps]);
 
   // Effect for saving game state to Firestore
   useEffect(() => {

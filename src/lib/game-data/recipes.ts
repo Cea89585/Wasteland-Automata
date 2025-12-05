@@ -147,6 +147,22 @@ export const recipes: Recipe[] = [
     requirements: { peach: 5, glassJar: 1 },
     unlockedBy: ['workbench'],
   },
+  {
+    id: 'recipe_glassTube',
+    name: 'Smelt Glass Tube',
+    description: 'Melt sand into a glass tube.',
+    creates: 'glassTube',
+    requirements: { sand: 5 },
+    unlockedBy: ['furnace'],
+  },
+  {
+    id: 'recipe_glassJar',
+    name: 'Craft Glass Jar',
+    description: 'Combine glass tubes to make a jar.',
+    creates: 'glassJar',
+    requirements: { glassTube: 2 },
+    unlockedBy: ['workbench'],
+  },
   // Machine recipes - Note: These don't create items, they're handled specially in BUILD_MACHINE action
   // Keeping them here for consistency and future UI integration
 ];
