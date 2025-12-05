@@ -2417,56 +2417,53 @@ export function GameProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'FINISH_DRONE_MISSION' });
         }
       }
-      if (now - gameState.smeltingTimestamps.charcoal >= 5000) {
-        dispatch({ type: 'FINISH_SMELTING_CHARCOAL' });
-      }
-    }
+
     }, 1000);
 
-  return () => clearInterval(interval);
-}, [gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, gameState.smeltingTimestamps]);
+    return () => clearInterval(interval);
+  }, [gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, gameState.smeltingTimestamps]);
 
-// Effect for saving game state to Firestore
-useEffect(() => {
-  if (gameState.isInitialized && user && gameState.lastSavedTimestamp && Date.now() - gameState.lastSavedTimestamp > 2000) {
-    isSavingRef.current = true;
-    const docRef = doc(firestore, 'users', user.uid);
-    const { isInitialized, ...savableState } = gameState;
+  // Effect for saving game state to Firestore
+  useEffect(() => {
+    if (gameState.isInitialized && user && gameState.lastSavedTimestamp && Date.now() - gameState.lastSavedTimestamp > 2000) {
+      isSavingRef.current = true;
+      const docRef = doc(firestore, 'users', user.uid);
+      const { isInitialized, ...savableState } = gameState;
 
-    // Remove undefined values to prevent Firestore errors
-    const cleanState = JSON.parse(JSON.stringify({ ...savableState, lastSavedTimestamp: Date.now() }));
+      // Remove undefined values to prevent Firestore errors
+      const cleanState = JSON.parse(JSON.stringify({ ...savableState, lastSavedTimestamp: Date.now() }));
 
-    setDoc(docRef, cleanState, { merge: true }).finally(() => {
-      isSavingRef.current = false;
-    });
-  }
-}, [gameState, user, firestore]);
-
-
-// Effect for game tick
-useEffect(() => {
-  if (!gameState.isInitialized || gameState.playerStats.health <= 0) return;
-
-  const tickInterval = setInterval(() => {
-    dispatch({ type: 'GAME_TICK' });
-  }, TICK_RATE_MS);
-
-  return () => clearInterval(tickInterval);
-}, [gameState.isInitialized, gameState.playerStats.health]);
-
-// Effect for inactivity timer
-useEffect(() => {
-  if (gameState.isInitialized) {
-    if (gameState.droneIsActive || gameState.smeltingQueue > 0 || gameState.ironIngotSmeltingQueue > 0 || gameState.charcoalSmeltingQueue > 0) {
-      resetTimer();
+      setDoc(docRef, cleanState, { merge: true }).finally(() => {
+        isSavingRef.current = false;
+      });
     }
-  }
-}, [gameState.isInitialized, gameState.droneIsActive, gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, resetTimer]);
+  }, [gameState, user, firestore]);
 
 
-return (
-  <GameContext.Provider value={{ gameState, dispatch, idleProgress }}>
-    {children}
-  </GameContext.Provider>
-);
+  // Effect for game tick
+  useEffect(() => {
+    if (!gameState.isInitialized || gameState.playerStats.health <= 0) return;
+
+    const tickInterval = setInterval(() => {
+      dispatch({ type: 'GAME_TICK' });
+    }, TICK_RATE_MS);
+
+    return () => clearInterval(tickInterval);
+  }, [gameState.isInitialized, gameState.playerStats.health]);
+
+  // Effect for inactivity timer
+  useEffect(() => {
+    if (gameState.isInitialized) {
+      if (gameState.droneIsActive || gameState.smeltingQueue > 0 || gameState.ironIngotSmeltingQueue > 0 || gameState.charcoalSmeltingQueue > 0) {
+        resetTimer();
+      }
+    }
+  }, [gameState.isInitialized, gameState.droneIsActive, gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, resetTimer]);
+
+
+  return (
+    <GameContext.Provider value={{ gameState, dispatch, idleProgress }}>
+      {children}
+    </GameContext.Provider>
+  );
 }

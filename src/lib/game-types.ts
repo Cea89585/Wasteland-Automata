@@ -24,6 +24,11 @@ export const Resources = {
   glassTube: 'Glass Tube',
   glassJar: 'Glass Jar',
   pickledPeaches: 'Pickled Peaches',
+  iron: 'Iron Ore',
+  rawFish: 'Raw Fish',
+  rawSalmon: 'Raw Salmon',
+  rawTuna: 'Raw Tuna',
+  rawShark: 'Raw Shark',
 } as const;
 export type Resource = keyof typeof Resources;
 
@@ -131,6 +136,8 @@ export interface GameState {
   unlockedTech: TechId[];
   lockedItems: Resource[];
   completedQuests: string[];
+  storageLevel: number;
+  isIdle: boolean;
   energyLevel: number;
   hungerLevel: number;
   thirstLevel: number;
@@ -241,6 +248,7 @@ export type GameAction =
   | { type: 'UPGRADE_REST_EFFICIENCY' }
   | { type: 'TRAVEL'; payload: { locationId: LocationId } }
   | { type: 'QUEUE_DRONE_MISSIONS', payload: { amount: number; type?: DroneMissionType } }
+  | { type: 'FINISH_DRONE_MISSION' }
   | { type: 'ADD_FUEL', payload: { fuelType: 'wood' | 'biomass' | 'charcoal' } }
   | { type: 'SET_THEME'; payload: Theme }
   | { type: 'CLAIM_DAILY_REWARD' }
