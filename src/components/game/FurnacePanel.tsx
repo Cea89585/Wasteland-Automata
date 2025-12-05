@@ -43,10 +43,10 @@ export default function FurnacePanel() {
   }, [gameState.inventory.wood]);
 
   // Glass Tube requirements
-  const glassSmeltRequirements = { sand: 5 };
+  const glassSmeltRequirements = { sand: 5, wood: 5 };
   const maxSmeltableGlass = useMemo(() => {
-    return Math.floor((gameState.inventory.sand || 0) / glassSmeltRequirements.sand);
-  }, [gameState.inventory.sand]);
+    return Math.floor(Math.min((gameState.inventory.sand || 0) / glassSmeltRequirements.sand, (gameState.inventory.wood || 0) / glassSmeltRequirements.wood));
+  }, [gameState.inventory.sand, gameState.inventory.wood]);
 
 
   const isBusy = gameState.isResting;
@@ -72,7 +72,7 @@ export default function FurnacePanel() {
 
       if (gameState.charcoalSmeltingQueue > 0 && gameState.smeltingTimestamps?.charcoal) {
         const elapsed = now - gameState.smeltingTimestamps.charcoal;
-        setCharcoalProgress(Math.min(100, (elapsed / 5000) * 100));
+        setCharcoalProgress(Math.min(100, (elapsed / 10000) * 100));
       } else {
         setCharcoalProgress(0);
       }
@@ -376,6 +376,10 @@ export default function FurnacePanel() {
                     <span className="flex items-center">
                       <GameIcon type="item" id="sand" size={16} className="mr-1" />
                       {itemData['sand'].name}: {glassSmeltRequirements.sand}
+                    </span>
+                    <span className="flex items-center">
+                      <GameIcon type="item" id="wood" size={16} className="mr-1" />
+                      {itemData['wood'].name}: {glassSmeltRequirements.wood}
                     </span>
                   </div>
                   <div className="flex items-center gap-1 mt-1">

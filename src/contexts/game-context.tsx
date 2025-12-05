@@ -2624,7 +2624,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
 
       if (currentState.charcoalSmeltingQueue > 0 && currentState.smeltingTimestamps?.charcoal) {
-        if (now - currentState.smeltingTimestamps.charcoal >= 5000) {
+        if (now - currentState.smeltingTimestamps.charcoal >= 10000) {
           dispatch({ type: 'FINISH_SMELTING_CHARCOAL' });
         }
       }
