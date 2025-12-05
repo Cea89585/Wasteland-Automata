@@ -2546,6 +2546,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const { user } = useUser();
   const { firestore } = useFirebase();
   const isSavingRef = useRef(false);
+  const gameStateRef = useRef(gameState);
+
+  // Keep gameStateRef updated
+  useEffect(() => {
+    gameStateRef.current = gameState;
+  }, [gameState]);
 
   const isFirstLoad = useRef(true);
 
@@ -2634,10 +2640,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
   // Effect for saving game state to Firestore
   useEffect(() => {
     const saveInterval = setInterval(() => {
-      if (gameState.isInitialized && user && !isSavingRef.current) {
+      const currentGameState = gameStateRef.current;
+      if (currentGameState.isInitialized && user && !isSavingRef.current) {
         isSavingRef.current = true;
         const docRef = doc(firestore, 'users', user.uid);
-        const { isInitialized, ...savableState } = gameState;
+        const { isInitialized, ...savableState } = currentGameState;
 
         // Remove undefined values to prevent Firestore errors
         const cleanState = JSON.parse(JSON.stringify({ ...savableState, lastSavedTimestamp: Date.now() }));
