@@ -115,7 +115,7 @@ export interface FarmPlot {
   duration: number; // ms
 }
 
-export type DroneMissionType = 'scavenge' | 'mine' | 'fish';
+export type DroneMissionType = 'scavenge' | 'mine' | 'fish' | 'explore';
 
 export interface GameState {
   characterName: string;

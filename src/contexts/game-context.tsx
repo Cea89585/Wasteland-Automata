@@ -1631,10 +1631,10 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         ...state,
         inventory: newInventory,
         droneMissionQueue: state.droneMissionQueue + amount,
-        droneMissionType: isFirstMission ? (type || 'scavenge') : state.droneMissionType,
+        droneMissionType: isFirstMission ? (type || 'explore') : state.droneMissionType,
         droneIsActive: true,
         droneReturnTimestamp: isFirstMission ? Date.now() + (30 * 1000) : state.droneReturnTimestamp,
-        log: [{ id: generateUniqueLogId(), text: `Queued ${amount} drone mission(s) (${type || 'scavenge'}).`, type: 'info', timestamp: Date.now() }, ...state.log],
+        log: [{ id: generateUniqueLogId(), text: `Queued ${amount} drone mission(s) (${type || 'explore'}).`, type: 'info', timestamp: Date.now() }, ...state.log],
       };
     }
 
@@ -1648,9 +1648,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
       if (missionType === 'mine') {
         const roll = Math.random();
-        if (roll < 0.6) loot = { stone: Math.floor(Math.random() * 5) + 3 };
-        else if (roll < 0.9) loot = { scrap: Math.floor(Math.random() * 3) + 1 };
-        else if (roll < 0.98) loot = { iron: Math.floor(Math.random() * 2) + 1 };
+        if (roll < 0.5) loot = { stone: Math.floor(Math.random() * 5) + 3 };
+        else if (roll < 0.8) loot = { charcoal: Math.floor(Math.random() * 3) + 1 };
+        else if (roll < 0.95) loot = { iron: Math.floor(Math.random() * 2) + 1 };
         else loot = { uranium: 1 };
       } else if (missionType === 'fish') {
         const roll = Math.random();
@@ -1658,12 +1658,17 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         else if (roll < 0.85) loot = { rawSalmon: 1 };
         else if (roll < 0.98) loot = { rawTuna: 1 };
         else loot = { rawShark: 1 };
-      } else {
-        // Scavenge
+      } else if (missionType === 'explore') {
+        // Explore logic - similar to manual explore but automated
         const roll = Math.random();
         if (roll < 0.4) loot = { wood: Math.floor(Math.random() * 5) + 2 };
         else if (roll < 0.7) loot = { scrap: Math.floor(Math.random() * 3) + 1 };
         else if (roll < 0.9) loot = { apple: Math.floor(Math.random() * 2) + 1 };
+        else loot = { water: Math.floor(Math.random() * 2) + 1 };
+      } else {
+        // Scavenge (legacy/fallback)
+        const roll = Math.random();
+        if (roll < 0.5) loot = { apple: Math.floor(Math.random() * 2) + 1 };
         else loot = { water: Math.floor(Math.random() * 2) + 1 };
       }
 
