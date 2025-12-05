@@ -137,7 +137,7 @@ export const recipes: Recipe[] = [
     description: 'Crush stone into fine sand.',
     creates: 'sand',
     requirements: { stone: 1 },
-    unlockedBy: ['start'],
+    unlockedBy: [],
   },
   {
     id: 'recipe_pickledPeaches',

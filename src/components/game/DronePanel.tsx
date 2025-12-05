@@ -31,7 +31,7 @@ export default function DronePanel({ mode = 'scavenge' }: DronePanelProps) {
     return Math.floor(Math.min(gameState.inventory.apple / missionRequirements.apple, gameState.inventory.water / missionRequirements.water));
   }, [gameState.inventory.apple, gameState.inventory.water]);
 
-  const hasPower = power > 0;
+  const hasPower = gameState.builtStructures.includes('generator') && power > 0;
   const isBusy = gameState.isResting || gameState.smeltingQueue > 0;
   const currentQueue = droneMissionQueue;
 
@@ -98,7 +98,7 @@ export default function DronePanel({ mode = 'scavenge' }: DronePanelProps) {
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground flex items-center">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {gameState.droneIsActive ? `${mode === 'mine' ? 'Mining' : mode === 'fish' ? 'Fishing' : 'Exploring'}... (${currentQueue} in queue)` : `Queued (${currentQueue})`}
+              {gameState.droneIsActive ? `${mode === 'mine' ? 'Mining' : mode === 'fish' ? 'Fishing' : mode === 'explore' ? 'Exploring' : 'Scavenging'}... (${currentQueue} in queue)` : `Queued (${currentQueue})`}
             </p>
             {gameState.droneIsActive && <span className="text-xs font-mono text-muted-foreground">{Math.round(progress)}%</span>}
           </div>
@@ -128,7 +128,7 @@ export default function DronePanel({ mode = 'scavenge' }: DronePanelProps) {
                   variant={hasPower ? 'default' : 'outline'}
                 >
                   <Bot className="mr-2 h-4 w-4" />
-                  Queue {mode === 'mine' ? 'Mining' : mode === 'fish' ? 'Fishing' : 'Scavenge'}
+                  Queue {mode === 'mine' ? 'Mining' : mode === 'fish' ? 'Fishing' : mode === 'explore' ? 'Explore' : 'Scavenge'}
                 </Button>
               </div>
             </TooltipTrigger>
