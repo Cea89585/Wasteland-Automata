@@ -39,7 +39,7 @@ const addResource = (inventory: GameState['inventory'], statistics: GameState['s
 };
 
 const processDroneReturn = (state: GameState): { droneState: GameState, logMessage: { text: string, type: 'success' } | null } => {
-  const currentLocation = locations[state.currentLocation];
+  const missionType = state.droneMissionType || 'explore';
   const droneBuff = 1 + (state.droneLevel * 0.1);
   const scavengersEyeLevel = state.skills?.scavengersEye || 0;
   const scavengerBuff = 1 + (scavengersEyeLevel * 0.1);
@@ -47,30 +47,113 @@ const processDroneReturn = (state: GameState): { droneState: GameState, logMessa
   let totalFound: Partial<Record<Resource, number>> = {};
   let finalInventory = { ...state.inventory };
   let finalStatistics = { ...state.statistics };
-  const INVENTORY_CAP = 200 + (state.storageLevel || 0) * 50;
-
-  for (let i = 0; i < 15; i++) {
-    currentLocation.resources.forEach((res) => {
-      if (Math.random() < res.chance) {
-        let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
-        amount = Math.ceil(amount * droneBuff * scavengerBuff);
-        totalFound[res.resource] = (totalFound[res.resource] || 0) + amount;
-      }
-    });
-  }
-
-  let resourcesFoundText = "Drone has returned.";
+  let finalCaughtFish = { ...state.caughtFish };
+  const packMuleLevel = state.skills?.packMule || 0;
+  const INVENTORY_CAP = 200 + (state.storageLevel || 0) * 50 + (packMuleLevel * 25);
+  let resourcesFoundText = `Drone has returned from ${missionType} mission.`;
   let foundSomething = false;
 
-  for (const [resource, amount] of Object.entries(totalFound)) {
-    if (amount > 0) {
-      const { newInventory: updatedInventory, newStatistics: updatedStatistics } = addResource(finalInventory, finalStatistics, resource as Resource, amount, INVENTORY_CAP);
-      finalInventory = updatedInventory;
-      finalStatistics = updatedStatistics;
-      resourcesFoundText += ` It collected ${amount} ${itemData[resource as Resource].name}.`;
-      foundSomething = true;
+  // Generate loot based on mission type
+  if (missionType === 'fish') {
+    // Fishing mission - use the current fishing zone's loot table
+    const { getFishingZoneById, rollFishingLoot } = require('@/lib/game-data/fishing');
+    const zone = getFishingZoneById(state.currentFishingZone || 'toxic_puddle');
+
+    if (zone) {
+      // Track fish counts for aggregated display
+      const fishCounts: Record<string, number> = {};
+      const resourceCounts: Record<string, number> = {};
+
+      // Roll loot 15 times (same as explore) for drone fishing
+      for (let i = 0; i < 15; i++) {
+        const loot = rollFishingLoot(zone.lootTable);
+        if (loot.isFish) {
+          // Track fish count
+          fishCounts[loot.item as string] = (fishCounts[loot.item as string] || 0) + 1;
+        } else {
+          // Track resource count
+          resourceCounts[loot.item as string] = (resourceCounts[loot.item as string] || 0) + 1;
+        }
+      }
+
+      // Add fish to caughtFish state
+      for (const [fishType, count] of Object.entries(fishCounts)) {
+        finalCaughtFish[fishType] = (finalCaughtFish[fishType] || 0) + count;
+        finalStatistics.totalItemsGained[fishType as keyof typeof finalStatistics.totalItemsGained] =
+          (finalStatistics.totalItemsGained[fishType as keyof typeof finalStatistics.totalItemsGained] || 0) + count;
+        resourcesFoundText += ` It caught ${count} ${fishType}.`;
+        foundSomething = true;
+      }
+
+      // Add resources to inventory
+      for (const [resource, count] of Object.entries(resourceCounts)) {
+        const { newInventory, newStatistics } = addResource(finalInventory, finalStatistics, resource as Resource, count, INVENTORY_CAP);
+        finalInventory = newInventory;
+        finalStatistics = newStatistics;
+        resourcesFoundText += ` It collected ${count} ${itemData[resource as Resource]?.name || resource}.`;
+        foundSomething = true;
+      }
+    }
+  } else if (missionType === 'mine') {
+    // Mining mission - use stone, scrap, ironIngot (matching MINE action)
+    // Loop 15 times like explore and fish for consistent scaling
+    for (let i = 0; i < 15; i++) {
+      const rand = Math.random();
+      let item: Resource = 'stone';
+      let amount = 1;
+
+      if (rand < 0.45) {
+        // 45% chance for stone (2-4 items)
+        item = 'stone';
+        amount = Math.floor(Math.random() * 3) + 2;
+      } else if (rand < 0.75) {
+        // 30% chance for scrap (1-3 items)
+        item = 'scrap';
+        amount = Math.floor(Math.random() * 3) + 1;
+      } else {
+        // 25% chance for iron ingot (1 item)
+        item = 'ironIngot';
+        amount = 1;
+      }
+
+      totalFound[item] = (totalFound[item] || 0) + Math.ceil(amount * droneBuff * scavengerBuff);
+    }
+
+    // Add mining loot to inventory
+    for (const [resource, amount] of Object.entries(totalFound)) {
+      if (amount > 0) {
+        const { newInventory, newStatistics } = addResource(finalInventory, finalStatistics, resource as Resource, amount, INVENTORY_CAP);
+        finalInventory = newInventory;
+        finalStatistics = newStatistics;
+        resourcesFoundText += ` It collected ${amount} ${itemData[resource as Resource]?.name || resource}.`;
+        foundSomething = true;
+      }
+    }
+  } else {
+    // Explore or Scavenge mission - use location resources
+    const currentLocation = locations[state.currentLocation];
+    for (let i = 0; i < 15; i++) {
+      currentLocation.resources.forEach((res) => {
+        if (Math.random() < res.chance) {
+          let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
+          amount = Math.ceil(amount * droneBuff * scavengerBuff);
+          totalFound[res.resource] = (totalFound[res.resource] || 0) + amount;
+        }
+      });
+    }
+
+    // Add explore loot to inventory
+    for (const [resource, amount] of Object.entries(totalFound)) {
+      if (amount > 0) {
+        const { newInventory, newStatistics } = addResource(finalInventory, finalStatistics, resource as Resource, amount, INVENTORY_CAP);
+        finalInventory = newInventory;
+        finalStatistics = newStatistics;
+        resourcesFoundText += ` It collected ${amount} ${itemData[resource as Resource]?.name || resource}.`;
+        foundSomething = true;
+      }
     }
   }
+
   if (!foundSomething) {
     resourcesFoundText += " It found nothing of value.";
   }
@@ -79,8 +162,10 @@ const processDroneReturn = (state: GameState): { droneState: GameState, logMessa
     ...state,
     inventory: finalInventory,
     statistics: finalStatistics,
+    caughtFish: finalCaughtFish,
     droneIsActive: false,
     droneReturnTimestamp: null,
+    droneMissionType: null, // Reset mission type after completion
   };
 
   return { droneState, logMessage: { text: resourcesFoundText, type: 'success' } };
@@ -122,6 +207,25 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       } else {
         logIdCounter = 1;
       }
+
+      // MIGRATION: Ensure new recipes are unlocked for existing saves
+      // MIGRATION: Ensure new recipes are unlocked for existing saves
+      const requiredRecipes = ['recipe_grindStone'];
+
+      // Unlock recipes based on existing structures
+      if ((gameState.inventory.furnace || 0) > 0) {
+        requiredRecipes.push('recipe_glassTube');
+      }
+      if ((gameState.inventory.workbench || 0) > 0) {
+        requiredRecipes.push('recipe_glassJar');
+        requiredRecipes.push('recipe_pickledPeaches');
+      }
+
+      requiredRecipes.forEach(recipeId => {
+        if (!gameState.unlockedRecipes.includes(recipeId)) {
+          gameState.unlockedRecipes.push(recipeId);
+        }
+      });
 
       // Offline Progress Calculation
       let offlineLogMessages: LogMessage[] = [];
@@ -203,6 +307,21 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       // Migration: Unlock Forest for players who completed quest_anya_1 before the fix
       if (newState.completedQuests?.includes('quest_anya_1') && !newState.unlockedLocations?.includes('forest')) {
         newState.unlockedLocations = [...(newState.unlockedLocations || []), 'forest'];
+      }
+
+      // MIGRATION: Ensure new recipes are unlocked for existing saves
+      const requiredRecipes = ['recipe_grindStone'];
+      if ((newState.inventory?.furnace || 0) > 0) requiredRecipes.push('recipe_glassTube');
+      if ((newState.inventory?.workbench || 0) > 0) {
+        requiredRecipes.push('recipe_glassJar');
+        requiredRecipes.push('recipe_pickledPeaches');
+      }
+
+      if (newState.unlockedRecipes) {
+        const missingRecipes = requiredRecipes.filter(r => !newState.unlockedRecipes.includes(r));
+        if (missingRecipes.length > 0) {
+          newState.unlockedRecipes = [...newState.unlockedRecipes, ...missingRecipes];
+        }
       }
 
       return { ...newState, isInitialized: true };
@@ -845,11 +964,16 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         };
       }
 
-      const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, 1, INVENTORY_CAP);
+      const outputAmount = recipe.outputAmount || 1;
+      const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, outputAmount, INVENTORY_CAP);
 
       // Track crafted item
-      if (!newStatistics.itemsCrafted) newStatistics.itemsCrafted = {};
-      newStatistics.itemsCrafted[recipe.creates] = (newStatistics.itemsCrafted[recipe.creates] || 0) + 1;
+      if (!newStatistics.itemsCrafted) {
+        newStatistics.itemsCrafted = {};
+      } else {
+        newStatistics.itemsCrafted = { ...newStatistics.itemsCrafted };
+      }
+      newStatistics.itemsCrafted[recipe.creates] = (newStatistics.itemsCrafted[recipe.creates] || 0) + 1; // Tracks number of CRAFTS, not items
 
       const newUnlockedRecipes = [...state.unlockedRecipes];
       recipes.forEach(r => {
@@ -860,7 +984,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
       const itemDetails = itemData[recipe.creates];
       const xpAmount = 10;
-      const logMessageText = `Crafted ${itemDetails.name}. (+${xpAmount} XP)\n${itemDetails.description}`;
+      const logMessageText = outputAmount > 1
+        ? `Crafted ${outputAmount} x ${itemDetails.name}. (+${xpAmount} XP)`
+        : `Crafted ${itemDetails.name}. (+${xpAmount} XP)\n${itemDetails.description}`;
 
       let withXpState = reducer({
         ...state,
@@ -892,15 +1018,20 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         newInventory[resource as Resource] -= cost;
       }
 
-      const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, amount, INVENTORY_CAP);
+      const outputAmount = (recipe.outputAmount || 1) * amount;
+      const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, outputAmount, INVENTORY_CAP);
 
       // Track crafted items
-      if (!newStatistics.itemsCrafted) newStatistics.itemsCrafted = {};
+      if (!newStatistics.itemsCrafted) {
+        newStatistics.itemsCrafted = {};
+      } else {
+        newStatistics.itemsCrafted = { ...newStatistics.itemsCrafted };
+      }
       newStatistics.itemsCrafted[recipe.creates] = (newStatistics.itemsCrafted[recipe.creates] || 0) + amount;
 
       const itemDetails = itemData[recipe.creates];
       const xpAmount = 10 * amount;
-      const logMessageText = `Batch crafted ${amount} x ${itemDetails.name}. (+${xpAmount} XP)`;
+      const logMessageText = `Batch crafted ${outputAmount} x ${itemDetails.name}. (+${xpAmount} XP)`;
 
       let withXpState = reducer({
         ...state,
@@ -1307,6 +1438,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         logText = `Queued ${amount} charcoal for making.`;
         if (state.charcoalSmeltingQueue === 0) newTimestamps.charcoal = Date.now();
         return { ...state, inventory: newInventory, charcoalSmeltingQueue: state.charcoalSmeltingQueue + amount, smeltingTimestamps: newTimestamps, log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log] }
+      } else if (type === 'glass') {
+        const totalSandNeeded = 5 * amount;
+        if (newInventory.sand < totalSandNeeded) return state;
+        newInventory.sand -= totalSandNeeded;
+        logText = `Queued ${amount} glass tubes for smelting.`;
+        if (state.glassSmeltingQueue === 0) newTimestamps.glass = Date.now();
+        return { ...state, inventory: newInventory, glassSmeltingQueue: state.glassSmeltingQueue + amount, smeltingTimestamps: newTimestamps, log: [{ id: generateUniqueLogId(), text: logText, type: 'info', timestamp: Date.now() }, ...state.log] }
+
       }
       return state;
     }
@@ -1424,6 +1563,59 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         charcoalSmeltingQueue: newSmeltingQueue,
         smeltingTimestamps: newTimestamps,
         log: [{ id: generateUniqueLogId(), text: logMessage, type: 'craft', item: 'charcoal', timestamp: Date.now() }, ...state.log],
+      };
+    }
+
+    case 'START_SMELTING_GLASS': {
+      const newInventory = { ...state.inventory };
+      const totalSandNeeded = 5;
+
+      if (newInventory.sand < totalSandNeeded) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: "Not enough sand to smelt glass.", type: 'danger', timestamp: Date.now() }, ...state.log],
+        };
+      }
+
+      newInventory.sand -= totalSandNeeded;
+
+      const newTimestamps = { ...state.smeltingTimestamps };
+      if (state.glassSmeltingQueue === 0) {
+        newTimestamps.glass = Date.now();
+      }
+
+      return {
+        ...state,
+        inventory: newInventory,
+        glassSmeltingQueue: state.glassSmeltingQueue + 1,
+        smeltingTimestamps: newTimestamps,
+        log: [{ id: generateUniqueLogId(), text: `The furnace melts the sand...`, type: 'info', timestamp: Date.now() }, ...state.log],
+      };
+    }
+
+    case 'FINISH_SMELTING_GLASS': {
+      if (state.glassSmeltingQueue <= 0) return state;
+      const INVENTORY_CAP = getInventoryCap();
+
+      let { newInventory, newStatistics } = addResource(state.inventory, state.statistics, 'glassTube', 1, INVENTORY_CAP);
+
+      const newSmeltingQueue = state.glassSmeltingQueue - 1;
+      const newTimestamps = { ...state.smeltingTimestamps };
+      if (newSmeltingQueue > 0) {
+        newTimestamps.glass = Date.now();
+      } else {
+        newTimestamps.glass = null;
+      }
+
+      const logMessage = `Glass tube smelted.`;
+
+      return {
+        ...state,
+        inventory: newInventory,
+        statistics: newStatistics,
+        glassSmeltingQueue: newSmeltingQueue,
+        smeltingTimestamps: newTimestamps,
+        log: [{ id: generateUniqueLogId(), text: logMessage, type: 'craft', item: 'glassTube', timestamp: Date.now() }, ...state.log],
       };
     }
 
@@ -1616,25 +1808,26 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (state.droneMissionQueue + amount > 10) {
         return { ...state, log: [{ id: generateUniqueLogId(), text: "Drone mission queue is full.", type: 'danger', timestamp: Date.now() }, ...state.log] };
       }
-      const appleCost = 10 * amount;
       const waterCost = 10 * amount;
-      if (state.inventory.apple < appleCost || state.inventory.water < waterCost) {
-        return { ...state, log: [{ id: generateUniqueLogId(), text: "Not enough resources to queue missions.", type: 'danger', timestamp: Date.now() }, ...state.log] };
+      if (state.inventory.water < waterCost) {
+        return { ...state, log: [{ id: generateUniqueLogId(), text: "Not enough water (coolant) to queue missions.", type: 'danger', timestamp: Date.now() }, ...state.log] };
       }
       const newInventory = { ...state.inventory };
-      newInventory.apple -= appleCost;
       newInventory.water -= waterCost;
 
-      const isFirstMission = state.droneMissionQueue === 0;
+      const isFirstMission = state.droneMissionQueue === 0 && !state.droneIsActive;
+      const missionType = isFirstMission ? (type || 'explore') : state.droneMissionType;
+
+      // Debug logging
+      // console.log('QUEUE_DRONE_MISSIONS:', { amount, type, isFirstMission, missionType });
 
       return {
         ...state,
         inventory: newInventory,
         droneMissionQueue: state.droneMissionQueue + amount,
-        droneMissionType: isFirstMission ? (type || 'explore') : state.droneMissionType,
-        droneIsActive: true,
-        droneReturnTimestamp: isFirstMission ? Date.now() + (30 * 1000) : state.droneReturnTimestamp,
-        log: [{ id: generateUniqueLogId(), text: `Queued ${amount} drone mission(s) (${type || 'explore'}).`, type: 'info', timestamp: Date.now() }, ...state.log],
+        droneMissionType: missionType,
+        // DON'T set droneIsActive or droneReturnTimestamp here - let GAME_TICK handle launch
+        log: [{ id: generateUniqueLogId(), text: `Queued ${amount} drone mission(s) (${missionType}).`, type: 'info', timestamp: Date.now() }, ...state.log],
       };
     }
 
@@ -1680,6 +1873,15 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
       const lootString = Object.entries(loot).map(([k, v]) => `${v} ${itemData[k as Resource | Item]?.name || k}`).join(', ');
       logText = `Drone returned from ${missionType} mission with: ${lootString}`;
+
+      // Debug logging
+      console.log('FINISH_DRONE_MISSION:', {
+        missionType,
+        stateDroneMissionType: state.droneMissionType,
+        loot,
+        logText,
+        queue: state.droneMissionQueue
+      });
 
       const newQueue = state.droneMissionQueue - 1;
       const isActive = newQueue > 0;
@@ -2416,33 +2618,38 @@ export function GameProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      // Drone persistence check
-      if (gameState.droneIsActive && gameState.droneReturnTimestamp) {
-        if (now >= gameState.droneReturnTimestamp) {
-          dispatch({ type: 'FINISH_DRONE_MISSION' });
+      if (gameState.glassSmeltingQueue > 0 && gameState.smeltingTimestamps?.glass) {
+        if (now - gameState.smeltingTimestamps.glass >= 10000) {
+          dispatch({ type: 'FINISH_SMELTING_GLASS' });
         }
       }
+
+      // NOTE: Drone persistence is handled in GAME_TICK via processDroneReturn(), no need to duplicate here
 
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, gameState.smeltingTimestamps]);
+  }, [gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, gameState.glassSmeltingQueue, gameState.smeltingTimestamps]);
 
   // Effect for saving game state to Firestore
   useEffect(() => {
-    if (gameState.isInitialized && user && gameState.lastSavedTimestamp && Date.now() - gameState.lastSavedTimestamp > 2000) {
-      isSavingRef.current = true;
-      const docRef = doc(firestore, 'users', user.uid);
-      const { isInitialized, ...savableState } = gameState;
+    const saveInterval = setInterval(() => {
+      if (gameState.isInitialized && user && !isSavingRef.current) {
+        isSavingRef.current = true;
+        const docRef = doc(firestore, 'users', user.uid);
+        const { isInitialized, ...savableState } = gameState;
 
-      // Remove undefined values to prevent Firestore errors
-      const cleanState = JSON.parse(JSON.stringify({ ...savableState, lastSavedTimestamp: Date.now() }));
+        // Remove undefined values to prevent Firestore errors
+        const cleanState = JSON.parse(JSON.stringify({ ...savableState, lastSavedTimestamp: Date.now() }));
 
-      setDoc(docRef, cleanState, { merge: true }).finally(() => {
-        isSavingRef.current = false;
-      });
-    }
-  }, [gameState, user, firestore]);
+        setDoc(docRef, cleanState, { merge: true }).finally(() => {
+          isSavingRef.current = false;
+        });
+      }
+    }, 5000); // Save every 5 seconds instead of on every render
+
+    return () => clearInterval(saveInterval);
+  }, [user, firestore]); // Removed gameState from dependencies to prevent re-render loop
 
 
   // Effect for game tick

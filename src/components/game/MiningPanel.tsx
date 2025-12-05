@@ -86,60 +86,58 @@ export default function MiningPanel() {
                         </div>
                     </div>
 
+                    {/* Drone Section */}
+                    {gameState.builtStructures.includes('droneBay') && (
+                        <DronePanel mode="mine" />
+                    )}
+
                     {/* Action Section */}
-                    <div className="flex flex-col items-center gap-4">
-                        {/* Drone Section */}
-                        {gameState.builtStructures.includes('droneBay') && (
-                            <DronePanel mode="mine" />
-                        )}
+                    <div className="flex gap-2 w-full">
+                        <Button
+                            size="lg"
+                            className="flex-1 h-16 text-lg gap-2"
+                            onClick={handleMine}
+                            disabled={!hasPickaxe || playerStats.energy < 10 || isResting}
+                        >
+                            <GameIcon type="nav" id="mining" className="h-6 w-6" />
+                            Mine Resources
+                        </Button>
 
-                        <div className="flex gap-2 w-full">
-                            <Button
-                                size="lg"
-                                className="flex-1 h-16 text-lg gap-2"
-                                onClick={handleMine}
-                                disabled={!hasPickaxe || playerStats.energy < 10 || isResting}
-                            >
-                                <GameIcon type="nav" id="mining" className="h-6 w-6" />
-                                Mine Resources
-                            </Button>
-
-                            <Button
-                                variant="outline"
-                                size="lg"
-                                className="flex-1 h-16 text-lg gap-2"
-                                onClick={handleRest}
-                                disabled={isResting || playerStats.health <= 0}
-                            >
-                                {isResting ? (
-                                    <Loader2 className="h-6 w-6 animate-spin" />
-                                ) : (
-                                    <Bed className="h-6 w-6" />
-                                )}
-                                {isResting ? 'Resting...' : 'Rest (+15 Energy)'}
-                            </Button>
-                        </div>
-
-                        {isResting && (
-                            <div className="space-y-2 w-full">
-                                <Progress value={restingProgress} className="w-full" />
-                                <p className="text-sm text-center text-muted-foreground">
-                                    Resting... {Math.floor(restingProgress)}%
-                                </p>
-                            </div>
-                        )}
-
-                        {!hasPickaxe && (
-                            <p className="text-sm text-destructive">
-                                You need to craft and equip a Pickaxe to mine here.
-                            </p>
-                        )}
-                        {hasPickaxe && playerStats.energy < 10 && (
-                            <p className="text-sm text-destructive">
-                                Not enough energy. Rest or eat to recover.
-                            </p>
-                        )}
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            className="flex-1 h-16 text-lg gap-2"
+                            onClick={handleRest}
+                            disabled={isResting || playerStats.health <= 0}
+                        >
+                            {isResting ? (
+                                <Loader2 className="h-6 w-6 animate-spin" />
+                            ) : (
+                                <Bed className="h-6 w-6" />
+                            )}
+                            {isResting ? 'Resting...' : 'Rest (+15 Energy)'}
+                        </Button>
                     </div>
+
+                    {isResting && (
+                        <div className="space-y-2 w-full">
+                            <Progress value={restingProgress} className="w-full" />
+                            <p className="text-sm text-center text-muted-foreground">
+                                Resting... {Math.floor(restingProgress)}%
+                            </p>
+                        </div>
+                    )}
+
+                    {!hasPickaxe && (
+                        <p className="text-sm text-destructive">
+                            You need to craft and equip a Pickaxe to mine here.
+                        </p>
+                    )}
+                    {hasPickaxe && playerStats.energy < 10 && (
+                        <p className="text-sm text-destructive">
+                            Not enough energy. Rest or eat to recover.
+                        </p>
+                    )}
                 </CardContent>
             </Card>
         </div>

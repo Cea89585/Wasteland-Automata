@@ -155,6 +155,7 @@ export interface GameState {
   smeltingQueue: number;
   ironIngotSmeltingQueue: number;
   charcoalSmeltingQueue: number;
+  glassSmeltingQueue: number;
   droneIsActive: boolean;
   droneReturnTimestamp: number | null;
   droneMissionQueue: number;
@@ -178,6 +179,7 @@ export interface GameState {
     components: number | null;
     iron: number | null;
     charcoal: number | null;
+    glass: number | null;
   };
 }
 
@@ -227,11 +229,13 @@ export type GameAction =
   | { type: 'FINISH_RESTING' }
   | { type: 'START_SMELTING' }
   | { type: 'FINISH_SMELTING' }
-  | { type: 'START_SMELTING_ALL'; payload: { type: 'components' | 'iron' | 'charcoal'; amount: number } }
+  | { type: 'START_SMELTING_ALL'; payload: { type: 'components' | 'iron' | 'charcoal' | 'glass'; amount: number } }
   | { type: 'START_SMELTING_IRON' }
   | { type: 'FINISH_SMELTING_IRON' }
   | { type: 'START_SMELTING_CHARCOAL' }
   | { type: 'FINISH_SMELTING_CHARCOAL' }
+  | { type: 'START_SMELTING_GLASS' }
+  | { type: 'FINISH_SMELTING_GLASS' }
   | { type: 'EQUIP'; payload: { item: Item, slot: EquipmentSlot } }
   | { type: 'UNEQUIP'; payload: { slot: EquipmentSlot } }
   | { type: 'UPGRADE_STORAGE' }

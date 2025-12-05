@@ -25,11 +25,10 @@ export default function DronePanel({ mode = 'scavenge' }: DronePanelProps) {
   const [queueAmount, setQueueAmount] = useState(1);
   const { droneMissionQueue, power } = gameState;
 
-  const missionRequirements = { apple: 10, water: 10 };
+  const missionRequirements = { water: 10 };
   const canAffordMissions = useMemo(() => {
-    if (gameState.inventory.apple === 0 || gameState.inventory.water === 0) return 0;
-    return Math.floor(Math.min(gameState.inventory.apple / missionRequirements.apple, gameState.inventory.water / missionRequirements.water));
-  }, [gameState.inventory.apple, gameState.inventory.water]);
+    return Math.floor(gameState.inventory.water / missionRequirements.water);
+  }, [gameState.inventory.water]);
 
   const hasPower = gameState.builtStructures.includes('generator') && power > 0;
   const isBusy = gameState.isResting || gameState.smeltingQueue > 0;
@@ -93,12 +92,15 @@ export default function DronePanel({ mode = 'scavenge' }: DronePanelProps) {
     }
 
     if (gameState.droneIsActive || currentQueue > 0) {
+      // Use the actual queued mission type from game state, not the current panel mode
+      const activeMissionType = gameState.droneMissionType || 'explore';
+      const missionLabel = activeMissionType === 'mine' ? 'Mining' : activeMissionType === 'fish' ? 'Fishing' : activeMissionType === 'explore' ? 'Exploring' : 'Scavenging';
       return (
         <div className="flex flex-col gap-2 w-full">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground flex items-center">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {gameState.droneIsActive ? `${mode === 'mine' ? 'Mining' : mode === 'fish' ? 'Fishing' : mode === 'explore' ? 'Exploring' : 'Scavenging'}... (${currentQueue} in queue)` : `Queued (${currentQueue})`}
+              {gameState.droneIsActive ? `${missionLabel}... (${currentQueue} in queue)` : `Queued (${currentQueue})`}
             </p>
             {gameState.droneIsActive && <span className="text-xs font-mono text-muted-foreground">{Math.round(progress)}%</span>}
           </div>
@@ -139,17 +141,7 @@ export default function DronePanel({ mode = 'scavenge' }: DronePanelProps) {
                 ) : maxCanQueue > 0 ? (
                   <>
                     <span>Queue {queueAmount} drone mission(s).</span>
-                    <span className="font-semibold text-muted-foreground">Total Cost:</span>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1">
-                      <span className="flex items-center">
-                        <GameIcon type="item" id="apple" size={16} className="mr-1" />
-                        {itemData['apple'].name}: {missionRequirements.apple * queueAmount}
-                      </span>
-                      <span className="flex items-center">
-                        <GameIcon type="item" id="water" size={16} className="mr-1" />
-                        {itemData['water'].name}: {missionRequirements.water * queueAmount}
-                      </span>
-                    </div>
+                    <span className="font-semibold text-muted-foreground">Cost: {missionRequirements.water * queueAmount} Water (coolant)</span>
                   </>
                 ) : (
                   <span>Not enough resources to queue a mission.</span>

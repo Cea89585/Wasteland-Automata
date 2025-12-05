@@ -123,6 +123,7 @@ export const initialState: GameState = {
   smeltingQueue: 0,
   ironIngotSmeltingQueue: 0,
   charcoalSmeltingQueue: 0,
+  glassSmeltingQueue: 0,
   droneIsActive: false,
   droneReturnTimestamp: null,
   droneMissionQueue: 0,
@@ -146,5 +147,6 @@ export const initialState: GameState = {
     components: null,
     iron: null,
     charcoal: null,
+    glass: null,
   },
 };

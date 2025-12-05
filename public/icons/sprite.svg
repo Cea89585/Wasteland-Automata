@@ -330,4 +330,47 @@
           transform="rotate(-45 28 29)"/>
   </symbol>
 
+  <!-- GLASS CRAFTING CHAIN -->
+  <symbol id="icon-sand" viewBox="0 0 64 64">
+    <!-- Sand pile -->
+    <ellipse cx="32" cy="48" rx="24" ry="8" fill="#F59E0B" stroke="#B45309" stroke-width="2"/>
+    <ellipse cx="32" cy="40" rx="18" ry="6" fill="#FBBF24"/>
+    <ellipse cx="32" cy="34" rx="12" ry="4" fill="#FCD34D"/>
+    <!-- Sand grains -->
+    <circle cx="24" cy="46" r="2" fill="#FDE68A"/>
+    <circle cx="36" cy="44" r="2" fill="#FDE68A"/>
+    <circle cx="28" cy="38" r="1.5" fill="#FEF3C7"/>
+  </symbol>
+
+  <symbol id="icon-glassTube" viewBox="0 0 64 64">
+    <!-- Glass tube -->
+    <rect x="24" y="8" width="16" height="48" rx="8" fill="#BFDBFE" fill-opacity="0.5" stroke="#3B82F6" stroke-width="2"/>
+    <rect x="28" y="12" width="8" height="40" rx="4" fill="#DBEAFE" fill-opacity="0.3"/>
+    <!-- Shine -->
+    <path d="M28 16 L28 44" stroke="#FFFFFF" stroke-width="1" opacity="0.5"/>
+  </symbol>
+
+  <symbol id="icon-glassJar" viewBox="0 0 64 64">
+    <!-- Jar body -->
+    <path d="M18 24 Q16 24 16 28 L16 52 Q16 56 20 56 L44 56 Q48 56 48 52 L48 28 Q48 24 46 24 Z" fill="#BFDBFE" fill-opacity="0.5" stroke="#3B82F6" stroke-width="2"/>
+    <!-- Jar neck -->
+    <rect x="22" y="16" width="20" height="8" fill="#BFDBFE" fill-opacity="0.5" stroke="#3B82F6" stroke-width="2"/>
+    <!-- Lid -->
+    <rect x="20" y="10" width="24" height="6" rx="2" fill="#64748B" stroke="#334155" stroke-width="2"/>
+    <!-- Shine -->
+    <path d="M22 28 L22 48" stroke="#FFFFFF" stroke-width="2" opacity="0.4"/>
+  </symbol>
+
+  <symbol id="icon-pickledPeaches" viewBox="0 0 64 64">
+    <!-- Jar body with peach-colored liquid -->
+    <path d="M18 24 Q16 24 16 28 L16 52 Q16 56 20 56 L44 56 Q48 56 48 52 L48 28 Q48 24 46 24 Z" fill="#FED7AA" fill-opacity="0.8" stroke="#EA580C" stroke-width="2"/>
+    <!-- Peaches inside -->
+    <circle cx="28" cy="38" r="6" fill="#FCA5A5" stroke="#DC2626" stroke-width="1"/>
+    <circle cx="38" cy="44" r="5" fill="#FCA5A5" stroke="#DC2626" stroke-width="1"/>
+    <circle cx="32" cy="50" r="4" fill="#FCA5A5" stroke="#DC2626" stroke-width="1"/>
+    <!-- Lid -->
+    <rect x="20" y="10" width="24" height="6" rx="2" fill="#64748B" stroke="#334155" stroke-width="2"/>
+    <rect x="22" y="16" width="20" height="8" fill="#FED7AA" fill-opacity="0.6" stroke="#EA580C" stroke-width="2"/>
+  </symbol>
+
 </svg>

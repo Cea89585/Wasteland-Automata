@@ -6,6 +6,7 @@ export interface Recipe {
   name: string;
   description: string;
   creates: Item | Resource;
+  outputAmount?: number;
   requirements: Partial<Record<Resource | Item, number>>;
   unlockedBy: string[]; // Can be item IDs (e.g., 'workbench') or tech IDs
 }
@@ -133,9 +134,10 @@ export const recipes: Recipe[] = [
   },
   {
     id: 'recipe_grindStone',
-    name: 'Grind Stone',
+    name: 'Craft Sand',
     description: 'Crush stone into fine sand.',
     creates: 'sand',
+    outputAmount: 5,
     requirements: { stone: 1 },
     unlockedBy: [],
   },

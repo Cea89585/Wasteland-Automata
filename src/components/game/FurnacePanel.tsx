@@ -19,6 +19,7 @@ export default function FurnacePanel() {
   const [componentProgress, setComponentProgress] = useState(0);
   const [ironProgress, setIronProgress] = useState(0);
   const [charcoalProgress, setCharcoalProgress] = useState(0);
+  const [glassProgress, setGlassProgress] = useState(0);
 
 
   // Component requirements
@@ -40,6 +41,12 @@ export default function FurnacePanel() {
   const maxSmeltableCharcoal = useMemo(() => {
     return Math.floor(gameState.inventory.wood / charcoalSmeltRequirements.wood);
   }, [gameState.inventory.wood]);
+
+  // Glass Tube requirements
+  const glassSmeltRequirements = { sand: 5 };
+  const maxSmeltableGlass = useMemo(() => {
+    return Math.floor((gameState.inventory.sand || 0) / glassSmeltRequirements.sand);
+  }, [gameState.inventory.sand]);
 
 
   const isBusy = gameState.isResting;
@@ -69,10 +76,17 @@ export default function FurnacePanel() {
       } else {
         setCharcoalProgress(0);
       }
+
+      if (gameState.glassSmeltingQueue > 0 && gameState.smeltingTimestamps?.glass) {
+        const elapsed = now - gameState.smeltingTimestamps.glass;
+        setGlassProgress(Math.min(100, (elapsed / 10000) * 100));
+      } else {
+        setGlassProgress(0);
+      }
     }, 100);
 
     return () => clearInterval(interval);
-  }, [gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, gameState.smeltingTimestamps]);
+  }, [gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, gameState.glassSmeltingQueue, gameState.smeltingTimestamps]);
 
   // Handler for components
   const handleSmeltComponent = () => {
@@ -82,17 +96,19 @@ export default function FurnacePanel() {
     }
   };
 
-  const handleSmeltAll = (type: 'components' | 'iron' | 'charcoal') => {
+  const handleSmeltAll = (type: 'components' | 'iron' | 'charcoal' | 'glass') => {
     let amount = 0;
     if (type === 'components') amount = maxSmeltableComponents;
     else if (type === 'iron') amount = maxSmeltableIron;
     else if (type === 'charcoal') amount = maxSmeltableCharcoal;
+    else if (type === 'glass') amount = maxSmeltableGlass;
 
     if (amount > 0) {
       dispatch({ type: 'START_SMELTING_ALL', payload: { type, amount } });
       if (type === 'components') setComponentProgress(0);
       else if (type === 'iron') setIronProgress(0);
       else if (type === 'charcoal') setCharcoalProgress(0);
+      else if (type === 'glass') setGlassProgress(0);
     }
   };
 
@@ -107,6 +123,13 @@ export default function FurnacePanel() {
     if (maxSmeltableCharcoal > 0) {
       dispatch({ type: 'START_SMELTING_CHARCOAL' });
       setCharcoalProgress(0);
+    }
+  };
+
+  const handleSmeltGlass = () => {
+    if (maxSmeltableGlass > 0) {
+      dispatch({ type: 'START_SMELTING_GLASS' });
+      setGlassProgress(0);
     }
   };
 
@@ -338,6 +361,79 @@ export default function FurnacePanel() {
             </div>
           </div>
         </Card>
+
+        {/* Glass Tubes */}
+        {gameState.unlockedRecipes.includes('recipe_glassTube') && (
+          <Card className="bg-muted/50 p-4 w-full">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex-grow">
+                <div className="flex items-center font-semibold text-base mb-2">
+                  <GameIcon type="item" id="glassTube" size={20} className="mr-2" /> Smelt Glass Tubes
+                </div>
+                <div className="flex flex-col gap-1 text-xs text-muted-foreground">
+                  <div className="flex flex-wrap gap-x-3 gap-y-1">
+                    <span>Requires:</span>
+                    <span className="flex items-center">
+                      <GameIcon type="item" id="sand" size={16} className="mr-1" />
+                      {itemData['sand'].name}: {glassSmeltRequirements.sand}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 mt-1">
+                    <span>Creates:</span>
+                    <span className="flex items-center font-medium text-primary">
+                      <GameIcon type="item" id="glassTube" size={16} className="mr-1" />
+                      1x {itemData['glassTube'].name}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0 w-full sm:w-auto sm:min-w-[200px]">
+                {gameState.glassSmeltingQueue > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm text-muted-foreground text-center flex items-center justify-center">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Smelting... ({gameState.glassSmeltingQueue})
+                    </p>
+                    <Progress value={glassProgress} className="w-full" />
+                  </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row items-stretch gap-2">
+                    <Button
+                      onClick={handleSmeltGlass}
+                      disabled={maxSmeltableGlass < 1 || isBusy || gameState.playerStats.health <= 0}
+                      className="flex-1"
+                      variant={maxSmeltableGlass > 0 ? 'default' : 'outline'}
+                    >
+                      <Power className="mr-2 h-4 w-4" />
+                      Smelt
+                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex-1">
+                            <Button
+                              onClick={() => handleSmeltAll('glass')}
+                              disabled={maxSmeltableGlass < 2 || isBusy || gameState.playerStats.health <= 0}
+                              className="w-full"
+                              variant="secondary"
+                            >
+                              <PackageCheck className="mr-2 h-4 w-4" />
+                              All ({maxSmeltableGlass})
+                            </Button>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          {maxSmeltableGlass < 2 ? <p>Need resources for 2+ items</p> : <p>Smelt all possible</p>}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+        )}
       </CardContent>
     </Card>
   );

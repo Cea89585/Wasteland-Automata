@@ -121,11 +121,8 @@ export default function GameUI() {
   ].filter(tab => tab.condition !== false);
 
   const handleTabChange = (value: string) => {
-    console.log('handleTabChange:', value);
     setActiveTab(value);
   }
-
-  console.log('GameUI Render: activeTab=', activeTab, 'isBusy=', isBusy, 'isResting=', gameState.isResting, 'isIdle=', gameState.isIdle);
 
   return (
     <div className="flex flex-col gap-4">
