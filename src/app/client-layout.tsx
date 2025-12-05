@@ -4,6 +4,7 @@
 import { useGame } from '@/hooks/use-game';
 import { useEffect } from 'react';
 import { Toaster } from '@/components/ui/toaster';
+import { Analytics } from '@vercel/analytics/next';
 
 function ThemeWrapper({ children }: { children: React.ReactNode }) {
   const { gameState } = useGame();
@@ -49,6 +50,7 @@ export default function ClientLayout({
             {children}
         </ThemeWrapper>
         <Toaster />
+        <Analytics />
       </body>
     </html>
   );
