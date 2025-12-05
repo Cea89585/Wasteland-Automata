@@ -1612,7 +1612,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'QUEUE_DRONE_MISSIONS': {
-      const { amount } = action.payload;
+      const { amount, type } = action.payload;
       if (state.droneMissionQueue + amount > 10) {
         return { ...state, log: [{ id: generateUniqueLogId(), text: "Drone mission queue is full.", type: 'danger', timestamp: Date.now() }, ...state.log] };
       }
@@ -1624,11 +1624,69 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const newInventory = { ...state.inventory };
       newInventory.apple -= appleCost;
       newInventory.water -= waterCost;
+
+      const isFirstMission = state.droneMissionQueue === 0;
+
       return {
         ...state,
         inventory: newInventory,
         droneMissionQueue: state.droneMissionQueue + amount,
-        log: [{ id: generateUniqueLogId(), text: `Queued ${amount} drone mission(s).`, type: 'info', timestamp: Date.now() }, ...state.log],
+        droneMissionType: isFirstMission ? (type || 'scavenge') : state.droneMissionType,
+        droneIsActive: true,
+        droneReturnTimestamp: isFirstMission ? Date.now() + (30 * 1000) : state.droneReturnTimestamp,
+        log: [{ id: generateUniqueLogId(), text: `Queued ${amount} drone mission(s) (${type || 'scavenge'}).`, type: 'info', timestamp: Date.now() }, ...state.log],
+      };
+    }
+
+    case 'FINISH_DRONE_MISSION': {
+      if (state.droneMissionQueue <= 0) return state;
+
+      const missionType = state.droneMissionType || 'scavenge';
+      const newInventory = { ...state.inventory };
+      let logText = "";
+      let loot: Partial<Record<Resource | Item, number>> = {};
+
+      if (missionType === 'mine') {
+        const roll = Math.random();
+        if (roll < 0.6) loot = { stone: Math.floor(Math.random() * 5) + 3 };
+        else if (roll < 0.9) loot = { scrap: Math.floor(Math.random() * 3) + 1 };
+        else if (roll < 0.98) loot = { iron: Math.floor(Math.random() * 2) + 1 };
+        else loot = { uranium: 1 };
+      } else if (missionType === 'fish') {
+        const roll = Math.random();
+        if (roll < 0.6) loot = { rawFish: 1 };
+        else if (roll < 0.85) loot = { rawSalmon: 1 };
+        else if (roll < 0.98) loot = { rawTuna: 1 };
+        else loot = { rawShark: 1 };
+      } else {
+        // Scavenge
+        const roll = Math.random();
+        if (roll < 0.4) loot = { wood: Math.floor(Math.random() * 5) + 2 };
+        else if (roll < 0.7) loot = { scrap: Math.floor(Math.random() * 3) + 1 };
+        else if (roll < 0.9) loot = { apple: Math.floor(Math.random() * 2) + 1 };
+        else loot = { water: Math.floor(Math.random() * 2) + 1 };
+      }
+
+      // Add loot to inventory
+      Object.entries(loot).forEach(([item, qty]) => {
+        const key = item as Resource | Item;
+        newInventory[key] = (newInventory[key] || 0) + qty;
+      });
+
+      const lootString = Object.entries(loot).map(([k, v]) => `${v} ${itemData[k as Resource | Item]?.name || k}`).join(', ');
+      logText = `Drone returned from ${missionType} mission with: ${lootString}`;
+
+      const newQueue = state.droneMissionQueue - 1;
+      const isActive = newQueue > 0;
+
+      return {
+        ...state,
+        inventory: newInventory,
+        droneMissionQueue: newQueue,
+        droneIsActive: isActive,
+        droneReturnTimestamp: isActive ? Date.now() + (30 * 1000) : null,
+        droneMissionType: isActive ? state.droneMissionType : null,
+        log: [{ id: generateUniqueLogId(), text: logText, type: 'success', timestamp: Date.now() }, ...state.log],
       };
     }
 
@@ -2352,52 +2410,63 @@ export function GameProvider({ children }: { children: ReactNode }) {
           dispatch({ type: 'FINISH_SMELTING_CHARCOAL' });
         }
       }
-    }, 1000);
 
-    return () => clearInterval(interval);
-  }, [gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, gameState.smeltingTimestamps]);
-
-  // Effect for saving game state to Firestore
-  useEffect(() => {
-    if (gameState.isInitialized && user && gameState.lastSavedTimestamp && Date.now() - gameState.lastSavedTimestamp > 2000) {
-      isSavingRef.current = true;
-      const docRef = doc(firestore, 'users', user.uid);
-      const { isInitialized, ...savableState } = gameState;
-
-      // Remove undefined values to prevent Firestore errors
-      const cleanState = JSON.parse(JSON.stringify({ ...savableState, lastSavedTimestamp: Date.now() }));
-
-      setDoc(docRef, cleanState, { merge: true }).finally(() => {
-        isSavingRef.current = false;
-      });
-    }
-  }, [gameState, user, firestore]);
-
-
-  // Effect for game tick
-  useEffect(() => {
-    if (!gameState.isInitialized || gameState.playerStats.health <= 0) return;
-
-    const tickInterval = setInterval(() => {
-      dispatch({ type: 'GAME_TICK' });
-    }, TICK_RATE_MS);
-
-    return () => clearInterval(tickInterval);
-  }, [gameState.isInitialized, gameState.playerStats.health]);
-
-  // Effect for inactivity timer
-  useEffect(() => {
-    if (gameState.isInitialized) {
-      if (gameState.droneIsActive || gameState.smeltingQueue > 0 || gameState.ironIngotSmeltingQueue > 0 || gameState.charcoalSmeltingQueue > 0) {
-        resetTimer();
+      // Drone persistence check
+      if (gameState.droneIsActive && gameState.droneReturnTimestamp) {
+        if (now >= gameState.droneReturnTimestamp) {
+          dispatch({ type: 'FINISH_DRONE_MISSION' });
+        }
+      }
+      if (now - gameState.smeltingTimestamps.charcoal >= 5000) {
+        dispatch({ type: 'FINISH_SMELTING_CHARCOAL' });
       }
     }
-  }, [gameState.isInitialized, gameState.droneIsActive, gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, resetTimer]);
+    }, 1000);
+
+  return () => clearInterval(interval);
+}, [gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, gameState.smeltingTimestamps]);
+
+// Effect for saving game state to Firestore
+useEffect(() => {
+  if (gameState.isInitialized && user && gameState.lastSavedTimestamp && Date.now() - gameState.lastSavedTimestamp > 2000) {
+    isSavingRef.current = true;
+    const docRef = doc(firestore, 'users', user.uid);
+    const { isInitialized, ...savableState } = gameState;
+
+    // Remove undefined values to prevent Firestore errors
+    const cleanState = JSON.parse(JSON.stringify({ ...savableState, lastSavedTimestamp: Date.now() }));
+
+    setDoc(docRef, cleanState, { merge: true }).finally(() => {
+      isSavingRef.current = false;
+    });
+  }
+}, [gameState, user, firestore]);
 
 
-  return (
-    <GameContext.Provider value={{ gameState, dispatch, idleProgress }}>
-      {children}
-    </GameContext.Provider>
-  );
+// Effect for game tick
+useEffect(() => {
+  if (!gameState.isInitialized || gameState.playerStats.health <= 0) return;
+
+  const tickInterval = setInterval(() => {
+    dispatch({ type: 'GAME_TICK' });
+  }, TICK_RATE_MS);
+
+  return () => clearInterval(tickInterval);
+}, [gameState.isInitialized, gameState.playerStats.health]);
+
+// Effect for inactivity timer
+useEffect(() => {
+  if (gameState.isInitialized) {
+    if (gameState.droneIsActive || gameState.smeltingQueue > 0 || gameState.ironIngotSmeltingQueue > 0 || gameState.charcoalSmeltingQueue > 0) {
+      resetTimer();
+    }
+  }
+}, [gameState.isInitialized, gameState.droneIsActive, gameState.smeltingQueue, gameState.ironIngotSmeltingQueue, gameState.charcoalSmeltingQueue, resetTimer]);
+
+
+return (
+  <GameContext.Provider value={{ gameState, dispatch, idleProgress }}>
+    {children}
+  </GameContext.Provider>
+);
 }

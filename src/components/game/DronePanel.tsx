@@ -13,7 +13,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/
 const MISSION_DURATION = 30; // seconds
 const MAX_QUEUE = 10;
 
-export default function DronePanel() {
+import { DroneMissionType } from '@/lib/game-types';
+
+interface DronePanelProps {
+  mode?: DroneMissionType;
+}
+
+export default function DronePanel({ mode = 'scavenge' }: DronePanelProps) {
   const { gameState, dispatch } = useGame();
   const [progress, setProgress] = useState(0);
   const [queueAmount, setQueueAmount] = useState(1);
@@ -72,7 +78,7 @@ export default function DronePanel() {
 
   const handleQueueDroneMissions = () => {
     if (queueAmount > 0) {
-      dispatch({ type: 'QUEUE_DRONE_MISSIONS', payload: { amount: queueAmount } });
+      dispatch({ type: 'QUEUE_DRONE_MISSIONS', payload: { amount: queueAmount, type: mode } });
       setQueueAmount(1); // Reset after queuing
     }
   };
@@ -92,7 +98,7 @@ export default function DronePanel() {
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground flex items-center">
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {gameState.droneIsActive ? `Exploring... (${currentQueue} in queue)` : `Queued (${currentQueue})`}
+              {gameState.droneIsActive ? `${mode === 'mine' ? 'Mining' : mode === 'fish' ? 'Fishing' : 'Exploring'}... (${currentQueue} in queue)` : `Queued (${currentQueue})`}
             </p>
             {gameState.droneIsActive && <span className="text-xs font-mono text-muted-foreground">{Math.round(progress)}%</span>}
           </div>
@@ -122,7 +128,7 @@ export default function DronePanel() {
                   variant={hasPower ? 'default' : 'outline'}
                 >
                   <Bot className="mr-2 h-4 w-4" />
-                  Queue
+                  Queue {mode === 'mine' ? 'Mining' : mode === 'fish' ? 'Fishing' : 'Scavenge'}
                 </Button>
               </div>
             </TooltipTrigger>

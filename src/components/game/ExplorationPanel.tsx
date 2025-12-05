@@ -112,7 +112,7 @@ export default function ExplorationPanel() {
             let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
 
             // Apply exploration efficiency upgrade
-            const explorationEffLevel = gameState.explorationEfficiency || 0;
+            const explorationEffLevel = gameState.explorationEfficiencyLevel || 0;
             if (explorationEffLevel > 0) {
               amount = Math.ceil(amount * (1 + (explorationEffLevel * 0.15))); // 15% per level
             }
@@ -255,7 +255,7 @@ export default function ExplorationPanel() {
         )}
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
-        {gameState.builtStructures.includes('droneBay') && <DronePanel />}
+        {gameState.builtStructures.includes('droneBay') && <DronePanel mode="scavenge" />}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <Button onClick={handleExplore} disabled={isBusy || isDead} className="flex-1">
             {isExploring ? (

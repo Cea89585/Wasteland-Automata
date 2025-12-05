@@ -110,6 +110,8 @@ export interface FarmPlot {
   duration: number; // ms
 }
 
+export type DroneMissionType = 'scavenge' | 'mine' | 'fish';
+
 export interface GameState {
   characterName: string;
   level: number;
@@ -129,14 +131,27 @@ export interface GameState {
   unlockedTech: TechId[];
   lockedItems: Resource[];
   completedQuests: string[];
-  storageLevel: number;
-  isIdle: boolean;
+  energyLevel: number;
+  hungerLevel: number;
+  thirstLevel: number;
+  healthLevel: number;
+  droneLevel: number;
+  farmPlotLevel: number;
+  machineSlotLevel: number;
+  automationSpeedLevel: number;
+  explorationEfficiencyLevel: number;
+  hasFishingLuck: boolean;
+  restEfficiencyLevel: number;
+  isInitialized: boolean;
+  gameTick: number;
+  isResting: boolean;
   smeltingQueue: number;
   ironIngotSmeltingQueue: number;
   charcoalSmeltingQueue: number;
   droneIsActive: boolean;
   droneReturnTimestamp: number | null;
   droneMissionQueue: number;
+  droneMissionType: DroneMissionType | null;
   power: number;
   powerDrainCounter: number; // Tracks ticks for slower power drain
   theme: Theme;
@@ -152,6 +167,11 @@ export interface GameState {
   unlockedLore: string[]; // lore entry IDs
   currentFishingZone: string; // current fishing zone ID
   caughtFish: Partial<Record<string, number>>; // fish type -> count
+  smeltingTimestamps: {
+    components: number | null;
+    iron: number | null;
+    charcoal: number | null;
+  };
 }
 
 export type MachineType = 'miner' | 'smelter' | 'constructor' | 'biomassBurner';
@@ -220,7 +240,7 @@ export type GameAction =
   | { type: 'UPGRADE_FISHING_LUCK' }
   | { type: 'UPGRADE_REST_EFFICIENCY' }
   | { type: 'TRAVEL'; payload: { locationId: LocationId } }
-  | { type: 'QUEUE_DRONE_MISSIONS', payload: { amount: number } }
+  | { type: 'QUEUE_DRONE_MISSIONS', payload: { amount: number; type?: DroneMissionType } }
   | { type: 'ADD_FUEL', payload: { fuelType: 'wood' | 'biomass' | 'charcoal' } }
   | { type: 'SET_THEME'; payload: Theme }
   | { type: 'CLAIM_DAILY_REWARD' }

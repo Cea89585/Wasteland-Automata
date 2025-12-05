@@ -132,6 +132,11 @@ export default function FishingPanel() {
                                 </div>
                             </div>
 
+                            {/* Drone Section */}
+                            {gameState.builtStructures.includes('droneBay') && (
+                                <DronePanel mode="fish" />
+                            )}
+
                             <Button
                                 onClick={handleFish}
                                 disabled={!canFish || !hasEnoughEnergy || playerStats.health <= 0}
@@ -164,11 +169,6 @@ export default function FishingPanel() {
                                         Resting... {Math.floor(restingProgress)}%
                                     </p>
                                 </div>
-                            )}
-
-                            {/* Drone Section */}
-                            {gameState.builtStructures.includes('droneBay') && (
-                                <DronePanel />
                             )}
 
                             {!hasEnoughEnergy && (

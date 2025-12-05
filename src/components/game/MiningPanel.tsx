@@ -88,7 +88,12 @@ export default function MiningPanel() {
 
                     {/* Action Section */}
                     <div className="flex flex-col items-center gap-4">
-                        <div className="flex flex-col sm:flex-row gap-2 w-full">
+                        {/* Drone Section */}
+                        {gameState.builtStructures.includes('droneBay') && (
+                            <DronePanel mode="mine" />
+                        )}
+
+                        <div className="flex gap-2 w-full">
                             <Button
                                 size="lg"
                                 className="flex-1 h-16 text-lg gap-2"
@@ -123,10 +128,6 @@ export default function MiningPanel() {
                                 </p>
                             </div>
                         )}
-                        {/* Drone Section */}
-                        {gameState.builtStructures.includes('droneBay') && (
-                            <DronePanel />
-                        )}
 
                         {!hasPickaxe && (
                             <p className="text-sm text-destructive">
@@ -138,25 +139,6 @@ export default function MiningPanel() {
                                 Not enough energy. Rest or eat to recover.
                             </p>
                         )}
-                    </div>
-
-                    {/* Loot Table Info - Hidden on mobile to save space */}
-                    <div className="hidden sm:grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
-                        <div className="p-3 border rounded-lg bg-card flex flex-col items-center text-center gap-2">
-                            <GameIcon type="item" id="stone" size={32} />
-                            <span className="font-medium">Stone</span>
-                            <span className="text-xs text-muted-foreground">Common</span>
-                        </div>
-                        <div className="p-3 border rounded-lg bg-card flex flex-col items-center text-center gap-2">
-                            <GameIcon type="item" id="scrap" size={32} />
-                            <span className="font-medium">Scrap Metal</span>
-                            <span className="text-xs text-muted-foreground">Uncommon</span>
-                        </div>
-                        <div className="p-3 border rounded-lg bg-card flex flex-col items-center text-center gap-2">
-                            <GameIcon type="item" id="ironIngot" size={32} />
-                            <span className="font-medium">Iron Ingot</span>
-                            <span className="text-xs text-muted-foreground">Uncommon</span>
-                        </div>
                     </div>
                 </CardContent>
             </Card>
