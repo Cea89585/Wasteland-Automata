@@ -60,6 +60,9 @@ export default function FactoryPanel() {
                                 ⚠️ Build more Biomass Burners and add fuel to increase power capacity
                             </p>
                         )}
+                        <p className="text-xs text-muted-foreground mt-2">
+                            ℹ️ Factory machines use a separate power grid from drone operations
+                        </p>
                     </div>
                 </CardContent>
             </Card>

@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { GameIcon } from '@/lib/icon-mapping';
 import { Pickaxe, Bed, Loader2 } from 'lucide-react';
+import DronePanel from './DronePanel';
 
 const REST_DURATION_SECONDS = 10;
 
@@ -121,6 +122,10 @@ export default function MiningPanel() {
                                     Resting... {Math.floor(restingProgress)}%
                                 </p>
                             </div>
+                        )}
+                        {/* Drone Section */}
+                        {gameState.builtStructures.includes('droneBay') && (
+                            <DronePanel />
                         )}
 
                         {!hasPickaxe && (

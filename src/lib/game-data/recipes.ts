@@ -131,6 +131,22 @@ export const recipes: Recipe[] = [
     requirements: { ironIngot: 2, wood: 1 },
     unlockedBy: ['workbench'],
   },
+  {
+    id: 'recipe_grindStone',
+    name: 'Grind Stone',
+    description: 'Crush stone into fine sand.',
+    creates: 'sand',
+    requirements: { stone: 1 },
+    unlockedBy: ['start'],
+  },
+  {
+    id: 'recipe_pickledPeaches',
+    name: 'Pickle Peaches',
+    description: 'Preserve peaches in a glass jar to create a valuable trade good.',
+    creates: 'pickledPeaches',
+    requirements: { peach: 5, glassJar: 1 },
+    unlockedBy: ['workbench'],
+  },
   // Machine recipes - Note: These don't create items, they're handled specially in BUILD_MACHINE action
   // Keeping them here for consistency and future UI integration
 ];

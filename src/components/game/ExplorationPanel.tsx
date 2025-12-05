@@ -111,6 +111,12 @@ export default function ExplorationPanel() {
           if (Math.random() < res.chance) {
             let amount = Math.floor(Math.random() * (res.max - res.min + 1)) + res.min;
 
+            // Apply exploration efficiency upgrade
+            const explorationEffLevel = gameState.explorationEfficiency || 0;
+            if (explorationEffLevel > 0) {
+              amount = Math.ceil(amount * (1 + (explorationEffLevel * 0.15))); // 15% per level
+            }
+
             // Apply bonuses from equipped items
             if (res.resource === 'wood' && equipment.hand === 'stoneAxe') {
               amount = Math.ceil(amount * 1.50); // 50% bonus

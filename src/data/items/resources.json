@@ -124,5 +124,37 @@
         "name": "Apple Seeds",
         "description": "Seeds extracted from an apple. Can be planted in a Hydroponics Bay.",
         "icon": "appleSeeds"
+    },
+    "sand": {
+        "id": "sand",
+        "type": "resource",
+        "name": "Sand",
+        "description": "Fine grains of crushed stone. Can be melted into glass.",
+        "icon": "sand",
+        "sellPrice": 1
+    },
+    "glassTube": {
+        "id": "glassTube",
+        "type": "resource",
+        "name": "Glass Tube",
+        "description": "A hollow glass tube, fragile but useful for crafting.",
+        "icon": "glassTube",
+        "sellPrice": 15
+    },
+    "glassJar": {
+        "id": "glassJar",
+        "type": "resource",
+        "name": "Glass Jar",
+        "description": "A sealed glass container, perfect for preserving food.",
+        "icon": "glassJar",
+        "sellPrice": 35
+    },
+    "pickledPeaches": {
+        "id": "pickledPeaches",
+        "type": "resource",
+        "name": "Pickled Peaches",
+        "description": "Preserved peaches in a glass jar. A wasteland delicacy worth good silver.",
+        "icon": "pickledPeaches",
+        "sellPrice": 100
     }
 }

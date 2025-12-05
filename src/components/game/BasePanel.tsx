@@ -32,14 +32,17 @@ const FuelSection = () => {
   return (
     <Card className="bg-muted/50">
       <CardHeader className="pb-4">
-        <CardTitle className="flex items-center text-lg gap-2"><Fuel /> Generator Fuel</CardTitle>
-        <CardDescription>Add fuel to the generator to power your automated systems. Biomass is a much more efficient fuel source.</CardDescription>
+        <CardTitle className="flex items-center text-lg gap-2"><Fuel /> Drone Power</CardTitle>
+        <CardDescription>Add fuel to power your Drone Bay operations. Power drains slowly when idle, faster when drones are active.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Power Level</span>
+            <span className="text-sm text-muted-foreground">Drone Power</span>
             <span className="font-mono text-primary">{power} / {maxPower}</span>
+          </div>
+          <div className="text-xs text-muted-foreground">
+            Drain rate: {gameState.droneIsActive ? '~8 seconds/point' : '~20 seconds/point'}
           </div>
           <Progress value={powerPercentage} />
         </div>

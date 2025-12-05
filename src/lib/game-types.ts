@@ -20,6 +20,10 @@ export const Resources = {
   ironIngot: 'Iron Ingot',
   biomass: 'Biomass',
   charcoal: 'Charcoal',
+  sand: 'Sand',
+  glassTube: 'Glass Tube',
+  glassJar: 'Glass Jar',
+  pickledPeaches: 'Pickled Peaches',
 } as const;
 export type Resource = keyof typeof Resources;
 
@@ -148,6 +152,7 @@ export interface GameState {
   droneReturnTimestamp: number | null;
   droneMissionQueue: number;
   power: number;
+  powerDrainCounter: number; // Tracks ticks for slower power drain
   theme: Theme;
   lastSavedTimestamp?: number;
   lastDailyRewardClaimed: number; // timestamp

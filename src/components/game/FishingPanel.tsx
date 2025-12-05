@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { GameIcon } from '@/lib/icon-mapping';
 import { useState, useEffect, useCallback } from 'react';
 import { Progress } from '../ui/progress';
+import DronePanel from './DronePanel';
 
 const REST_DURATION_SECONDS = 10;
 
@@ -163,6 +164,11 @@ export default function FishingPanel() {
                                         Resting... {Math.floor(restingProgress)}%
                                     </p>
                                 </div>
+                            )}
+
+                            {/* Drone Section */}
+                            {gameState.builtStructures.includes('droneBay') && (
+                                <DronePanel />
                             )}
 
                             {!hasEnoughEnergy && (

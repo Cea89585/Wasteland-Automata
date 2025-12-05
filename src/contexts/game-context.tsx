@@ -393,14 +393,24 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let currentState = { ...state };
       const logMessages: LogMessage[] = [];
 
-      // Power consumption
-      const isPowered = currentState.power > 0;
-      if (isPowered) {
-        currentState.power = Math.max(0, currentState.power - 1);
-        if (currentState.power === 0) {
-          logMessages.push({ id: generateUniqueLogId(), text: "Generator out of fuel. Automated systems offline.", type: 'danger', timestamp: Date.now() });
+      // Power consumption - slower drain rate
+      // Drain 1 power every 20 ticks when idle, every 8 ticks when drone is active
+      const isDroneUsingPower = currentState.droneIsActive;
+      const drainInterval = isDroneUsingPower ? 8 : 20;
+
+      currentState.powerDrainCounter = (currentState.powerDrainCounter || 0) + 1;
+
+      if (currentState.powerDrainCounter >= drainInterval) {
+        currentState.powerDrainCounter = 0;
+        if (currentState.power > 0) {
+          currentState.power = Math.max(0, currentState.power - 1);
+          if (currentState.power === 0) {
+            logMessages.push({ id: generateUniqueLogId(), text: "Generator out of fuel. Drone systems offline.", type: 'danger', timestamp: Date.now() });
+          }
         }
       }
+
+      const isPowered = currentState.power > 0;
 
       // Drone launch logic
       if (!currentState.droneIsActive && currentState.droneMissionQueue > 0 && isPowered) {
