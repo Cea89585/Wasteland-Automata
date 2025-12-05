@@ -13,7 +13,7 @@ import { quests } from '@/lib/game-data/quests';
 import { xpCurve } from '@/lib/game-data/xp-curve';
 import { useUser } from '@/hooks/use-user';
 import { useFirebase } from '@/firebase/provider';
-import { doc, setDoc, onSnapshot, DocumentData, writeBatch } from 'firebase/firestore';
+import { doc, setDoc, getDoc, DocumentData, writeBatch } from 'firebase/firestore';
 import { machineCosts } from '@/lib/game-data/machines';
 import { canUnlockSkill, skills } from '@/lib/game-data/skills';
 
@@ -2553,7 +2553,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     gameStateRef.current = gameState;
   }, [gameState]);
 
-  const isFirstLoad = useRef(true);
+
 
   const { idleProgress, resetTimer } = useInactivityTimer({
     onIdle: () => dispatch({ type: 'SET_IDLE', payload: true }),
@@ -2562,14 +2562,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
   });
 
   // Effect for loading game state from Firestore
+  // Effect for loading game state from Firestore
   useEffect(() => {
-    if (user) {
-      const userDocRef = doc(firestore, 'users', user.uid);
-      const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
-        if (docSnap.exists()) {
-          const data = docSnap.data() as GameState;
-          if (isFirstLoad.current) {
-            isFirstLoad.current = false;
+    async function loadData() {
+      if (user) {
+        const userDocRef = doc(firestore, 'users', user.uid);
+        try {
+          const docSnap = await getDoc(userDocRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data() as GameState;
             // Separate statistics from gameState for INITIALIZE payload
             const { statistics, ...restGameState } = data;
             dispatch({
@@ -2579,26 +2580,26 @@ export function GameProvider({ children }: { children: ReactNode }) {
                 statistics: statistics || initialStatistics
               }
             });
-          } else if (!isSavingRef.current) {
-            dispatch({ type: 'SET_GAME_STATE', payload: data });
+          } else {
+            // New user, create initial state in Firestore
+            const batch = writeBatch(firestore);
+            const newGameData = {
+              ...initialState,
+              isInitialized: true,
+            };
+            batch.set(userDocRef, newGameData);
+            await batch.commit();
+            dispatch({ type: 'SET_GAME_STATE', payload: newGameData });
           }
-        } else {
-          // New user, create initial state in Firestore
-          const batch = writeBatch(firestore);
-          const newGameData = {
-            ...initialState,
-            isInitialized: true,
-          };
-          batch.set(userDocRef, newGameData);
-          batch.commit();
-          dispatch({ type: 'SET_GAME_STATE', payload: newGameData });
+        } catch (error) {
+          console.error("Error loading game data:", error);
         }
-      });
-
-      return () => unsubscribe();
-    } else {
-      dispatch({ type: 'RESET_GAME_NO_LOCALSTORAGE' });
+      } else {
+        dispatch({ type: 'RESET_GAME_NO_LOCALSTORAGE' });
+      }
     }
+
+    loadData();
   }, [user, firestore]);
 
   // Effect for smelting persistence
