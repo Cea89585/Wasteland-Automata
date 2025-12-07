@@ -1554,9 +1554,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
 
       let logMessage = `You retrieve a block of charcoal.\n${itemData['charcoal'].description}`;
-      // DEBUG: Log timestamp update
-      console.log('DEBUG: FINISH_SMELTING_CHARCOAL', { oldQ: state.charcoalSmeltingQueue, newQ: newSmeltingQueue, oldTS: state.smeltingTimestamps.charcoal, newTS: newTimestamps.charcoal, now: Date.now() });
-
       if (newSmeltingQueue === 0) {
         logMessage += "\nThe charcoal queue is empty.";
       }
@@ -1566,6 +1563,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         inventory: newInventory,
         statistics: newStatistics,
         charcoalSmeltingQueue: newSmeltingQueue,
+        smeltingTimestamps: newTimestamps,
         log: [{ id: generateUniqueLogId(), text: logMessage, type: 'craft', item: 'charcoal', timestamp: Date.now() }, ...state.log],
       };
     }
