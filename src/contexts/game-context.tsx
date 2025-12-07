@@ -2550,6 +2550,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const { firestore } = useFirebase();
   const isSavingRef = useRef(false);
   const gameStateRef = useRef(gameState);
+  const isProcessingSmeltRef = useRef(false);
 
   // Keep gameStateRef updated
   useEffect(() => {
@@ -2563,6 +2564,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
     onActive: () => dispatch({ type: 'SET_IDLE', payload: false }),
     timeout: 37000,
   });
+
+  // Reset the processing flag when state updates (meaning dispatch completed)
+  useEffect(() => {
+    isProcessingSmeltRef.current = false;
+  }, [gameState]);
 
   // Effect for loading game state from Firestore
   // Effect for loading game state from Firestore
@@ -2608,29 +2614,35 @@ export function GameProvider({ children }: { children: ReactNode }) {
   // Effect for smelting persistence
   useEffect(() => {
     const interval = setInterval(() => {
+      if (isProcessingSmeltRef.current) return;
+
       const now = Date.now();
       const currentState = gameStateRef.current;
 
       if (currentState.smeltingQueue > 0 && currentState.smeltingTimestamps?.components) {
         if (now - currentState.smeltingTimestamps.components >= 10000) {
+          isProcessingSmeltRef.current = true;
           dispatch({ type: 'FINISH_SMELTING' });
         }
       }
 
       if (currentState.ironIngotSmeltingQueue > 0 && currentState.smeltingTimestamps?.iron) {
         if (now - currentState.smeltingTimestamps.iron >= 20000) {
+          isProcessingSmeltRef.current = true;
           dispatch({ type: 'FINISH_SMELTING_IRON' });
         }
       }
 
       if (currentState.charcoalSmeltingQueue > 0 && currentState.smeltingTimestamps?.charcoal) {
         if (now - currentState.smeltingTimestamps.charcoal >= 10000) {
+          isProcessingSmeltRef.current = true;
           dispatch({ type: 'FINISH_SMELTING_CHARCOAL' });
         }
       }
 
       if (currentState.glassSmeltingQueue > 0 && currentState.smeltingTimestamps?.glass) {
         if (now - currentState.smeltingTimestamps.glass >= 10000) {
+          isProcessingSmeltRef.current = true;
           dispatch({ type: 'FINISH_SMELTING_GLASS' });
         }
       }

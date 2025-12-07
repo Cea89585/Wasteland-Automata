@@ -154,7 +154,7 @@ export const recipes: Recipe[] = [
     name: 'Smelt Glass Tube',
     description: 'Melt sand into a glass tube.',
     creates: 'glassTube',
-    requirements: { sand: 5 },
+    requirements: { sand: 5, wood: 5 },
     unlockedBy: ['furnace'],
   },
   {
