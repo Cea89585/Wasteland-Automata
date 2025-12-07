@@ -1554,6 +1554,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
 
       let logMessage = `You retrieve a block of charcoal.\n${itemData['charcoal'].description}`;
+      // DEBUG: Log timestamp update
+      console.log('DEBUG: FINISH_SMELTING_CHARCOAL', { oldQ: state.charcoalSmeltingQueue, newQ: newSmeltingQueue, oldTS: state.smeltingTimestamps.charcoal, newTS: newTimestamps.charcoal, now: Date.now() });
+
       if (newSmeltingQueue === 0) {
         logMessage += "\nThe charcoal queue is empty.";
       }
@@ -2634,6 +2637,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
       }
 
       if (currentState.charcoalSmeltingQueue > 0 && currentState.smeltingTimestamps?.charcoal) {
+        // DEBUG: Trace interval check
+        // if (now - currentState.smeltingTimestamps.charcoal >= 10000) console.log('DEBUG: Interval Trigger Charcoal', { now, ts: currentState.smeltingTimestamps.charcoal, diff: now - currentState.smeltingTimestamps.charcoal });
+
         if (now - currentState.smeltingTimestamps.charcoal >= 10000) {
           isProcessingSmeltRef.current = true;
           dispatch({ type: 'FINISH_SMELTING_CHARCOAL' });
