@@ -29,6 +29,10 @@ export const Resources = {
   rawSalmon: 'Raw Salmon',
   rawTuna: 'Raw Tuna',
   rawShark: 'Raw Shark',
+  mutantMinnow: 'Mutant Minnow',
+  radPerch: 'Rad Perch',
+  mutantCatfish: 'Mutant Catfish',
+  glowfish: 'Glowfish',
 } as const;
 export type Resource = keyof typeof Resources;
 

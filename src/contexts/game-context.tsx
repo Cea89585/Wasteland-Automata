@@ -233,7 +233,9 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let newInventory = { ...gameState.inventory };
       let newStatistics = { ...statistics };
       let newPlayerStats = { ...gameState.playerStats };
-      const INVENTORY_CAP = 200 + (gameState.storageLevel || 0) * 50;
+
+      const packMuleLevel = gameState.skills?.packMule || 0;
+      const INVENTORY_CAP = 200 + (gameState.storageLevel || 0) * 50 + (packMuleLevel * 25);
       const MAX_ENERGY = 100 + (gameState.energyLevel || 0) * 5;
 
       if (gameState.lastSavedTimestamp) {
@@ -598,6 +600,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         }
 
         const machineData = machineCosts[machine.type];
+
+        // Machine Efficiency Skill
+        const machineEfficiencyLevel = currentState.skills?.machineEfficiency || 0;
+        const speedMultiplier = 1 + (machineEfficiencyLevel * 0.05); // 5% faster per level
+
+        // Process item
+        // ... (Logic continues)
+
         if (!machineData.processingSpeed || !machineData.recipe) {
           return { ...machine, status: 'idle' as const };
         }
@@ -624,8 +634,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         }
 
         // Process item
-        const machineEfficiencyLevel = currentState.skills?.machineEfficiency || 0;
-        const speedMultiplier = 1 + (machineEfficiencyLevel * 0.05);
         const newProgress = machine.processingProgress + (1 * speedMultiplier);
         if (newProgress >= machineData.processingSpeed) {
           // Production complete!
@@ -685,10 +693,24 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         const MAX_HEALTH = getMaxHealth();
         if (newStats.health < MAX_HEALTH) {
           const secondWindLevel = currentState.skills?.secondWind || 0;
-          const restEfficiencyLevel = currentState.restEfficiencyLevel || 0;
-          const healAmount = 0.25 * (1 + (secondWindLevel * 0.5)) * (1 + (restEfficiencyLevel * 0.05));
+          const restEfficiencyLevel = currentState.skills?.efficientMetabolism || 0; // Assuming efficient metabolism might help here too? No, wait.
+          // Correct implementation of Second Wind is already here.
+          // Let's implement Efficient Metabolism for hunger/thirst decay.
+
+          const healAmount = 0.25 * (1 + (secondWindLevel * 0.5));
           newStats.health = Math.min(MAX_HEALTH, newStats.health + healAmount);
         }
+      }
+
+      // METABOLISM CHECK (Hunger/Thirst Decay)
+      // Drain every 10 ticks
+      if (currentState.gameTick % 10 === 0 && !currentState.isResting) {
+        const efficientMetabolismLevel = currentState.skills?.efficientMetabolism || 0;
+        const decayReduction = efficientMetabolismLevel * 0.10; // 10% per level
+        const decayAmount = Math.max(0.1, 1 * (1 - decayReduction));
+
+        if (newStats.hunger > 0) newStats.hunger = Math.max(0, newStats.hunger - decayAmount);
+        if (newStats.thirst > 0) newStats.thirst = Math.max(0, newStats.thirst - decayAmount);
       } else {
         const efficientMetabolismLevel = currentState.skills?.efficientMetabolism || 0;
         const drainMultiplier = 1 - (efficientMetabolismLevel * 0.1);
@@ -967,7 +989,16 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
 
       const outputAmount = recipe.outputAmount || 1;
-      const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, outputAmount, INVENTORY_CAP);
+      let finalOutputAmount = outputAmount;
+
+      // Efficient Hands Skill (Chance to double output)
+      const efficientHandsLevel = state.skills?.efficientHands || 0;
+      if (efficientHandsLevel > 0 && Math.random() < (efficientHandsLevel * 0.1)) {
+        finalOutputAmount *= 2;
+        // We could log this, but let's keep it simple or append to log text
+      }
+
+      const { newInventory: finalInventory, newStatistics } = addResource(newInventory, state.statistics, recipe.creates, finalOutputAmount, INVENTORY_CAP);
 
       // Track crafted item
       if (!newStatistics.itemsCrafted) {
@@ -1105,6 +1136,18 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           newInventory.silver += reward.amount;
           newStatistics.totalItemsGained.silver = (newStatistics.totalItemsGained.silver || 0) + reward.amount;
           rewardLog += `${reward.amount} Silver`;
+        } else if (reward.type === 'location_unlock') {
+          const locationId = reward.location;
+          // We'll handle adding it to the state down below or right here.
+          // Since we reconstruct 'newState.unlockedLocations' anyway, let's just push it if not present.
+          if (!newState.unlockedLocations.includes(locationId)) {
+            newState.unlockedLocations = [...newState.unlockedLocations, locationId];
+            // Add a log message for the unlock
+            rewardLog += ` Unlocked Location: ${locationId}`; // Will be formatted better in valid UI but basic text here
+          } else {
+            // Already unlocked
+            rewardLog += ` (Location ${locationId} already discovered)`;
+          }
         }
       }
 

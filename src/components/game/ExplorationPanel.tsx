@@ -117,6 +117,12 @@ export default function ExplorationPanel() {
               amount = Math.ceil(amount * (1 + (explorationEffLevel * 0.15))); // 15% per level
             }
 
+            // Scavenger's Eye Skill
+            const scavengersEyeLevel = gameState.skills?.scavengersEye || 0;
+            if (scavengersEyeLevel > 0) {
+              amount = Math.ceil(amount * (1 + (scavengersEyeLevel * 0.10))); // 10% per level
+            }
+
             // Apply bonuses from equipped items
             if (res.resource === 'wood' && equipment.hand === 'stoneAxe') {
               amount = Math.ceil(amount * 1.50); // 50% bonus

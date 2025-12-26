@@ -137,14 +137,17 @@ export default function FishingPanel() {
                                 <DronePanel mode="fish" />
                             )}
 
-                            <div className="flex flex-col sm:flex-row gap-2 w-full">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
                                 <Button
                                     onClick={handleFish}
                                     disabled={!canFish || !hasEnoughEnergy || playerStats.health <= 0}
-                                    className="flex-1 gap-2"
-                                    size="lg"
+                                    className="w-full"
                                 >
-                                    <Fish className="h-5 w-5" />
+                                    {isResting ? (
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <Fish className="mr-2 h-4 w-4" />
+                                    )}
                                     Cast Line ({currentZone.energyCost} Energy)
                                 </Button>
 
@@ -152,13 +155,12 @@ export default function FishingPanel() {
                                     variant="outline"
                                     onClick={handleRest}
                                     disabled={isResting || playerStats.health <= 0}
-                                    className="flex-1 gap-2"
-                                    size="lg"
+                                    className="w-full"
                                 >
                                     {isResting ? (
-                                        <Loader2 className="h-5 w-5 animate-spin" />
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     ) : (
-                                        <Bed className="h-5 w-5" />
+                                        <Bed className="mr-2 h-4 w-4" />
                                     )}
                                     {isResting ? 'Resting...' : 'Rest (+15 Energy)'}
                                 </Button>

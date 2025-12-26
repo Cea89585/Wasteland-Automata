@@ -1,5 +1,5 @@
 // src/lib/game-data/quests.ts
-import type { Resource, Item } from '../game-types';
+import type { Resource, Item, LocationId } from '../game-types';
 
 export type QuestRequirement = {
     type: 'item';
@@ -18,6 +18,9 @@ type QuestReward = {
 } | {
     type: 'silver';
     amount: number;
+} | {
+    type: 'location_unlock';
+    location: LocationId;
 };
 
 export interface Quest {
@@ -106,6 +109,7 @@ export const quests: Quest[] = [
         rewards: [
             { type: 'item', item: 'metalDetector', amount: 1 },
             { type: 'silver', amount: 500 },
+            { type: 'location_unlock', location: 'wasteland' }
         ],
         completionMessage: 'Kael expertly fits the plates onto his device. "Perfect. The signal will be clean. You\'ve done well. This old metal detector is surplus to my needs; it should serve you better. We\'re close to finishing this project."',
         dependsOn: 'quest_kael_mining',
@@ -269,7 +273,8 @@ export const quests: Quest[] = [
         ],
         rewards: [
             { type: 'silver', amount: 500 },
-            { type: 'item', item: 'components', amount: 10 }
+            { type: 'item', item: 'components', amount: 10 },
+            { type: 'location_unlock', location: 'industrial' }
         ],
         completionMessage: 'Vera connects the generator. The screens flicker to life, showing fragmented logs. "The crash... it wasn\'t an accident. Someone sabotaged the navigation. But who? And why are they still hiding?"',
         dependsOn: 'quest_kael_2',
@@ -286,7 +291,8 @@ export const quests: Quest[] = [
         ],
         rewards: [
             { type: 'item', item: 'biomass', amount: 15 },
-            { type: 'silver', amount: 800 }
+            { type: 'silver', amount: 800 },
+            { type: 'location_unlock', location: 'bunker' }
         ],
         completionMessage: 'The scan reveals a hidden facility. "There. That\'s where they\'re operating from. But we can\'t go alone. We need allies. And we need to be ready for what we\'ll find. The truth is darker than I imagined."',
         dependsOn: 'quest_vera_1',
@@ -417,5 +423,54 @@ export const quests: Quest[] = [
         ],
         completionMessage: '"We\'re not helpless anymore. Marcus can\'t control us through fear and scarcity. You\'ve given us independence. The people won\'t forget this. Neither will I."',
         dependsOn: 'quest_chen_2',
+    },
+    // Finn Arc: The Angler's Legacy
+    {
+        id: 'quest_finn_1',
+        title: 'Ripples in the Water',
+        npc: 'Finn, the River Keeper',
+        description: 'A calm man sits by the water\'s edge, fashioning a hook from scrap metal. "The water speaks, if you listen," he says softly. "But the fish are wary. They know the taste of poison. Prove you have the patience of the river. Catch me some simple fish, and I\'ll share my catch."',
+        requirements: [
+            { type: 'item', item: 'mutantMinnow', amount: 3 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 100 },
+            { type: 'item', item: 'cookedApple', amount: 5 }
+        ],
+        completionMessage: 'Finn nods slowly. "Good. You have patience. Hunger is a noise that scares the fish. Eat, and sit with me awhile."',
+        dependsOn: 'quest_silas_2',
+        unlocks: 'quest_finn_2',
+    },
+    {
+        id: 'quest_finn_2',
+        title: 'The Flow of Life',
+        npc: 'Finn, the River Keeper',
+        description: '"The river flows deeper than you think," Finn muses. "There are perch that swim against the current, glowing with the land\'s sickness. They are survivors. Bring me some. Let us feast on their resilience."',
+        requirements: [
+            { type: 'item', item: 'radPerch', amount: 5 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 300 },
+            { type: 'item', item: 'components', amount: 5 }
+        ],
+        completionMessage: '"Strong flesh. Good spirit. You are beginning to understand the river\'s way. But the deep water holds greater secrets... and greater dangers."',
+        dependsOn: 'quest_finn_1',
+        unlocks: 'quest_finn_3',
+    },
+    {
+        id: 'quest_finn_3',
+        title: 'Titan of the Deep',
+        npc: 'Finn, the River Keeper',
+        description: 'Finn looks out at the dark, churning water. "There is a beast in the reactor pools. A mutant catfish. It rules the deep, devouring everything. Catch it, and the glowfish that follow in its wake. Show me you are the apex predator."',
+        requirements: [
+            { type: 'item', item: 'mutantCatfish', amount: 1 },
+            { type: 'item', item: 'glowfish', amount: 5 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 1000 },
+            { type: 'item', item: 'components', amount: 10 }
+        ],
+        completionMessage: 'Finn laughs, a rare, booming sound. "You have done it! The beast is tamed. You are a true master of the waters, {{characterName}}. The river has no more lessons for you today."',
+        dependsOn: 'quest_finn_2',
     },
 ];

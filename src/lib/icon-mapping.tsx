@@ -31,6 +31,8 @@ const ITEM_ICON_MAP: Record<string, string> = {
     ironPlates: 'ironPlates',
     uranium: 'uranium',
     biomass: 'biomass',
+    charcoal: 'charcoal',
+    components: 'components',
     radio: 'default',
     generator: 'energy',
     sand: 'sand',
@@ -40,7 +42,7 @@ const ITEM_ICON_MAP: Record<string, string> = {
     droneBay: 'default',
     hydroponicsBay: 'default',
     miningRig: 'craft',
-    biomassCompressor: 'default',
+    biomassCompressor: 'biomassCompressor',
     crudeMap: 'explore',
 
     // Tools
