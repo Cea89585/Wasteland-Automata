@@ -19,6 +19,10 @@ export default function FishingPanel() {
     const { gameState, dispatch } = useGame();
     const { currentFishingZone, level, playerStats, isResting, smeltingQueue } = gameState;
     const [restingProgress, setRestingProgress] = useState(0);
+    const [isFishing, setIsFishing] = useState(false);
+    const [fishingProgress, setFishingProgress] = useState(0);
+
+    const FISHING_DURATION = 2000; // 2 seconds
 
     const availableZones = getAvailableFishingZones(level);
     const currentZone = fishingZones.find(z => z.id === currentFishingZone);
@@ -28,8 +32,25 @@ export default function FishingPanel() {
     const hasEnoughEnergy = currentZone ? playerStats.energy >= currentZone.energyCost : false;
 
     const handleFish = () => {
-        if (currentZone && canFish && hasEnoughEnergy) {
-            dispatch({ type: 'FISH', payload: { zoneId: currentZone.id } });
+        if (currentZone && canFish && hasEnoughEnergy && !isFishing) {
+            setIsFishing(true);
+            setFishingProgress(0);
+
+            const interval = setInterval(() => {
+                setFishingProgress(prev => {
+                    if (prev >= 100) {
+                        clearInterval(interval);
+                        return 100;
+                    }
+                    return prev + (100 / (FISHING_DURATION / 100));
+                });
+            }, 100);
+
+            setTimeout(() => {
+                dispatch({ type: 'FISH', payload: { zoneId: currentZone.id } });
+                setIsFishing(false);
+                setFishingProgress(0);
+            }, FISHING_DURATION);
         }
     };
 
@@ -140,15 +161,15 @@ export default function FishingPanel() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
                                 <Button
                                     onClick={handleFish}
-                                    disabled={!canFish || !hasEnoughEnergy || playerStats.health <= 0}
+                                    disabled={!canFish || !hasEnoughEnergy || playerStats.health <= 0 || isFishing}
                                     className="w-full"
                                 >
-                                    {isResting ? (
+                                    {isFishing || isResting ? (
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                     ) : (
                                         <Fish className="mr-2 h-4 w-4" />
                                     )}
-                                    Cast Line ({currentZone.energyCost} Energy)
+                                    {isFishing ? 'Fishing...' : `Cast Line (${currentZone.energyCost} Energy)`}
                                 </Button>
 
                                 <Button
@@ -165,6 +186,15 @@ export default function FishingPanel() {
                                     {isResting ? 'Resting...' : 'Rest (+15 Energy)'}
                                 </Button>
                             </div>
+
+                            {isFishing && (
+                                <div className="space-y-2">
+                                    <Progress value={fishingProgress} className="w-full" />
+                                    <p className="text-sm text-center text-muted-foreground font-mono italic">
+                                        Watching the bobber... {Math.floor(fishingProgress)}%
+                                    </p>
+                                </div>
+                            )}
 
                             {isResting && (
                                 <div className="space-y-2">

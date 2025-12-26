@@ -424,4 +424,63 @@
     <circle cx="40" cy="32" r="4" fill="#FDE047"/>
   </symbol>
 
+  <symbol id="icon-cookedFish" viewBox="0 0 64 64">
+    <!-- Plate -->
+    <ellipse cx="32" cy="48" rx="24" ry="8" fill="#E2E8F0" stroke="#94A3B8" stroke-width="2"/>
+    <!-- Fish body -->
+    <path d="M16 36 Q32 24 48 36 L52 32 V40 L48 36 Q32 48 16 36" fill="#94A3B8" stroke="#475569" stroke-width="2"/>
+    <!-- Grill marks -->
+    <path d="M24 32 L28 40 M32 30 L36 42 M40 32 L44 40" stroke="#444" stroke-width="2" opacity="0.6"/>
+  </symbol>
+
+  <symbol id="icon-cornChowder" viewBox="0 0 64 64">
+    <!-- Bowl -->
+    <path d="M12 28 Q12 52 32 52 Q52 52 52 28 H12" fill="#F1F5F9" stroke="#94A3B8" stroke-width="2"/>
+    <!-- Soup -->
+    <path d="M14 28 Q32 32 50 28 H14" fill="#FDE047" stroke="#EAB308" stroke-width="1"/>
+    <!-- Kernels in soup -->
+    <circle cx="24" cy="36" r="3" fill="#EAB308"/>
+    <circle cx="34" cy="42" r="2.5" fill="#EAB308"/>
+    <circle cx="42" cy="34" r="3" fill="#EAB308"/>
+  </symbol>
+
+  <symbol id="icon-vegetableMedley" viewBox="0 0 64 64">
+    <!-- Bowl -->
+    <path d="M12 28 Q12 52 32 52 Q52 52 52 28 H12" fill="#F1F5F9" stroke="#94A3B8" stroke-width="2"/>
+    <!-- Veggies -->
+    <circle cx="24" cy="32" r="5" fill="#F97316"/> <!-- Carrot -->
+    <circle cx="32" cy="36" r="4" fill="#FDE047"/> <!-- Corn -->
+    <circle cx="40" cy="30" r="5" fill="#EF4444"/> <!-- Apple -->
+    <path d="M14 28 Q32 34 50 28 H14" fill="#10B981" fill-opacity="0.3"/>
+  </symbol>
+
+  <symbol id="icon-fruitSalad" viewBox="0 0 64 64">
+    <!-- Bowl -->
+    <ellipse cx="32" cy="48" rx="20" ry="10" fill="#F1F5F9" stroke="#94A3B8" stroke-width="2"/>
+    <path d="M14 24 Q14 48 32 48 Q50 48 50 24 H14" fill="#F1F5F9" stroke="#94A3B8" stroke-width="2"/>
+    <!-- Fruits -->
+    <circle cx="22" cy="28" r="6" fill="#EF4444"/> <!-- Apple -->
+    <circle cx="32" cy="32" r="6" fill="#FDE047"/> <!-- Banana -->
+    <circle cx="42" cy="26" r="6" fill="#FED7AA"/> <!-- Peach -->
+  </symbol>
+
+  <symbol id="icon-lemonade" viewBox="0 0 64 64">
+    <!-- Glass -->
+    <path d="M20 12 L24 52 Q32 56 40 52 L44 12 Z" fill="#F1F5F9" fill-opacity="0.3" stroke="#94A3B8" stroke-width="2"/>
+    <!-- Liquid -->
+    <path d="M22 28 L24 50 Q32 54 40 50 L42 28 Z" fill="#FDE047" stroke="#EAB308" stroke-width="1"/>
+    <!-- Straw -->
+    <path d="M36 4 L36 32" stroke="#EF4444" stroke-width="3" stroke-linecap="round"/>
+  </symbol>
+
+  <symbol id="icon-kitchen" viewBox="0 0 64 64">
+    <!-- Pan body -->
+    <circle cx="28" cy="36" r="20" fill="#475569" stroke="#1E293B" stroke-width="2"/>
+    <!-- Handle -->
+    <rect x="44" y="32" width="16" height="8" rx="2" fill="#475569" stroke="#1E293B" stroke-width="2"/>
+    <!-- Steam -->
+    <path d="M20 12 Q20 4 24 8 T28 4" stroke="#CBD5E1" stroke-width="2" fill="none"/>
+    <path d="M30 14 Q30 6 34 10 T38 6" stroke="#CBD5E1" stroke-width="2" fill="none"/>
+  </symbol>
+
 </svg>

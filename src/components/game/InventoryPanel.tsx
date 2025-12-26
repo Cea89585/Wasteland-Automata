@@ -5,14 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { itemData } from '@/lib/game-data/items';
 import { GameIcon, AppleIcon, WaterIcon, CookedAppleIcon } from '@/lib/icon-mapping';
 import { Button } from '../ui/button';
-import { Shirt } from 'lucide-react';
+import { Shirt, Flame } from 'lucide-react';
 import type { Item } from '@/lib/game-types';
 
 export default function InventoryPanel() {
   const { gameState, dispatch } = useGame();
   const { inventory, equipment, caughtFish } = gameState;
 
-  const consumableSortOrder = ['apple', 'water', 'cookedApple'];
+  const consumableSortOrder = ['apple', 'water', 'cookedApple', 'cookedFish', 'cornChowder', 'vegetableMedley', 'fruitSalad', 'lemonade'];
 
   // Get owned inventory items
   const ownedInventoryItems = Object.entries(inventory)
@@ -43,23 +43,19 @@ export default function InventoryPanel() {
   const isDead = gameState.playerStats.health <= 0;
   const isBusy = gameState.isResting;
 
-  const handleEat = () => {
-    if (inventory.apple > 0) {
+  const handleUseItem = (itemId: string) => {
+    // Check if it's a basic item with a legacy handler
+    if (itemId === 'apple') {
       dispatch({ type: 'EAT' });
-    }
-  };
-
-  const handleDrink = () => {
-    if (inventory.water > 0) {
+    } else if (itemId === 'water') {
       dispatch({ type: 'DRINK' });
+    } else if (itemId === 'cookedApple') {
+      dispatch({ type: 'EAT_COOKED_APPLE' });
+    } else {
+      // Use the new generic handler
+      dispatch({ type: 'USE_ITEM', payload: { itemId } });
     }
   };
-
-  const handleEatCookedApple = () => {
-    if (inventory.cookedApple > 0) {
-      dispatch({ type: 'EAT_COOKED_APPLE' });
-    }
-  }
 
   const handleEquip = (itemId: Item) => {
     const itemDetails = itemData[itemId];
@@ -106,18 +102,23 @@ export default function InventoryPanel() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-lg font-semibold text-primary">{quantity}</span>
+                    {data?.type === 'consumable' && (
+                      <Button size="icon" variant="outline" onClick={() => handleUseItem(itemId)} disabled={isDead || quantity === 0 || isBusy} aria-label={`Use ${data.name}`}>
+                        <Flame size={16} />
+                      </Button>
+                    )}
                     {itemId === 'apple' && (
-                      <Button size="icon" variant="outline" onClick={handleEat} disabled={isDead || inventory.apple === 0 || isBusy} aria-label="Eat apple">
+                      <Button size="icon" variant="outline" onClick={() => handleUseItem('apple')} disabled={isDead || quantity === 0 || isBusy} aria-label="Eat apple">
                         <AppleIcon size={16} />
                       </Button>
                     )}
                     {itemId === 'water' && (
-                      <Button size="icon" variant="outline" onClick={handleDrink} disabled={isDead || inventory.water === 0 || isBusy} aria-label="Drink water">
+                      <Button size="icon" variant="outline" onClick={() => handleUseItem('water')} disabled={isDead || quantity === 0 || isBusy} aria-label="Drink water">
                         <WaterIcon size={16} />
                       </Button>
                     )}
                     {itemId === 'cookedApple' && (
-                      <Button size="icon" variant="outline" onClick={handleEatCookedApple} disabled={isDead || inventory.cookedApple === 0 || isBusy} aria-label="Eat Cooked Apple">
+                      <Button size="icon" variant="outline" onClick={() => handleUseItem('cookedApple')} disabled={isDead || quantity === 0 || isBusy} aria-label="Eat Cooked Apple">
                         <CookedAppleIcon size={16} />
                       </Button>
                     )}

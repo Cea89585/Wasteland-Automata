@@ -27,6 +27,13 @@ const ITEM_ICON_MAP: Record<string, string> = {
     carrotSeeds: 'carrotSeeds',
     corn: 'corn',
     cornSeeds: 'cornSeeds',
+    cookedFish: 'cookedFish',
+    cornChowder: 'cornChowder',
+    vegetableMedley: 'vegetableMedley',
+    fruitSalad: 'fruitSalad',
+    lemonade: 'lemonade',
+    kitchen: 'kitchen',
+    cooking: 'kitchen',
 
     // Materials
     scrap: 'scrap',
@@ -145,6 +152,7 @@ const NAV_ICON_MAP: Record<string, string> = {
     logo: 'default',
     wasteland: 'default',
     mining: 'mining',
+    cooking: 'kitchen',
 };
 
 // Component wrapper for easy icon rendering
@@ -253,3 +261,15 @@ export const WastelandAutomataIcon: React.FC<{ className?: string; size?: number
     <SpriteIcon name="default" {...props} />;
 export const MiningIcon: React.FC<{ className?: string; size?: number }> = (props) =>
     <GameIcon type="nav" id="mining" {...props} />;
+export const CookingIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="kitchen" {...props} />;
+export const CookedFishIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="cookedFish" {...props} />;
+export const CornChowderIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="cornChowder" {...props} />;
+export const VegetableMedleyIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="vegetableMedley" {...props} />;
+export const FruitSaladIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="fruitSalad" {...props} />;
+export const LemonadeIcon: React.FC<{ className?: string; size?: number }> = (props) =>
+    <SpriteIcon name="lemonade" {...props} />;

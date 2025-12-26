@@ -14,9 +14,32 @@ export default function MiningPanel() {
     const { equipment, playerStats, inventory, isResting } = gameState;
     const hasPickaxe = equipment.hand === 'pickaxe';
     const [restingProgress, setRestingProgress] = useState(0);
+    const [isMining, setIsMining] = useState(false);
+    const [miningProgress, setMiningProgress] = useState(0);
+
+    const MINING_DURATION = 1500; // 1.5 seconds
 
     const handleMine = () => {
-        dispatch({ type: 'MINE' });
+        if (!hasPickaxe || playerStats.energy < 10 || isResting || isMining) return;
+
+        setIsMining(true);
+        setMiningProgress(0);
+
+        const interval = setInterval(() => {
+            setMiningProgress(prev => {
+                if (prev >= 100) {
+                    clearInterval(interval);
+                    return 100;
+                }
+                return prev + (100 / (MINING_DURATION / 100));
+            });
+        }, 100);
+
+        setTimeout(() => {
+            dispatch({ type: 'MINE' });
+            setIsMining(false);
+            setMiningProgress(0);
+        }, MINING_DURATION);
     };
 
     const finishResting = useCallback(() => {
@@ -96,14 +119,14 @@ export default function MiningPanel() {
                         <Button
                             className="w-full"
                             onClick={handleMine}
-                            disabled={!hasPickaxe || playerStats.energy < 10 || isResting}
+                            disabled={!hasPickaxe || playerStats.energy < 10 || isResting || isMining}
                         >
-                            {isResting ? (
+                            {isMining || isResting ? (
                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             ) : (
                                 <GameIcon type="nav" id="mining" className="mr-2 h-4 w-4" />
                             )}
-                            Mine (10 Energy)
+                            {isMining ? 'Mining...' : 'Mine (10 Energy)'}
                         </Button>
 
                         <Button
@@ -120,6 +143,15 @@ export default function MiningPanel() {
                             {isResting ? 'Resting...' : 'Rest (+15 Energy)'}
                         </Button>
                     </div>
+
+                    {isMining && (
+                        <div className="space-y-2 w-full">
+                            <Progress value={miningProgress} className="w-full" />
+                            <p className="text-sm text-center text-muted-foreground font-mono">
+                                Extracting Core Samples... {Math.floor(miningProgress)}%
+                            </p>
+                        </div>
+                    )}
 
                     {isResting && (
                         <div className="space-y-2 w-full">

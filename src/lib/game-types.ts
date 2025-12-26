@@ -28,6 +28,13 @@ export const Resources = {
   glassTube: 'Glass Tube',
   glassJar: 'Glass Jar',
   pickledPeaches: 'Pickled Peaches',
+  cookedFish: 'Grilled Fish',
+  cornChowder: 'Corn Chowder',
+  vegetableMedley: 'Vegetable Medley',
+  fruitSalad: 'Fruit Salad',
+  lemonade: 'Wasteland Lemonade',
+  cookedApple: 'Cooked Apple',
+  kitchen: 'Kitchen',
   iron: 'Iron Ore',
   rawFish: 'Raw Fish',
   rawSalmon: 'Raw Salmon',
@@ -254,7 +261,7 @@ export type GameAction =
   | { type: 'GAME_TICK' }
   | { type: 'SET_IDLE', payload: boolean }
   | { type: 'ADD_XP', payload: number }
-  | { type: 'TRACK_STAT'; payload: { stat: keyof Pick<Statistics, 'timesExplored' | 'timesScavenged'> } }
+  | { type: 'TRACK_STAT'; payload: { stat: keyof Pick<Statistics, 'timesExplored' | 'timesScavenged' | 'timesFished' | 'timesMined' | 'deaths'> } }
   | { type: 'ADD_LOG'; payload: { text: string; type: LogMessage['type'], item?: Resource | Item } }
   | { type: 'CLEAR_LOG' }
   | { type: 'TRIGGER_ENCOUNTER'; payload: FixedEncounter }
@@ -272,6 +279,7 @@ export type GameAction =
   | { type: 'EAT' }
   | { type: 'DRINK' }
   | { type: 'EAT_COOKED_APPLE' }
+  | { type: 'USE_ITEM'; payload: { itemId: string } }
   | { type: 'START_RESTING' }
   | { type: 'FINISH_RESTING' }
   | { type: 'START_SMELTING' }

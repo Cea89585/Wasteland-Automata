@@ -26,9 +26,10 @@ import FactoryPanel from './FactoryPanel';
 import SkillsPanel from './SkillsPanel';
 import FishingPanel from './FishingPanel';
 import MiningPanel from './MiningPanel';
+import CookingPanel from './CookingPanel';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertTriangle, LogOut, Settings } from 'lucide-react';
-import { ExploreIcon, QuestIcon, InventoryIcon, CraftIcon, CharacterIcon, BaseIcon, FurnaceIcon, MarketIcon, FarmingIcon, FishingIcon, FactoryIcon, SkillsIcon, TechIcon, MiningIcon } from '@/lib/icon-mapping';
+import { ExploreIcon, QuestIcon, InventoryIcon, CraftIcon, CharacterIcon, BaseIcon, FurnaceIcon, MarketIcon, FarmingIcon, FishingIcon, FactoryIcon, SkillsIcon, TechIcon, MiningIcon, CookingIcon } from '@/lib/icon-mapping';
 import { GlowIcon } from '@/components/ui/glow-icon';
 import {
   AlertDialog,
@@ -97,6 +98,7 @@ export default function GameUI() {
   const showMarket = gameState.builtStructures?.includes('workbench') ?? false;
   const showFarming = gameState.builtStructures?.includes('hydroponicsBay') ?? false;
   const showMining = gameState.completedQuests?.includes('quest_kael_mining') ?? false;
+  const showCooking = gameState.builtStructures?.includes('kitchen') ?? false;
 
   const hasReadyCrops = gameState.farmPlots?.some(plot => {
     if (!plot.seed || !plot.plantedTimestamp) return false;
@@ -115,6 +117,7 @@ export default function GameUI() {
     { value: "farming", label: "Farming", icon: FarmingIcon, condition: showFarming, badge: hasReadyCrops },
     { value: "fishing", label: "Fishing", icon: FishingIcon },
     { value: "mining", label: "Mining", icon: MiningIcon, condition: showMining },
+    { value: "cooking", label: "Cooking", icon: CookingIcon, condition: showCooking },
     { value: "factory", label: "Factory", icon: FactoryIcon },
     { value: "skills", label: "Skills", icon: SkillsIcon },
     { value: "tech", label: "Tech", icon: TechIcon },
@@ -207,6 +210,7 @@ export default function GameUI() {
             {showFarming && <TabsContent value="farming" className="mt-4"><FarmingPanel /></TabsContent>}
             <TabsContent value="fishing" className="mt-4"><FishingPanel /></TabsContent>
             {showMining && <TabsContent value="mining" className="mt-4"><MiningPanel /></TabsContent>}
+            {showCooking && <TabsContent value="cooking" className="mt-4"><CookingPanel /></TabsContent>}
             <TabsContent value="factory" className="mt-4"><FactoryPanel /></TabsContent>
             <TabsContent value="skills" className="mt-4"><SkillsPanel /></TabsContent>
             <TabsContent value="tech" className="mt-4"><TechPanel /></TabsContent>

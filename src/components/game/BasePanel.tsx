@@ -2,7 +2,7 @@
 'use client';
 import { useGame } from '@/hooks/use-game';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Home, Hammer, CheckCircle, Droplets, Power, Bot, Sprout, Fuel, Leaf } from 'lucide-react';
+import { Home, Hammer, CheckCircle, Droplets, Power, Bot, Sprout, Fuel, Leaf, Utensils } from 'lucide-react';
 import { Button } from '../ui/button';
 import { recipes } from '@/lib/game-data/recipes';
 import type { Resource } from '@/lib/game-types';
@@ -211,6 +211,15 @@ export default function BasePanel() {
               Icon={Droplets}
               successText="Water Purifier built!"
               successDescription="Passively generating water."
+            />
+            <StructureSection
+              structureId="kitchen"
+              recipeId="recipe_kitchen"
+              title="Build a Kitchen"
+              description="Unlocks the ability to cook more advanced and nutritious meals."
+              Icon={Utensils}
+              successText="Kitchen built!"
+              successDescription="Cooking is now available."
             />
             <StructureSection
               structureId="hydroponicsBay"

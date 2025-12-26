@@ -30,7 +30,12 @@ export default function ExplorationPanel() {
   const [isExploring, setIsExploring] = useState(false);
   const [isScavenging, setIsScavenging] = useState(false);
   const [restingProgress, setRestingProgress] = useState(0);
+  const [exploreProgress, setExploreProgress] = useState(0);
+  const [scavengeProgress, setScavengeProgress] = useState(0);
   const [isTravelDialogOpen, setIsTravelDialogOpen] = useState(false);
+
+  const EXPLORE_DURATION = 1500;
+  const SCAVENGE_DURATION = 1000;
 
 
   const currentLocation = locations[gameState.currentLocation];
@@ -93,8 +98,19 @@ export default function ExplorationPanel() {
     }
 
     setIsExploring(true);
+    setExploreProgress(0);
     dispatch({ type: 'TRACK_STAT', payload: { stat: 'timesExplored' } });
     dispatch({ type: 'CONSUME', payload: { stat: 'energy', amount: 10 } });
+
+    const interval = setInterval(() => {
+      setExploreProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + (100 / (EXPLORE_DURATION / 100));
+      });
+    }, 100);
 
     setTimeout(() => {
       // Decide if an encounter or resource finding happens.
@@ -162,7 +178,8 @@ export default function ExplorationPanel() {
       }
 
       setIsExploring(false);
-    }, 1000); // Simulate exploration time
+      setExploreProgress(0);
+    }, EXPLORE_DURATION);
   };
 
   const handleScavenge = async () => {
@@ -172,8 +189,19 @@ export default function ExplorationPanel() {
     }
 
     setIsScavenging(true);
+    setScavengeProgress(0);
     dispatch({ type: 'TRACK_STAT', payload: { stat: 'timesScavenged' } });
     dispatch({ type: 'CONSUME', payload: { stat: 'energy', amount: 5 } });
+
+    const interval = setInterval(() => {
+      setScavengeProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + (100 / (SCAVENGE_DURATION / 100));
+      });
+    }, 100);
 
     setTimeout(() => {
       let foundSomething = false;
@@ -215,7 +243,8 @@ export default function ExplorationPanel() {
 
       dispatch({ type: 'ADD_LOG', payload: { text: scavengeText, type: 'info' } });
       setIsScavenging(false);
-    }, 800);
+      setScavengeProgress(0);
+    }, SCAVENGE_DURATION);
   };
 
   const handleRest = () => {
@@ -319,6 +348,20 @@ export default function ExplorationPanel() {
             </Dialog>
           )}
         </div>
+
+        {isExploring && (
+          <div className="flex flex-col gap-2">
+            <Progress value={exploreProgress} className="w-full" />
+            <p className="text-sm text-muted-foreground text-center font-mono">Trekking through waste... {Math.floor(exploreProgress)}%</p>
+          </div>
+        )}
+
+        {isScavenging && (
+          <div className="flex flex-col gap-2">
+            <Progress value={scavengeProgress} className="w-full" />
+            <p className="text-sm text-muted-foreground text-center font-mono italic">Sifting through debris... {Math.floor(scavengeProgress)}%</p>
+          </div>
+        )}
 
         {gameState.isResting && (
           <div className="flex flex-col gap-2">

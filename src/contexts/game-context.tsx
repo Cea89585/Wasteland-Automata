@@ -13,7 +13,7 @@ import { quests } from '@/lib/game-data/quests';
 import { xpCurve } from '@/lib/game-data/xp-curve';
 import { useUser } from '@/hooks/use-user';
 import { useFirebase } from '@/firebase/provider';
-import { doc, setDoc, getDoc, DocumentData, writeBatch } from 'firebase/firestore';
+import { doc, setDoc, getDoc, DocumentData, writeBatch, onSnapshot } from 'firebase/firestore';
 import { machineCosts } from '@/lib/game-data/machines';
 import { canUnlockSkill, skills } from '@/lib/game-data/skills';
 
@@ -1405,6 +1405,60 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       };
     }
 
+    case 'USE_ITEM': {
+      const { itemId } = action.payload;
+      if (state.inventory[itemId as Resource] <= 0) return state;
+
+      const newInventory = { ...state.inventory };
+      const newStats = { ...state.playerStats };
+      let logText = "";
+
+      const MAX_HUNGER = getMaxHunger();
+      const MAX_ENERGY = getMaxEnergy();
+      const MAX_HEALTH = getMaxHealth();
+      const MAX_THIRST = getMaxThirst();
+
+      switch (itemId) {
+        case 'cookedFish':
+          newStats.hunger = Math.min(MAX_HUNGER, newStats.hunger + 40);
+          newStats.health = Math.min(MAX_HEALTH, newStats.health + 10);
+          logText = "You eat the grilled fish. It's surprisingly good.";
+          break;
+        case 'cornChowder':
+          newStats.hunger = Math.min(MAX_HUNGER, newStats.hunger + 60);
+          newStats.health = Math.min(MAX_HEALTH, newStats.health + 20);
+          logText = "You finish the corn chowder. You feel warm and full.";
+          break;
+        case 'vegetableMedley':
+          newStats.hunger = Math.min(MAX_HUNGER, newStats.hunger + 50);
+          newStats.health = Math.min(MAX_HEALTH, newStats.health + 15);
+          newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 5);
+          logText = "You eat the vegetable medley. You feel healthy.";
+          break;
+        case 'fruitSalad':
+          newStats.hunger = Math.min(MAX_HUNGER, newStats.hunger + 20);
+          newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 30);
+          logText = "You eat the fruit salad. You feel refreshed and energetic.";
+          break;
+        case 'lemonade':
+          newStats.thirst = Math.min(MAX_THIRST, newStats.thirst + 40);
+          newStats.energy = Math.min(MAX_ENERGY, newStats.energy + 15);
+          logText = "You drink the lemonade. It's tart and refreshing!";
+          break;
+        default:
+          return state;
+      }
+
+      newInventory[itemId as Resource] -= 1;
+
+      return {
+        ...state,
+        inventory: newInventory,
+        playerStats: newStats,
+        log: [{ id: generateUniqueLogId(), text: logText, type: 'success', timestamp: Date.now() }, ...state.log],
+      };
+    }
+
     case 'EQUIP': {
       const { item, slot } = action.payload;
       if (state.inventory[item] < 1) return state;
@@ -2680,6 +2734,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const isSavingRef = useRef(false);
   const gameStateRef = useRef(gameState);
   const isProcessingSmeltRef = useRef(false);
+  const hasInitializedRef = useRef(false);
 
   // Keep gameStateRef updated
   useEffect(() => {
@@ -2699,17 +2754,24 @@ export function GameProvider({ children }: { children: ReactNode }) {
     isProcessingSmeltRef.current = false;
   }, [gameState]);
 
-  // Effect for loading game state from Firestore
-  // Effect for loading game state from Firestore
+  // Effect for loading game state from Firestore using real-time snapshots
   useEffect(() => {
-    async function loadData() {
-      if (user) {
-        const userDocRef = doc(firestore, 'users', user.uid);
-        try {
-          const docSnap = await getDoc(userDocRef);
-          if (docSnap.exists()) {
-            const data = docSnap.data() as GameState;
-            // Separate statistics from gameState for INITIALIZE payload
+    if (!user) {
+      dispatch({ type: 'RESET_GAME_NO_LOCALSTORAGE' });
+      hasInitializedRef.current = false;
+      return;
+    }
+
+    const userDocRef = doc(firestore, 'users', user.uid);
+
+    // Use onSnapshot for real-time multi-device sync
+    const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+      try {
+        if (docSnap.exists()) {
+          const data = docSnap.data() as GameState;
+
+          if (!hasInitializedRef.current) {
+            // First load: handle offline progress via INITIALIZE
             const { statistics, ...restGameState } = data;
             dispatch({
               type: 'INITIALIZE',
@@ -2718,26 +2780,44 @@ export function GameProvider({ children }: { children: ReactNode }) {
                 statistics: statistics || initialStatistics
               }
             });
+            hasInitializedRef.current = true;
           } else {
-            // New user, create initial state in Firestore
-            const batch = writeBatch(firestore);
+            // Subsequent updates: sync remote changes
+            const currentTs = gameStateRef.current.lastSavedTimestamp || 0;
+            const remoteTs = data.lastSavedTimestamp || 0;
+
+            if (remoteTs > currentTs) {
+              dispatch({ type: 'SET_GAME_STATE', payload: data });
+            }
+          }
+        } else {
+          // New user, create initial state in Firestore
+          if (!hasInitializedRef.current) {
             const newGameData = {
               ...initialState,
               isInitialized: true,
             };
-            batch.set(userDocRef, newGameData);
-            await batch.commit();
+            setDoc(userDocRef, newGameData);
             dispatch({ type: 'SET_GAME_STATE', payload: newGameData });
+            hasInitializedRef.current = true;
           }
-        } catch (error) {
-          console.error("Error loading game data:", error);
         }
-      } else {
-        dispatch({ type: 'RESET_GAME_NO_LOCALSTORAGE' });
+      } catch (error) {
+        console.error("Error processing game data snapshot:", error);
+        if (!hasInitializedRef.current) {
+          dispatch({ type: 'SET_GAME_STATE', payload: { isInitialized: true } });
+          hasInitializedRef.current = true;
+        }
       }
-    }
+    }, (error) => {
+      console.error("Firestore onSnapshot error:", error);
+      if (!hasInitializedRef.current) {
+        dispatch({ type: 'SET_GAME_STATE', payload: { isInitialized: true } });
+        hasInitializedRef.current = true;
+      }
+    });
 
-    loadData();
+    return () => unsubscribe();
   }, [user, firestore]);
 
   // Effect for smelting persistence
