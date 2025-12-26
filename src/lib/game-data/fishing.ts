@@ -176,17 +176,31 @@ export const getAvailableFishingZones = (playerLevel: number): FishingZone[] => 
 };
 
 // Weighted random selection from loot table
-export const rollFishingLoot = (lootTable: FishingLoot[]): FishingLoot => {
-    const totalWeight = lootTable.reduce((sum, loot) => sum + loot.weight, 0);
-    let random = Math.random() * totalWeight;
+export const rollFishingLoot = (lootTable: FishingLoot[], hasLuck: boolean = false): FishingLoot => {
+    const performRoll = () => {
+        const totalWeight = lootTable.reduce((sum, loot) => sum + loot.weight, 0);
+        let random = Math.random() * totalWeight;
 
-    for (const loot of lootTable) {
-        random -= loot.weight;
-        if (random <= 0) {
-            return loot;
+        for (const loot of lootTable) {
+            random -= loot.weight;
+            if (random <= 0) {
+                return loot;
+            }
+        }
+        return lootTable[0];
+    };
+
+    const result1 = performRoll();
+    if (!hasLuck) return result1;
+
+    // With luck, if result is common, try to get something better
+    if (result1.rarity === 'common' || result1.rarity === 'veryCommon') {
+        const result2 = performRoll();
+        // Lower weight value means rarer item (defined in rarityWeights)
+        if (rarityWeights[result2.rarity] < rarityWeights[result1.rarity]) {
+            return result2;
         }
     }
 
-    // Fallback to first item (should never happen)
-    return lootTable[0];
+    return result1;
 };

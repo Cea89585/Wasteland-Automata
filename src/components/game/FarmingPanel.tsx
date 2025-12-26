@@ -18,8 +18,8 @@ export default function FarmingPanel() {
     }, []);
 
     const plots = gameState.farmPlots || [];
-    // Ensure we display at least 3 plots if Hydroponics Bay is built
-    const displayPlots = Array.from({ length: 3 }).map((_, i) => {
+    // Ensure we display at least 3 plots if Hydroponics Bay is built, plus any upgraded plots
+    const displayPlots = Array.from({ length: 3 + (gameState.farmPlotLevel || 0) }).map((_, i) => {
         const existing = plots.find(p => p.id === i);
         return existing || { id: i, seed: null, plantedTimestamp: null, duration: 0 };
     });

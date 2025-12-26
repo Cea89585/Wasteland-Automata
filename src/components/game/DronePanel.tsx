@@ -31,7 +31,7 @@ export default function DronePanel({ mode = 'scavenge' }: DronePanelProps) {
   }, [gameState.inventory.water]);
 
   const hasPower = gameState.builtStructures.includes('generator') && power > 0;
-  const isBusy = gameState.isResting || gameState.smeltingQueue > 0;
+  const isBusy = gameState.isResting;
   const currentQueue = droneMissionQueue;
 
   const maxCanQueue = Math.min(MAX_QUEUE - currentQueue, canAffordMissions);

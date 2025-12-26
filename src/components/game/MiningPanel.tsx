@@ -92,28 +92,28 @@ export default function MiningPanel() {
                     )}
 
                     {/* Action Section */}
-                    <div className="flex gap-2 w-full">
+                    <div className="flex flex-col sm:flex-row gap-2 w-full">
                         <Button
                             size="lg"
-                            className="flex-1 h-16 text-lg gap-2"
+                            className="flex-1 gap-2"
                             onClick={handleMine}
                             disabled={!hasPickaxe || playerStats.energy < 10 || isResting}
                         >
-                            <GameIcon type="nav" id="mining" className="h-6 w-6" />
+                            <GameIcon type="nav" id="mining" className="h-5 w-5" />
                             Mine Resources
                         </Button>
 
                         <Button
                             variant="outline"
                             size="lg"
-                            className="flex-1 h-16 text-lg gap-2"
+                            className="flex-1 gap-2"
                             onClick={handleRest}
                             disabled={isResting || playerStats.health <= 0}
                         >
                             {isResting ? (
-                                <Loader2 className="h-6 w-6 animate-spin" />
+                                <Loader2 className="h-5 w-5 animate-spin" />
                             ) : (
-                                <Bed className="h-6 w-6" />
+                                <Bed className="h-5 w-5" />
                             )}
                             {isResting ? 'Resting...' : 'Rest (+15 Energy)'}
                         </Button>

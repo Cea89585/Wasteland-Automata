@@ -68,7 +68,7 @@ export default function MarketPanel() {
   }
 
   const isDead = gameState.playerStats.health <= 0;
-  const isBusy = gameState.isResting || gameState.smeltingQueue > 0;
+  const isBusy = gameState.isResting;
 
   const renderItem = (item: typeof sellableItems[0]) => {
     const isLocked = lockedItems.includes(item.id);

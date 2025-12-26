@@ -19,7 +19,7 @@ interface QuestDetailsProps {
 export default function QuestDetails({ quest: questProp, onBack }: QuestDetailsProps) {
     const { gameState, dispatch } = useGame();
     const { inventory, completedQuests, playerStats, isResting, smeltingQueue, builtStructures, characterName } = gameState;
-    const isBusy = isResting || smeltingQueue > 0;
+    const isBusy = isResting;
     const isDead = playerStats.health <= 0;
 
     const canComplete = (questId: string) => {

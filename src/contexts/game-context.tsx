@@ -65,8 +65,9 @@ const processDroneReturn = (state: GameState): { droneState: GameState, logMessa
       const resourceCounts: Record<string, number> = {};
 
       // Roll loot 15 times (same as explore) for drone fishing
+      // Drone inherits player's fishing luck? Sure.
       for (let i = 0; i < 15; i++) {
-        const loot = rollFishingLoot(zone.lootTable);
+        const loot = rollFishingLoot(zone.lootTable, state.hasFishingLuck);
         if (loot.isFish) {
           // Track fish count
           fishCounts[loot.item as string] = (fishCounts[loot.item as string] || 0) + 1;
@@ -165,7 +166,7 @@ const processDroneReturn = (state: GameState): { droneState: GameState, logMessa
     caughtFish: finalCaughtFish,
     droneIsActive: false,
     droneReturnTimestamp: null,
-    droneMissionType: null, // Reset mission type after completion
+    droneMissionType: state.droneMissionQueue > 0 ? state.droneMissionType : null, // Reset mission type only if queue is empty
   };
 
   return { droneState, logMessage: { text: resourcesFoundText, type: 'success' } };
@@ -684,7 +685,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         const MAX_HEALTH = getMaxHealth();
         if (newStats.health < MAX_HEALTH) {
           const secondWindLevel = currentState.skills?.secondWind || 0;
-          const healAmount = 0.25 * (1 + (secondWindLevel * 0.5));
+          const restEfficiencyLevel = currentState.restEfficiencyLevel || 0;
+          const healAmount = 0.25 * (1 + (secondWindLevel * 0.5)) * (1 + (restEfficiencyLevel * 0.05));
           newStats.health = Math.min(MAX_HEALTH, newStats.health + healAmount);
         }
       } else {
@@ -1846,8 +1848,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (missionType === 'mine') {
         const roll = Math.random();
         if (roll < 0.5) loot = { stone: Math.floor(Math.random() * 5) + 3 };
-        else if (roll < 0.8) loot = { charcoal: Math.floor(Math.random() * 3) + 1 };
-        else if (roll < 0.95) loot = { iron: Math.floor(Math.random() * 2) + 1 };
+        else if (roll < 0.75) loot = { charcoal: Math.floor(Math.random() * 3) + 1 };
+        else if (roll < 0.90) loot = { iron: Math.floor(Math.random() * 2) + 1 };
         else loot = { uranium: 1 };
       } else if (missionType === 'fish') {
         const roll = Math.random();
@@ -1994,6 +1996,18 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     case 'BUILD_MACHINE': {
       const { type } = action.payload;
       const machineData = machineCosts[type];
+
+      // Check machine slot limit
+      const baseSlots = 5; // Base number of machines
+      const extraSlots = state.machineSlotLevel || 0;
+      const maxMachines = baseSlots + extraSlots;
+
+      if (state.machines.length >= maxMachines) {
+        return {
+          ...state,
+          log: [{ id: generateUniqueLogId(), text: `Machine limit reached (${maxMachines}). Upgrade Machine Slots in Tech Tree.`, type: 'danger' as const, timestamp: Date.now() }, ...state.log]
+        };
+      }
 
       // Check unlock conditions
       const isUnlocked = machineData.unlockedBy.every(req => state.builtStructures.includes(req));
@@ -2184,7 +2198,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       }
 
       // Roll for loot
-      const loot = rollFishingLoot(zone.lootTable);
+      const loot = rollFishingLoot(zone.lootTable, state.hasFishingLuck);
 
       let newInventory = { ...state.inventory };
       let newCaughtFish = { ...state.caughtFish };
@@ -2483,8 +2497,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       let item: Resource = 'stone';
       let amount = 1;
 
+      // 2% chance for ultra-rare Uranium (Super Jackpot)
+      if (rand < 0.02) {
+        item = 'uranium';
+        amount = 1;
+      }
       // 5% chance for jackpot (10 items)
-      if (rand < 0.05) {
+      else if (rand < 0.07) {
         const jackpotRand = Math.random();
         if (jackpotRand < 0.5) {
           item = 'stone';
@@ -2494,16 +2513,16 @@ const reducer = (state: GameState, action: GameAction): GameState => {
           item = 'ironIngot';
         }
         amount = 10;
-      } else if (rand < 0.45) {
+      } else if (rand < 0.47) {
         // 40% chance for stone (3-6 items)
         item = 'stone';
         amount = Math.floor(Math.random() * 4) + 3;
-      } else if (rand < 0.75) {
+      } else if (rand < 0.77) {
         // 30% chance for scrap (2-4 items)
         item = 'scrap';
         amount = Math.floor(Math.random() * 3) + 2;
       } else {
-        // 25% chance for iron ingot (1-2 items)
+        // Remaining chance for iron ingot
         item = 'ironIngot';
         amount = Math.floor(Math.random() * 2) + 1;
       }
@@ -2620,15 +2639,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
       const now = Date.now();
       const currentState = gameStateRef.current;
 
+      const automationSpeedModifier = Math.max(0.1, 1 - ((currentState.automationSpeedLevel || 0) * 0.05));
+      const componentDuration = 10000 * automationSpeedModifier;
+      const ironDuration = 20000 * automationSpeedModifier;
+      const charcoalDuration = 10000 * automationSpeedModifier;
+      const glassDuration = 10000 * automationSpeedModifier;
+
       if (currentState.smeltingQueue > 0 && currentState.smeltingTimestamps?.components) {
-        if (now - currentState.smeltingTimestamps.components >= 10000) {
+        if (now - currentState.smeltingTimestamps.components >= componentDuration) {
           isProcessingSmeltRef.current = true;
           dispatch({ type: 'FINISH_SMELTING' });
         }
       }
 
       if (currentState.ironIngotSmeltingQueue > 0 && currentState.smeltingTimestamps?.iron) {
-        if (now - currentState.smeltingTimestamps.iron >= 20000) {
+        if (now - currentState.smeltingTimestamps.iron >= ironDuration) {
           isProcessingSmeltRef.current = true;
           dispatch({ type: 'FINISH_SMELTING_IRON' });
         }
@@ -2638,14 +2663,14 @@ export function GameProvider({ children }: { children: ReactNode }) {
         // DEBUG: Trace interval check
         // if (now - currentState.smeltingTimestamps.charcoal >= 10000) console.log('DEBUG: Interval Trigger Charcoal', { now, ts: currentState.smeltingTimestamps.charcoal, diff: now - currentState.smeltingTimestamps.charcoal });
 
-        if (now - currentState.smeltingTimestamps.charcoal >= 10000) {
+        if (now - currentState.smeltingTimestamps.charcoal >= charcoalDuration) {
           isProcessingSmeltRef.current = true;
           dispatch({ type: 'FINISH_SMELTING_CHARCOAL' });
         }
       }
 
       if (currentState.glassSmeltingQueue > 0 && currentState.smeltingTimestamps?.glass) {
-        if (now - currentState.smeltingTimestamps.glass >= 10000) {
+        if (now - currentState.smeltingTimestamps.glass >= glassDuration) {
           isProcessingSmeltRef.current = true;
           dispatch({ type: 'FINISH_SMELTING_GLASS' });
         }

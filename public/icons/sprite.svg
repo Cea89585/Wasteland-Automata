@@ -71,6 +71,18 @@
     <rect x="20" y="24" width="24" height="24" fill="none" stroke="#94A3B8" stroke-width="1" stroke-dasharray="4 2"/>
   </symbol>
 
+  <symbol id="icon-ironPlates" viewBox="0 0 64 64">
+    <!-- Stack of Plates -->
+    <path d="M12 44 L52 44 L48 56 L16 56 Z" fill="#475569" stroke="#1E293B" stroke-width="2"/>
+    <path d="M12 32 L52 32 L48 44 L16 44 Z" fill="#64748B" stroke="#334155" stroke-width="2"/>
+    <path d="M16 20 L48 20 L52 32 L12 32 Z" fill="#94A3B8" stroke="#475569" stroke-width="2"/>
+    <!-- Rivets -->
+    <circle cx="16" cy="24" r="1" fill="#1E293B"/>
+    <circle cx="48" cy="24" r="1" fill="#1E293B"/>
+    <circle cx="16" cy="38" r="1" fill="#1E293B"/>
+    <circle cx="48" cy="38" r="1" fill="#1E293B"/>
+  </symbol>
+
   <symbol id="icon-components" viewBox="0 0 64 64">
     <!-- Circuit Chip -->
     <rect x="12" y="12" width="40" height="40" fill="#065F46" stroke="#047857" stroke-width="2"/>
@@ -98,11 +110,6 @@
     <path d="M28 28 Q32 32 28 36" stroke="#CA8A04" stroke-width="1" opacity="0.3"/>
   </symbol>
 
-  <symbol id="icon-banana" viewBox="0 0 64 64">
-    <!-- Banana curve -->
-    <path d="M20 20 Q32 16 44 24 Q48 32 44 40 Q32 48 20 44" fill="#FDE047" stroke="#CA8A04" stroke-width="2"/>
-    <path d="M20 20 L20 44" stroke="#CA8A04" stroke-width="1"/>
-  </symbol>
 
   <symbol id="icon-mutatedTwigs" viewBox="0 0 64 64">
     <!-- Glowing twisted branches -->

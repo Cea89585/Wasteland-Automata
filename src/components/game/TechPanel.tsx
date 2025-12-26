@@ -143,7 +143,7 @@ export default function TechPanel() {
   const canAffordFishingLuck = inventory.silver >= FISHING_LUCK_COST && !hasFishingLuck;
   const canAffordRest = inventory.silver >= restCost;
 
-  const isBusy = isResting || smeltingQueue > 0;
+  const isBusy = isResting;
   const isDead = playerStats.health <= 0;
 
   const handleUpgradeStorage = () => dispatch({ type: 'UPGRADE_STORAGE' });

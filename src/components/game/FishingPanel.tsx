@@ -24,7 +24,7 @@ export default function FishingPanel() {
     const currentZone = fishingZones.find(z => z.id === currentFishingZone);
 
     const MAX_ENERGY = 100 + (gameState.energyLevel || 0) * 5;
-    const canFish = !isResting && smeltingQueue === 0 && playerStats.health > 0;
+    const canFish = !isResting && playerStats.health > 0;
     const hasEnoughEnergy = currentZone ? playerStats.energy >= currentZone.energyCost : false;
 
     const handleFish = () => {
@@ -137,30 +137,32 @@ export default function FishingPanel() {
                                 <DronePanel mode="fish" />
                             )}
 
-                            <Button
-                                onClick={handleFish}
-                                disabled={!canFish || !hasEnoughEnergy || playerStats.health <= 0}
-                                className="w-full"
-                                size="lg"
-                            >
-                                <Fish className="mr-2 h-4 w-4" />
-                                Cast Line ({currentZone.energyCost} Energy)
-                            </Button>
+                            <div className="flex flex-col sm:flex-row gap-2 w-full">
+                                <Button
+                                    onClick={handleFish}
+                                    disabled={!canFish || !hasEnoughEnergy || playerStats.health <= 0}
+                                    className="flex-1 gap-2"
+                                    size="lg"
+                                >
+                                    <Fish className="h-5 w-5" />
+                                    Cast Line ({currentZone.energyCost} Energy)
+                                </Button>
 
-                            <Button
-                                variant="outline"
-                                onClick={handleRest}
-                                disabled={isResting || playerStats.health <= 0}
-                                className="w-full"
-                                size="lg"
-                            >
-                                {isResting ? (
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                ) : (
-                                    <Bed className="mr-2 h-4 w-4" />
-                                )}
-                                {isResting ? 'Resting...' : 'Rest (+15 Energy)'}
-                            </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={handleRest}
+                                    disabled={isResting || playerStats.health <= 0}
+                                    className="flex-1 gap-2"
+                                    size="lg"
+                                >
+                                    {isResting ? (
+                                        <Loader2 className="h-5 w-5 animate-spin" />
+                                    ) : (
+                                        <Bed className="h-5 w-5" />
+                                    )}
+                                    {isResting ? 'Resting...' : 'Rest (+15 Energy)'}
+                                </Button>
+                            </div>
 
                             {isResting && (
                                 <div className="space-y-2">
