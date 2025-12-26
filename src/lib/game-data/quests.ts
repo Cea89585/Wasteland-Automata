@@ -425,6 +425,7 @@ export const quests: Quest[] = [
         dependsOn: 'quest_chen_2',
     },
     // Finn Arc: The Angler's Legacy
+    // Zone 1: Toxic Puddle
     {
         id: 'quest_finn_1',
         title: 'Ripples in the Water',
@@ -443,34 +444,227 @@ export const quests: Quest[] = [
     },
     {
         id: 'quest_finn_2',
+        title: 'Cleaning the Puddle',
+        npc: 'Finn, the River Keeper',
+        description: '"The river is choked with the old world\'s refuse," Finn sighs. "It sickens the water. Do a service for the spirits of the stream. Pull out the garbage that poisons their home."',
+        requirements: [
+            { type: 'item', item: 'rustyCan', amount: 3 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 150 },
+            { type: 'item', item: 'scrap', amount: 5 }
+        ],
+        completionMessage: '"You have cleared a small space for life to breathe. The water thanks you, and so do I. But there are larger waters, and larger troubles ahead."',
+        dependsOn: 'quest_finn_1',
+        unlocks: 'quest_finn_3',
+    },
+
+    // Zone 2: Contaminated Creek
+    {
+        id: 'quest_finn_3',
         title: 'The Flow of Life',
         npc: 'Finn, the River Keeper',
-        description: '"The river flows deeper than you think," Finn muses. "There are perch that swim against the current, glowing with the land\'s sickness. They are survivors. Bring me some. Let us feast on their resilience."',
+        description: '"The creek flows faster, carrying different life. The Sludge Bass are resilient creatures, swimming through the muck. Catch them, and you prove you can handle the current."',
         requirements: [
-            { type: 'item', item: 'radPerch', amount: 5 }
+            { type: 'item', item: 'sludgeBass', amount: 5 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 200 },
+            { type: 'item', item: 'components', amount: 3 }
+        ],
+        completionMessage: '"Strong fish for a strong angler. You are learning the rhythm of the waters."',
+        dependsOn: 'quest_finn_2',
+        unlocks: 'quest_finn_4',
+    },
+    {
+        id: 'quest_finn_4',
+        title: 'Creek Scavenger',
+        npc: 'Finn, the River Keeper',
+        description: '"The creek hides more than just fish. Old things, lost things. And carp that have seen too much radiation. Bring me what lies beneath the surface."',
+        requirements: [
+            { type: 'item', item: 'oldBoot', amount: 3 },
+            { type: 'item', item: 'irradiatedCarp', amount: 3 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 250 },
+            { type: 'item', item: 'ironIngot', amount: 3 }
+        ],
+        completionMessage: '"One man\'s trash is another\'s treasure... or at least, a reminder of what was lost. You are doing well."',
+        dependsOn: 'quest_finn_3',
+        unlocks: 'quest_finn_5',
+    },
+
+    // Zone 3: Reactor Pond
+    {
+        id: 'quest_finn_5',
+        title: 'Bioluminescence',
+        npc: 'Finn, the River Keeper',
+        description: '"The Reactor Pond... a place of beautiful danger. The fish there hold the light of the sickness. Glowfish. They are like stars in the dark water. Bring me their light."',
+        requirements: [
+            { type: 'item', item: 'glowfish', amount: 5 }
         ],
         rewards: [
             { type: 'silver', amount: 300 },
             { type: 'item', item: 'components', amount: 5 }
         ],
-        completionMessage: '"Strong flesh. Good spirit. You are beginning to understand the river\'s way. But the deep water holds greater secrets... and greater dangers."',
-        dependsOn: 'quest_finn_1',
-        unlocks: 'quest_finn_3',
+        completionMessage: 'Finn holds the glowing fish with reverence. "Beautiful. Terrible, but beautiful. You walk where others fear to tread."',
+        dependsOn: 'quest_finn_4',
+        unlocks: 'quest_finn_6',
     },
     {
-        id: 'quest_finn_3',
-        title: 'Titan of the Deep',
+        id: 'quest_finn_6',
+        title: 'Reactor Hazards',
         npc: 'Finn, the River Keeper',
-        description: 'Finn looks out at the dark, churning water. "There is a beast in the reactor pools. A mutant catfish. It rules the deep, devouring everything. Catch it, and the glowfish that follow in its wake. Show me you are the apex predator."',
+        description: '"The heart of the pond is poison. Shards of the old core still leak their venom. And a beast guards them. A Mutant Catfish, swollen with power. Cleanse the pond, if you dare."',
         requirements: [
-            { type: 'item', item: 'mutantCatfish', amount: 1 },
-            { type: 'item', item: 'glowfish', amount: 5 }
+            { type: 'item', item: 'reactorCoreShard', amount: 3 },
+            { type: 'item', item: 'mutantCatfish', amount: 1 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 400 },
+            { type: 'item', item: 'uranium', amount: 2 }
+        ],
+        completionMessage: '"You have faced the beast and the poison, and survived. You are no longer just a fisherman. You are a guardian of the waters."',
+        dependsOn: 'quest_finn_5',
+        unlocks: 'quest_finn_7',
+    },
+
+    // Zone 4: Flooded Bunker
+    {
+        id: 'quest_finn_7',
+        title: 'Secrets of the Bunker',
+        npc: 'Finn, the River Keeper',
+        description: '"Deep below, the old war bunkers are flooded. The Carp there have adapted to the darkness and the steel. They are tough, like the soldiers who once lived there. Find them."',
+        requirements: [
+            { type: 'item', item: 'bunkerCarp', amount: 5 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 500 },
+            { type: 'item', item: 'ironPlates', amount: 5 }
+        ],
+        completionMessage: '"Hard scales for a hard life. You are proving to be as adaptable as they are."',
+        dependsOn: 'quest_finn_6',
+        unlocks: 'quest_finn_8',
+    },
+    {
+        id: 'quest_finn_8',
+        title: 'Military Rations',
+        npc: 'Finn, the River Keeper',
+        description: '"The soldiers left behind more than just ghosts. Their supplies, their history... and the eels that weave through it all. Scavenge the past, angler."',
+        requirements: [
+            { type: 'item', item: 'militaryRation', amount: 3 },
+            { type: 'item', item: 'caveEel', amount: 3 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 600 },
+            { type: 'item', item: 'components', amount: 10 }
+        ],
+        completionMessage: '"The taste of the old world... stale, but sustaining. You retrieve history from the depths."',
+        dependsOn: 'quest_finn_7',
+        unlocks: 'quest_finn_9',
+    },
+
+    // Zone 5: Chemical Lake
+    {
+        id: 'quest_finn_9',
+        title: 'Chemical Adaptation',
+        npc: 'Finn, the River Keeper',
+        description: '"The Chemical Lake is a cauldron of change. The Acid Swimmers don\'t just survive the burn; they embrace it. Show me this miracle of adaptation."',
+        requirements: [
+            { type: 'item', item: 'acidSwimmer', amount: 5 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 700 },
+            { type: 'item', item: 'biomass', amount: 10 }
+        ],
+        completionMessage: '"Life finds a way, even in acid. You are witnessing the new world\'s birth."',
+        dependsOn: 'quest_finn_8',
+        unlocks: 'quest_finn_10',
+    },
+    {
+        id: 'quest_finn_10',
+        title: 'Toxic Ecology',
+        npc: 'Finn, the River Keeper',
+        description: '"The chemicals crystallize into strange forms. And the trout... they have become something else entirely. Bring me samples of this twisted ecology."',
+        requirements: [
+            { type: 'item', item: 'strangeCrystal', amount: 3 },
+            { type: 'item', item: 'toxicTrout', amount: 3 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 800 },
+            { type: 'item', item: 'components', amount: 15 }
+        ],
+        completionMessage: '"Crystals of poison, fish of toxins. You handle them with care. You are a master of the hazardous harvest."',
+        dependsOn: 'quest_finn_9',
+        unlocks: 'quest_finn_11',
+    },
+
+    // Zone 6: Deep Crater
+    {
+        id: 'quest_finn_11',
+        title: 'From the Stars',
+        npc: 'Finn, the River Keeper',
+        description: '"The crater holds water touched by the void. The Crater Dwellers have seen the sky fall. Catch them, and touch the cosmos."',
+        requirements: [
+            { type: 'item', item: 'craterDweller', amount: 5 }
         ],
         rewards: [
             { type: 'silver', amount: 1000 },
-            { type: 'item', item: 'components', amount: 10 }
+            { type: 'item', item: 'uranium', amount: 5 }
         ],
-        completionMessage: 'Finn laughs, a rare, booming sound. "You have done it! The beast is tamed. You are a true master of the waters, {{characterName}}. The river has no more lessons for you today."',
-        dependsOn: 'quest_finn_2',
+        completionMessage: '"To hold a creature of the crater is to hold a piece of the sky. You have reached far, angler."',
+        dependsOn: 'quest_finn_10',
+        unlocks: 'quest_finn_12',
     },
+    {
+        id: 'quest_finn_12',
+        title: 'Cosmic Debris',
+        npc: 'Finn, the River Keeper',
+        description: '"The stars left fragments behind. And in the deepest crushing dark, the Depth Fish swim. Bring me the debris of the heavens and the monsters of the deep."',
+        requirements: [
+            { type: 'item', item: 'meteorFragment', amount: 3 },
+            { type: 'item', item: 'depthFish', amount: 1 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 1200 },
+            { type: 'item', item: 'ironIngot', amount: 10 }
+        ],
+        completionMessage: '"You have dredged the depths of a falling star. There is little left that can surprise you now."',
+        dependsOn: 'quest_finn_11',
+        unlocks: 'quest_finn_13',
+    },
+
+    // Zone 7: Sunken City
+    {
+        id: 'quest_finn_13',
+        title: 'Relics of the Sunken City',
+        npc: 'Finn, the River Keeper',
+        description: '"The old city sleeps beneath the waves. The Urban Scavenger Fish pick through the bones of our ancestors. Catch them, and let us see what they have found."',
+        requirements: [
+            { type: 'item', item: 'urbanScavengerFish', amount: 5 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 1500 },
+            { type: 'item', item: 'components', amount: 20 }
+        ],
+        completionMessage: '"They feast on the past. By catching them, you reclaim a piece of it."',
+        dependsOn: 'quest_finn_12',
+        unlocks: 'quest_finn_14',
+    },
+    {
+        id: 'quest_finn_14',
+        title: 'Lost Treasures',
+        npc: 'Finn, the River Keeper',
+        description: '"We are at the end of the river, you and I. The Sunken City hides the Golden City Fish, a legend made flesh. And the currency of the dead world still floats there. Bring me these final treasures, and claim your legacy."',
+        requirements: [
+            { type: 'item', item: 'preWarCurrency', amount: 3 },
+            { type: 'item', item: 'goldenCityFish', amount: 1 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 5000 },
+            { type: 'item', item: 'ancientArtifact', amount: 1 }
+        ],
+        completionMessage: 'Finn bows low. "I have nothing left to teach you. You are the master of all waters, from the toxic puddles to the sunken depths. The river flows in you now. Go, with my blessing."',
+        dependsOn: 'quest_finn_13',
+    }
 ];
