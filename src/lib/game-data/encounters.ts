@@ -36,6 +36,7 @@ export const encounters: Record<LocationId, LocationEncounters> = {
             { type: 'positive', message: "A friendly scout leaves you a small care package.", reward: { item: 'apple', amount: 3 } },
             { type: 'positive', message: "A malfunctioning robot ejects a component before shutting down.", reward: { item: 'components', amount: 1 } },
             { type: 'positive', message: "You find a perfectly preserved can of pre-war peaches.", reward: { item: 'peach', amount: 2 } },
+            { type: 'positive', message: "A small, weathered pouch contains a handful of viable carrot seeds.", reward: { item: 'carrotSeeds', amount: 2 } },
         ],
         negative: [
             { type: 'negative', message: "A wild beast scratches you during a frantic escape!", penalty: { type: 'health', amount: 10 } },
@@ -52,6 +53,7 @@ export const encounters: Record<LocationId, LocationEncounters> = {
             { type: 'positive', message: "A fallen, ancient tree provides a massive amount of sturdy wood.", reward: { item: 'wood', amount: 15 } },
             { type: 'positive', message: "You find a pool of clear water filtered by glowing moss.", reward: { item: 'water', amount: 5 } },
             { type: 'positive', message: "The glowing mutated twigs seem to pulse in unison, revealing a hidden one.", reward: { item: 'mutatedTwigs', amount: 3 } },
+            { type: 'positive', message: "You find a dried-up corn cob with a few seeds still intact.", reward: { item: 'cornSeeds', amount: 2 } },
         ],
         negative: [
             { type: 'negative', message: "Thorny vines snag your pack, tearing a hole and spilling some of your wood.", penalty: { type: 'wood', amount: 5 } },

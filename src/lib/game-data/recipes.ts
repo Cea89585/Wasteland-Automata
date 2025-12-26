@@ -125,6 +125,22 @@ export const recipes: Recipe[] = [
     unlockedBy: ['hydroponicsBay'],
   },
   {
+    id: 'recipe_carrotSeeds',
+    name: 'Extract Carrot Seeds',
+    description: 'Extract seeds from a carrot for planting.',
+    creates: 'carrotSeeds',
+    requirements: { carrot: 1 },
+    unlockedBy: ['hydroponicsBay'],
+  },
+  {
+    id: 'recipe_cornSeeds',
+    name: 'Extract Corn Seeds',
+    description: 'Extract seeds from an ear of corn for planting.',
+    creates: 'cornSeeds',
+    requirements: { corn: 1 },
+    unlockedBy: ['hydroponicsBay'],
+  },
+  {
     id: 'recipe_pickaxe',
     name: 'Craft Pickaxe',
     description: 'A sturdy tool for breaking rocks and finding ore.',

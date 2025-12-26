@@ -156,5 +156,35 @@
         "description": "Preserved peaches in a glass jar. A wasteland delicacy worth good silver.",
         "icon": "pickledPeaches",
         "sellPrice": 100
+    },
+    "carrot": {
+        "id": "carrot",
+        "type": "resource",
+        "name": "Carrot",
+        "description": "A hardy, orange root vegetable. Grows quickly.",
+        "icon": "carrot",
+        "sellPrice": 3
+    },
+    "carrotSeeds": {
+        "id": "carrotSeeds",
+        "type": "resource",
+        "name": "Carrot Seeds",
+        "description": "Seeds for planting carrots. Grows in 3 minutes.",
+        "icon": "carrotSeeds"
+    },
+    "corn": {
+        "id": "corn",
+        "type": "resource",
+        "name": "Corn",
+        "description": "Golden ears of corn. Takes longer to grow but yields plenty.",
+        "icon": "corn",
+        "sellPrice": 5
+    },
+    "cornSeeds": {
+        "id": "cornSeeds",
+        "type": "resource",
+        "name": "Corn Seeds",
+        "description": "Seeds for planting corn. Grows in 8 minutes.",
+        "icon": "cornSeeds"
     }
 }

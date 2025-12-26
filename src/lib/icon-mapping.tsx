@@ -23,6 +23,10 @@ const ITEM_ICON_MAP: Record<string, string> = {
     banana: 'banana',
     lemon: 'lemon',
     mutatedTwigs: 'mutatedTwigs',
+    carrot: 'carrot',
+    carrotSeeds: 'carrotSeeds',
+    corn: 'corn',
+    cornSeeds: 'cornSeeds',
 
     // Materials
     scrap: 'scrap',

@@ -281,6 +281,49 @@ const reducer = (state: GameState, action: GameAction): GameState => {
               timestamp: Date.now()
             });
           }
+
+          // Smelting Offline Progress
+          const automationSpeedModifier = Math.max(0.1, 1 - ((gameState.automationSpeedLevel || 0) * 0.05));
+          const smaltData = [
+            { queueKey: 'smeltingQueue', tsKey: 'components', duration: 10000, item: 'components' },
+            { queueKey: 'ironIngotSmeltingQueue', tsKey: 'iron', duration: 20000, item: 'ironIngot' },
+            { queueKey: 'charcoalSmeltingQueue', tsKey: 'charcoal', duration: 10000, item: 'charcoal' },
+            { queueKey: 'glassSmeltingQueue', tsKey: 'glass', duration: 10000, item: 'glassTube' },
+          ] as const;
+
+          smaltData.forEach(({ queueKey, tsKey, duration: baseDuration, item }) => {
+            const duration = baseDuration * automationSpeedModifier;
+            const queueSize = (gameState as any)[queueKey] || 0;
+            const startTimestamp = gameState.smeltingTimestamps?.[tsKey as keyof typeof gameState.smeltingTimestamps];
+
+            if (queueSize > 0 && startTimestamp) {
+              const elapsed = Date.now() - startTimestamp;
+              const completed = Math.floor(elapsed / duration);
+              const actualCompleted = Math.min(completed, queueSize);
+
+              if (actualCompleted > 0) {
+                // Add resources
+                const res = addResource(newInventory, newStatistics, item as any, actualCompleted, INVENTORY_CAP);
+                newInventory = res.newInventory;
+                newStatistics = res.newStatistics;
+
+                // Update queue and timestamp in the local gameState being built
+                (gameState as any)[queueKey] = queueSize - actualCompleted;
+                if ((gameState as any)[queueKey] > 0) {
+                  gameState.smeltingTimestamps[tsKey as keyof typeof gameState.smeltingTimestamps] = startTimestamp + (actualCompleted * duration);
+                } else {
+                  gameState.smeltingTimestamps[tsKey as keyof typeof gameState.smeltingTimestamps] = null;
+                }
+
+                offlineLogMessages.push({
+                  id: generateUniqueLogId(),
+                  text: `The furnace finished ${actualCompleted}x ${itemData[item as any].name} while you were away.`,
+                  type: 'success',
+                  timestamp: Date.now()
+                });
+              }
+            }
+          });
         }
       }
 
@@ -332,7 +375,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'RESET_GAME': {
       localStorage.clear();
-      return { ...initialState, statistics: initialStatistics, isInitialized: true };
+      // Only reset the game world and player state, but keep the lifetime statistics and character name
+      return {
+        ...initialState,
+        characterName: state.characterName,
+        statistics: state.statistics,
+        isInitialized: true
+      };
     }
 
     case 'RESET_GAME_NO_LOCALSTORAGE': {
@@ -431,7 +480,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       // Green Thumb Skill
       const greenThumbLevel = state.skills?.greenThumb || 0;
       const growthReduction = greenThumbLevel * 0.15; // 15% per level
-      const duration = 60000 * 5 * (1 - growthReduction);
+
+      let baseDuration = 60000 * 5; // Default 5 mins
+      if (seed === 'carrotSeeds') baseDuration = 60000 * 3;
+      if (seed === 'cornSeeds') baseDuration = 60000 * 8;
+
+      const duration = baseDuration * (1 - growthReduction);
 
       if (existingPlotIndex >= 0) {
         if (newPlots[existingPlotIndex].seed) return state; // Already planted
@@ -474,6 +528,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (plot.seed === 'appleSeeds') {
         produce = 'apple';
         amount = Math.floor(Math.random() * 3) + 2; // 2-4 apples
+      } else if (plot.seed === 'carrotSeeds') {
+        produce = 'carrot';
+        amount = Math.floor(Math.random() * 3) + 3; // 3-5 carrots
+      } else if (plot.seed === 'cornSeeds') {
+        produce = 'corn';
+        amount = Math.floor(Math.random() * 5) + 4; // 4-8 corn
       }
 
       // Bountiful Harvest Skill
@@ -778,8 +838,14 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if (encounter.type === 'negative' && encounter.penalty) {
         const { type: penaltyType, amount } = encounter.penalty;
         if (penaltyType === 'health') {
+          const oldHealth = newStats.health;
           newStats.health = Math.max(0, newStats.health - amount);
           logText += ` You lost ${amount} health.`;
+
+          if (oldHealth > 0 && newStats.health <= 0) {
+            newStatistics.deaths += 1;
+            logText += " Your vision fades to black. The wasteland has claimed another soul.";
+          }
         } else if (penaltyType === 'stoneAxe') {
           if (newEquipment.hand === 'stoneAxe') {
             newEquipment.hand = null;

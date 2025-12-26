@@ -26,6 +26,7 @@ export const locations: Record<LocationId, LocationData> = {
       { resource: 'stone', min: 2, max: 4, chance: 0.8 },
       { resource: 'scrap', min: 1, max: 2, chance: 0.4 },
       { resource: 'apple', min: 1, max: 1, chance: 0.1 },
+      { resource: 'carrot', min: 1, max: 2, chance: 0.05 },
       { resource: 'mutatedTwigs', min: 1, max: 2, chance: 0.05 },
     ],
     flavorText: [
@@ -44,6 +45,7 @@ export const locations: Record<LocationId, LocationData> = {
       { resource: 'mutatedTwigs', min: 2, max: 5, chance: 0.6 },
       { resource: 'banana', min: 1, max: 2, chance: 0.2 },
       { resource: 'peach', min: 1, max: 1, chance: 0.1 },
+      { resource: 'corn', min: 1, max: 2, chance: 0.05 },
     ],
     flavorText: [
       'The trees here have an unsettling, almost intelligent look to them.',

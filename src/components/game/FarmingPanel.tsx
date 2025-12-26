@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Sprout, Apple, Timer } from 'lucide-react';
 import { itemData } from '@/lib/game-data/items';
+import { GameIcon } from '@/lib/icon-mapping';
 import type { Resource } from '@/lib/game-types';
 
 export default function FarmingPanel() {
@@ -32,7 +33,7 @@ export default function FarmingPanel() {
         dispatch({ type: 'HARVEST_CROP', payload: { plotId } });
     };
 
-    const seeds: Resource[] = ['appleSeeds'];
+    const seeds: Resource[] = ['appleSeeds', 'carrotSeeds', 'cornSeeds'];
 
     return (
         <div className="space-y-4">
@@ -64,7 +65,9 @@ export default function FarmingPanel() {
                                         {isPlanted ? (
                                             <>
                                                 <div className="relative">
-                                                    {plot.seed === 'appleSeeds' && <Apple className={`h-8 w-8 ${isReady ? 'text-red-500 animate-pulse' : 'text-green-600'}`} />}
+                                                    <div className={isReady ? 'animate-pulse' : ''}>
+                                                        <GameIcon type="item" id={plot.seed!} size={32} />
+                                                    </div>
                                                     {isReady && <Badge className="absolute -top-2 -right-6 bg-green-600">Ready</Badge>}
                                                 </div>
                                                 <div className="text-sm font-medium">{itemData[plot.seed!].name}</div>

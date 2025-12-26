@@ -165,7 +165,7 @@ export default function SettingsPage() {
                             <AlertDialogHeader>
                                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This will permanently delete ALL data, including your current game progress and all-time statistics. This action cannot be undone.
+                                    This will reset your current game progress (inventory, buildings, level), but your all-time statistics and collection goals will be preserved.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

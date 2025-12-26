@@ -35,7 +35,7 @@ export interface Quest {
     dependsOn?: string;
 }
 
-export const quests: Quest[] = [
+export const baseQuests: Quest[] = [
     {
         id: 'quest_silas_1',
         title: 'A Glimmer of Trust',
@@ -81,6 +81,7 @@ export const quests: Quest[] = [
         ],
         completionMessage: 'He takes the component, turning it over in his hand. "See? From useless junk to the heart of a machine. This is how we rebuild. You\'re starting to think long-term. Keep this up. Here\'s some more scrap, put it to good use."',
         dependsOn: 'quest_silas_2',
+        unlocks: 'quest_silas_glass_1'
     },
     {
         id: 'quest_kael_1',
@@ -113,7 +114,7 @@ export const quests: Quest[] = [
         ],
         completionMessage: 'Kael expertly fits the plates onto his device. "Perfect. The signal will be clean. You\'ve done well. This old metal detector is surplus to my needs; it should serve you better. We\'re close to finishing this project."',
         dependsOn: 'quest_kael_mining',
-        unlocks: 'quest_marcus_1' // Marcus arc starts after proving yourself with advanced tech
+        unlocks: 'quest_kael_drone_1'
     },
     {
         id: 'quest_kael_mining',
@@ -144,6 +145,7 @@ export const quests: Quest[] = [
             { type: 'item', item: 'components', amount: 5 }
         ],
         completionMessage: 'Elara snatches the resources and hands you a small, heavy pouch. "A pleasure doing business. These components are top-notch... probably. Now, if you\'ll excuse me, I have... inventory to sort."',
+        unlocks: 'quest_elara_preserve_1'
     },
     {
         id: 'quest_anya_1',
@@ -155,6 +157,7 @@ export const quests: Quest[] = [
         ],
         rewards: [
             { type: 'silver', amount: 150 },
+            { type: 'item', item: 'carrotSeeds', amount: 5 },
         ],
         completionMessage: 'Anya takes the twigs, her eyes alight with scientific curiosity. "Incredible! The cellular structure is unlike anything I\'ve seen. This is a major breakthrough. Your efforts have been invaluable. Please, take this for your troubles. Oh, and I\'ve marked the location of the mutated forest on your map - you should explore it further!"',
         dependsOn: 'quest_silas_3',
@@ -190,6 +193,7 @@ export const quests: Quest[] = [
         rewards: [
             { type: 'item', item: 'components', amount: 5 },
             { type: 'item', item: 'cookedApple', amount: 10 },
+            { type: 'item', item: 'cornSeeds', amount: 5 },
         ],
         completionMessage: '"Excellent. These samples are perfect, and the iron plates will shield my gear from any... unexpected energy signatures. My research is leading me to believe there are other, stranger places out there. I\'m close to a breakthrough."',
         dependsOn: 'quest_anya_map_1',
@@ -208,6 +212,7 @@ export const quests: Quest[] = [
         ],
         completionMessage: '"Here is the fee... and here is the map. A new path is open to you. Who knows what you\'ll find out there. Good luck, and thank you. You\'ve funded some very important research today."',
         dependsOn: 'quest_anya_map_2',
+        unlocks: 'quest_anya_lab_1'
     },
 
     // Marcus Arc: The Salvage Wars
@@ -224,7 +229,7 @@ export const quests: Quest[] = [
             { type: 'item', item: 'components', amount: 5 }
         ],
         completionMessage: 'Marcus weighs the uranium carefully. "Impressive. Most people wouldn\'t survive the radiation zones. You\'re either brave or stupid. Either way, you\'re useful. We\'ll talk again."',
-        dependsOn: 'quest_kael_1',
+        dependsOn: 'quest_kael_drone_2',
         unlocks: 'quest_marcus_2',
     },
     {
@@ -260,6 +265,7 @@ export const quests: Quest[] = [
         ],
         completionMessage: '"Excellent work. You\'ve proven yourself valuable. But remember—loyalty is rewarded, betrayal is... not forgotten. We understand each other, yes?"',
         dependsOn: 'quest_marcus_2',
+        unlocks: 'quest_marcus_industry_1'
     },
 
     // Vera Arc: Echoes of the Past
@@ -314,6 +320,7 @@ export const quests: Quest[] = [
         ],
         completionMessage: '"This is it. The proof we need. The radiation signatures match the sabotage device. Someone wanted us stranded here. But why? What are they protecting? Or hiding from?"',
         dependsOn: 'quest_vera_2',
+        unlocks: 'quest_vera_4'
     },
 
     // Rook Arc: The Outcast's Gambit
@@ -366,6 +373,7 @@ export const quests: Quest[] = [
         ],
         completionMessage: '"They have a chance now. A real chance. You helped me do something good. In this wasteland, that\'s rare. You\'re alright, {{characterName}}. If you ever need someone to watch your back, you know where to find me."',
         dependsOn: 'quest_rook_2',
+        unlocks: 'quest_rook_4'
     },
 
     // Dr. Chen Arc: The Healer's Burden
@@ -423,6 +431,7 @@ export const quests: Quest[] = [
         ],
         completionMessage: '"We\'re not helpless anymore. Marcus can\'t control us through fear and scarcity. You\'ve given us independence. The people won\'t forget this. Neither will I."',
         dependsOn: 'quest_chen_2',
+        unlocks: 'quest_chen_4'
     },
     // Finn Arc: The Angler's Legacy
     // Zone 1: Toxic Puddle
@@ -666,5 +675,269 @@ export const quests: Quest[] = [
         ],
         completionMessage: 'Finn bows low. "I have nothing left to teach you. You are the master of all waters, from the toxic puddles to the sunken depths. The river flows in you now. Go, with my blessing."',
         dependsOn: 'quest_finn_13',
+    }];
+
+// --- Extension Quests ---
+
+const silasGlassQuests: Quest[] = [
+    {
+        id: 'quest_silas_glass_1',
+        title: 'Sand and Fire',
+        npc: 'Silas, the Watcher',
+        description: '"You\'ve mastered the basics," Silas says, kicking at the dirt. "But to truly thrive, you need to master the elements. Sand is everywhere. Fire is in your furnace. Combine them. Bring me sand, and show me you can gather the raw materials for something... cleaner."',
+        requirements: [
+            { type: 'item', item: 'sand', amount: 50 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 100 },
+            { type: 'item', item: 'wood', amount: 20 }
+        ],
+        completionMessage: '"Good. It\'s coarse, useless on its own. But you\'re going to change that."',
+        dependsOn: 'quest_silas_3',
+        unlocks: 'quest_silas_glass_2'
+    },
+    {
+        id: 'quest_silas_glass_2',
+        title: 'Clear Vision',
+        npc: 'Silas, the Watcher',
+        description: '"Now, put that furnace to work. Melt the sand. Shape it. Create glass tubes. They are fragile, yes, but they hold the potential for chemistry, for preservation. Bring me proof of your craftsmanship."',
+        requirements: [
+            { type: 'item', item: 'glassTube', amount: 10 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 250 },
+            { type: 'item', item: 'components', amount: 5 }
+        ],
+        completionMessage: '"Clear, smooth, perfect. You\'re not just banging rocks together anymore. You\'re refining the world around you. Keep this up."',
+        dependsOn: 'quest_silas_glass_1',
+        // Unlocks Elara's preservation arc if she is ready, but we handle that link in Elara's quest chain or via direct dependency if possible.
+        // Since we can only have one 'unlocks', and Elara's start depends on her own intro, we'll link Elara's new quest to 'quest_elara_1' but it logically requires glass.
+        // We will make 'quest_elara_preserve_1' depend on 'quest_elara_1', and we'll trust the player finds the glass tech via Silas.
     }
+];
+
+const elaraPreserveQuests: Quest[] = [
+    {
+        id: 'quest_elara_preserve_1',
+        title: 'Sweet Savings',
+        npc: 'Elara, the Hoarder',
+        description: '"Food rots," Elara grumbles, tossing a mushy apple aside. "It\'s a waste. But I hear you can make glass now. Glass jars... they stop the rot. Pickle me some peaches. Make them last forever. I\'ll pay well for stability."',
+        requirements: [
+            { type: 'item', item: 'pickledPeaches', amount: 5 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 600 },
+            { type: 'item', item: 'components', amount: 10 }
+        ],
+        completionMessage: 'Elara holds the jar up to the light. "Beautiful. suspended in time. This... this is security. thank you."',
+        dependsOn: 'quest_elara_1',
+        unlocks: 'quest_elara_preserve_2'
+    },
+    {
+        id: 'quest_elara_preserve_2',
+        title: 'The Long Winter',
+        npc: 'Elara, the Hoarder',
+        description: '"I have a feeling," Elara whispers. "A long, hard season is coming. Or maybe just a slow Tuesday. Either way, I need to stock up. Fill my shelves. Jars, pickles... everything. Help me build a stockpile that will outlast us all."',
+        requirements: [
+            { type: 'item', item: 'pickledPeaches', amount: 20 },
+            { type: 'item', item: 'glassJar', amount: 10 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 1500 },
+            { type: 'item', item: 'ancientArtifact', amount: 1 }
+        ],
+        completionMessage: '"Enough to feed a small army... or me, for a month. You\'ve done well, scavenger. You understand the value of keeping things."',
+        dependsOn: 'quest_elara_preserve_1'
+    }
+];
+
+const kaelDroneQuests: Quest[] = [
+    {
+        id: 'quest_kael_drone_1',
+        title: 'Eyes in the Sky',
+        npc: 'Kael, the Engineer',
+        description: '"We\'re stuck on the ground," Kael complains, looking at the clouds. "I need data from the upper atmosphere, and I need scouts that don\'t get eaten by mutants. Build a Drone Bay. Let\'s automate our reconnaissance."',
+        requirements: [
+            { type: 'structure', structure: 'droneBay', amount: 1 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 1000 },
+            { type: 'item', item: 'components', amount: 20 }
+        ],
+        completionMessage: '"It works! Look at that telemetry. We\'re not blind anymore. But a single drone is just a toy. We need a swarm."',
+        dependsOn: 'quest_kael_2',
+        unlocks: 'quest_kael_drone_2'
+    },
+    {
+        id: 'quest_kael_drone_2',
+        title: 'Swarm Logistics',
+        npc: 'Kael, the Engineer',
+        description: '"To manage a fleet, I need advanced processing power and raw materials for the chassis. Bring me the good stuff. Components for the brains, Iron for the bodies."',
+        requirements: [
+            { type: 'item', item: 'components', amount: 50 },
+            { type: 'item', item: 'ironIngot', amount: 20 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 1200 },
+            { type: 'item', item: 'uranium', amount: 5 }
+        ],
+        completionMessage: '"Excellent. The network is growing. Soon, we\'ll have eyes on every sector. You\'re building the future, my friend."',
+        dependsOn: 'quest_kael_drone_1',
+        unlocks: 'quest_marcus_1' // Re-linking Marcus arc here
+    }
+];
+
+const anyaLabQuests: Quest[] = [
+    {
+        id: 'quest_anya_lab_1',
+        title: 'Sterile Equipment',
+        npc: 'Anya, the Botanist',
+        description: '"The map was just the beginning," Anya says, pacing the lab. "I found a pristine zone, untouched by radiation. To study the samples I\'ll find there, I need sterile equipment. Glass tubes, sealed and pure. And iron plates to reinforce the clean room."',
+        requirements: [
+            { type: 'item', item: 'glassTube', amount: 15 },
+            { type: 'item', item: 'ironPlates', amount: 10 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 800 },
+            { type: 'item', item: 'biomass', amount: 15 }
+        ],
+        completionMessage: '"Perfect. No contaminants. We can finally do real science here."',
+        dependsOn: 'quest_anya_map_3',
+        unlocks: 'quest_anya_lab_2'
+    },
+    {
+        id: 'quest_anya_lab_2',
+        title: 'Exotic Cultivation',
+        npc: 'Anya, the Botanist',
+        description: '"I want to try growing something... fragile. Not these mutated weeds. Lemons, Bananas. Old world fruits that need care. Bring me a stockpile of them, I need to extract their seeds and genetic material to adapt them to our soil."',
+        requirements: [
+            { type: 'item', item: 'lemon', amount: 20 },
+            { type: 'item', item: 'banana', amount: 20 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 1200 },
+            { type: 'item', item: 'biomass', amount: 50 }
+        ],
+        completionMessage: '"The DNA is remarkably stable. With some splicing... yes. We might have orchards again one day."',
+        dependsOn: 'quest_anya_lab_1'
+    }
+];
+
+const marcusIndustryQuests: Quest[] = [
+    {
+        id: 'quest_marcus_industry_1',
+        title: 'Mass Production',
+        npc: 'Marcus, the Salvage King',
+        description: '"Small dealings are boring," Marcus yawns. "I want to export. Pickles, preserved goods. They sell for a fortune in the inner sectors. I need containers, and I need fuel to transport them. Fill the order."',
+        requirements: [
+            { type: 'item', item: 'glassJar', amount: 50 },
+            { type: 'item', item: 'charcoal', amount: 100 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 3000 },
+            { type: 'item', item: 'preWarCurrency', amount: 10 }
+        ],
+        completionMessage: '"Now that is volume! You\'re thinking like a tycoon. We\'re going to be very rich."',
+        dependsOn: 'quest_marcus_3',
+        unlocks: 'quest_final_monument'
+    }
+];
+
+const finalQuests: Quest[] = [
+    {
+        id: 'quest_final_monument',
+        title: 'The Rebuilder\'s Legacy',
+        npc: 'Silas, the Watcher',
+        description: '"You\'ve done it all," Silas looks around at the thriving settlement. "Mines, farms, drones, factories. But what do we leave behind? A monument. A testament to our refusal to die. Build the foundation of a new city. Bring everything."',
+        requirements: [
+            { type: 'item', item: 'stone', amount: 1000 },
+            { type: 'item', item: 'wood', amount: 500 },
+            { type: 'item', item: 'ironIngot', amount: 200 },
+            { type: 'item', item: 'glassJar', amount: 100 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 10000 },
+            { type: 'item', item: 'treasureCache', amount: 1 }
+        ],
+        completionMessage: '"It stands tall. A beacon. As long as this stands, humanity remains. You did good, kid. You did real good."',
+        dependsOn: 'quest_marcus_industry_1'
+    }
+];
+
+const rookExtensionQuests: Quest[] = [
+    {
+        id: 'quest_rook_4',
+        title: 'The Outcast\'s Outpost',
+        npc: 'Rook, the Outcast',
+        description: '"I\'m done hiding in the shadows," Rook says, his jaw set. "I want to build a place where people like me—the ones the world gave up on—can find a home. A real outpost, fortified and self-sufficient. I need the materials to make it a reality. You with me?"',
+        requirements: [
+            { type: 'item', item: 'wood', amount: 300 },
+            { type: 'item', item: 'stone', amount: 300 },
+            { type: 'item', item: 'ironPlates', amount: 50 },
+            { type: 'item', item: 'components', amount: 20 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 2500 },
+            { type: 'item', item: 'ancientArtifact', amount: 1 }
+        ],
+        completionMessage: '"It\'s solid. A beacon in the dark. Thank you, {{characterName}}. You\'re more than just a scavenger. You\'re a builder."',
+        dependsOn: 'quest_rook_3'
+    }
+];
+
+const chenExtensionQuests: Quest[] = [
+    {
+        id: 'quest_chen_4',
+        title: 'Wasteland Wellness',
+        npc: 'Dr. Yuki Chen',
+        description: '"We\'re expanding the clinic\'s reach," Dr. Chen explains, showing you a map of the surrounding settlements. "We need to send out medical kits. Glass jars for the tinctures, pickled peaches for nutrition, and uranium for the portable sterilization units. It\'s a lot to ask, but it will save hundreds."',
+        requirements: [
+            { type: 'item', item: 'glassJar', amount: 30 },
+            { type: 'item', item: 'pickledPeaches', amount: 20 },
+            { type: 'item', item: 'uranium', amount: 15 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 3500 },
+            { type: 'item', item: 'biomass', amount: 100 }
+        ],
+        completionMessage: '"These kits... they\'re a miracle. You\'ve extended our reach further than I ever thought possible. The wasteland is a little less cruel today because of you."',
+        dependsOn: 'quest_chen_3'
+    }
+];
+
+const veraExtensionQuests: Quest[] = [
+    {
+        id: 'quest_vera_4',
+        title: 'The Signal',
+        npc: 'Vera, the Archivist',
+        description: '"The facility I found... it\'s transmitting," Vera says, her voice trembling with excitement. "A signal from before the fall. But my antenna is too small, too weak. I need a high-gain array. Components for the logic, iron plates for the dish, and glass tubes for the vacuum seals."',
+        requirements: [
+            { type: 'item', item: 'components', amount: 100 },
+            { type: 'item', item: 'ironPlates', amount: 50 },
+            { type: 'item', item: 'glassTube', amount: 10 }
+        ],
+        rewards: [
+            { type: 'silver', amount: 4000 },
+            { type: 'item', item: 'preWarTech', amount: 5 }
+        ],
+        completionMessage: '"The signal... it\'s clear now. It\'s a voice from the past, calling to us. We\'re not alone in history. Thank you for giving the ancestors a voice again."',
+        dependsOn: 'quest_vera_3'
+    }
+];
+
+const newQuests = [
+    ...silasGlassQuests,
+    ...elaraPreserveQuests,
+    ...kaelDroneQuests,
+    ...anyaLabQuests,
+    ...marcusIndustryQuests,
+    ...rookExtensionQuests,
+    ...chenExtensionQuests,
+    ...veraExtensionQuests,
+    ...finalQuests
+];
+
+export const quests: Quest[] = [
+    ...baseQuests,
+    ...newQuests
 ];
