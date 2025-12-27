@@ -103,23 +103,22 @@ export default function InventoryPanel() {
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-lg font-semibold text-primary">{quantity}</span>
                     {data?.type === 'consumable' && (
-                      <Button size="icon" variant="outline" onClick={() => handleUseItem(itemId)} disabled={isDead || quantity === 0 || isBusy} aria-label={`Use ${data.name}`}>
-                        <Flame size={16} />
-                      </Button>
-                    )}
-                    {itemId === 'apple' && (
-                      <Button size="icon" variant="outline" onClick={() => handleUseItem('apple')} disabled={isDead || quantity === 0 || isBusy} aria-label="Eat apple">
-                        <AppleIcon size={16} />
-                      </Button>
-                    )}
-                    {itemId === 'water' && (
-                      <Button size="icon" variant="outline" onClick={() => handleUseItem('water')} disabled={isDead || quantity === 0 || isBusy} aria-label="Drink water">
-                        <WaterIcon size={16} />
-                      </Button>
-                    )}
-                    {itemId === 'cookedApple' && (
-                      <Button size="icon" variant="outline" onClick={() => handleUseItem('cookedApple')} disabled={isDead || quantity === 0 || isBusy} aria-label="Eat Cooked Apple">
-                        <CookedAppleIcon size={16} />
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        onClick={() => handleUseItem(itemId)}
+                        disabled={isDead || quantity === 0 || isBusy}
+                        aria-label={`Use ${data.name}`}
+                      >
+                        {itemId === 'apple' ? (
+                          <AppleIcon size={16} />
+                        ) : itemId === 'water' ? (
+                          <WaterIcon size={16} />
+                        ) : itemId === 'cookedApple' ? (
+                          <CookedAppleIcon size={16} />
+                        ) : (
+                          <Flame size={16} />
+                        )}
                       </Button>
                     )}
                     {isEquippable && !isEquipped && (

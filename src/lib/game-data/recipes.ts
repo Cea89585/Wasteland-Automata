@@ -182,14 +182,6 @@ export const recipes: Recipe[] = [
     unlockedBy: ['workbench'],
   },
   {
-    id: 'recipe_kitchen',
-    name: 'Build Kitchen',
-    description: 'A place to prepare nutritious meals.',
-    creates: 'kitchen',
-    requirements: { ironIngot: 10, stone: 25, wood: 20 },
-    unlockedBy: ['workbench'],
-  },
-  {
     id: 'cook_fish',
     name: 'Grilled Fish',
     description: 'A plain, grilled fish. Restores 40 hunger and 10 health.',
