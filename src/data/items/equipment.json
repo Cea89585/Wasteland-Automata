@@ -73,14 +73,6 @@
         "description": "An automated rig that extracts resources from the earth.",
         "icon": "miningRig"
     },
-    "cookedApple": {
-        "id": "cookedApple",
-        "type": "consumable",
-        "name": "Cooked Apple",
-        "description": "A cooked apple that restores some energy.",
-        "icon": "cookedApple",
-        "sellPrice": 8
-    },
     "crudeMap": {
         "id": "crudeMap",
         "type": "item",
@@ -118,45 +110,5 @@
         "name": "Kitchen",
         "description": "A clean space for preparing nutritious meals from wasteland ingredients.",
         "icon": "kitchen"
-    },
-    "cookedFish": {
-        "id": "cookedFish",
-        "type": "consumable",
-        "name": "Grilled Fish",
-        "description": "A generic fish, grilled to perfection. High in protein.",
-        "icon": "cookedFish",
-        "sellPrice": 15
-    },
-    "cornChowder": {
-        "id": "cornChowder",
-        "type": "consumable",
-        "name": "Corn Chowder",
-        "description": "A creamy, hearty soup that very much warms the soul.",
-        "icon": "cornChowder",
-        "sellPrice": 25
-    },
-    "vegetableMedley": {
-        "id": "vegetableMedley",
-        "type": "consumable",
-        "name": "Vegetable Medley",
-        "description": "A mix of carrots, corn, and apples. Surprisingly tasty.",
-        "icon": "vegetableMedley",
-        "sellPrice": 30
-    },
-    "fruitSalad": {
-        "id": "fruitSalad",
-        "type": "consumable",
-        "name": "Fruit Salad",
-        "description": "A refreshing mix of wasteland fruits. Great for energy.",
-        "icon": "fruitSalad",
-        "sellPrice": 30
-    },
-    "lemonade": {
-        "id": "lemonade",
-        "type": "consumable",
-        "name": "Wasteland Lemonade",
-        "description": "Sour and sweet. Very refreshing for a weary traveler.",
-        "icon": "lemonade",
-        "sellPrice": 20
     }
 }

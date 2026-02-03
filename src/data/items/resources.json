@@ -25,7 +25,7 @@
     },
     "apple": {
         "id": "apple",
-        "type": "resource",
+        "type": "consumable",
         "name": "Apple",
         "description": "A tough, slightly mutated apple. Keeps hunger at bay.",
         "icon": "apple",
@@ -33,7 +33,7 @@
     },
     "water": {
         "id": "water",
-        "type": "resource",
+        "type": "consumable",
         "name": "Water",
         "description": "Purified water, safe to drink.",
         "icon": "water",

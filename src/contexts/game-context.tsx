@@ -221,6 +221,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         requiredRecipes.push('recipe_glassJar');
         requiredRecipes.push('recipe_pickledPeaches');
       }
+      if (gameState.builtStructures.includes('kitchen')) {
+        allRecipes.forEach(r => {
+          if (r.unlockedBy.includes('kitchen')) {
+            requiredRecipes.push(r.id);
+          }
+        });
+      }
 
       requiredRecipes.forEach(recipeId => {
         if (!gameState.unlockedRecipes.includes(recipeId)) {
@@ -361,6 +368,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       if ((newState.inventory?.workbench || 0) > 0) {
         requiredRecipes.push('recipe_glassJar');
         requiredRecipes.push('recipe_pickledPeaches');
+      }
+      if (newState.builtStructures?.includes('kitchen')) {
+        allRecipes.forEach(r => {
+          if (r.unlockedBy.includes('kitchen')) {
+            requiredRecipes.push(r.id);
+          }
+        });
       }
 
       if (newState.unlockedRecipes) {

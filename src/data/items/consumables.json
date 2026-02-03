@@ -1,0 +1,50 @@
+{
+    "cookedApple": {
+        "id": "cookedApple",
+        "type": "consumable",
+        "name": "Cooked Apple",
+        "description": "A warm, baked apple. Soft, sweet, and comforting.",
+        "icon": "cookedApple",
+        "sellPrice": 8
+    },
+    "cookedFish": {
+        "id": "cookedFish",
+        "type": "consumable",
+        "name": "Grilled Fish",
+        "description": "A plain, grilled fish. Tastes a bit metallic, but fills the belly.",
+        "icon": "cookedFish",
+        "sellPrice": 15
+    },
+    "cornChowder": {
+        "id": "cornChowder",
+        "type": "consumable",
+        "name": "Corn Chowder",
+        "description": "A thick, hearty soup made from corn and milk (or something like it).",
+        "icon": "cornChowder",
+        "sellPrice": 25
+    },
+    "vegetableMedley": {
+        "id": "vegetableMedley",
+        "type": "consumable",
+        "name": "Vegetable Medley",
+        "description": "A mix of roasted vegetables. Very healthy.",
+        "icon": "vegetableMedley",
+        "sellPrice": 30
+    },
+    "fruitSalad": {
+        "id": "fruitSalad",
+        "type": "consumable",
+        "name": "Fruit Salad",
+        "description": "A bowl of chopped fruits. Fresh and energizing.",
+        "icon": "fruitSalad",
+        "sellPrice": 35
+    },
+    "lemonade": {
+        "id": "lemonade",
+        "type": "consumable",
+        "name": "Lemonade",
+        "description": "Freshly squeezed lemons, water, and a bit of hope. Refreshing.",
+        "icon": "lemonade",
+        "sellPrice": 20
+    }
+}

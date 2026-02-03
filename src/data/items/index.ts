@@ -4,12 +4,14 @@
 import resourcesData from './resources.json';
 import fishData from './fish.json';
 import equipmentData from './equipment.json';
+import consumablesData from './consumables.json';
 
 // Combine all item data into a single database
 export const ITEMS_DB = {
     ...resourcesData,
     ...fishData,
-    ...equipmentData
+    ...equipmentData,
+    ...consumablesData
 } as const;
 
 // Type definitions

@@ -4,19 +4,29 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
-import { Sprout, Apple, Timer } from 'lucide-react';
+import { Sprout, Apple, Timer, Zap } from 'lucide-react';
 import { itemData } from '@/lib/game-data/items';
 import { GameIcon } from '@/lib/icon-mapping';
 import type { Resource } from '@/lib/game-types';
+import { cn } from '@/lib/utils';
 
 export default function FarmingPanel() {
     const { gameState, dispatch } = useGame();
     const [now, setNow] = useState(Date.now());
+    const { inventory, playerStats } = gameState;
 
     useEffect(() => {
         const interval = setInterval(() => setNow(Date.now()), 1000);
         return () => clearInterval(interval);
     }, []);
+
+    const handleEatCookedApple = () => {
+        if (inventory.cookedApple > 0) {
+            dispatch({ type: 'EAT_COOKED_APPLE' });
+        }
+    };
+
+    const isDead = playerStats.health <= 0;
 
     const plots = gameState.farmPlots || [];
     // Ensure we display at least 3 plots if Hydroponics Bay is built, plus any upgraded plots
@@ -38,7 +48,7 @@ export default function FarmingPanel() {
     return (
         <div className="space-y-4">
             <Card>
-                <CardHeader>
+                <CardHeader className="relative">
                     <CardTitle className="flex items-center gap-2">
                         <Sprout className="h-5 w-5" />
                         Hydroponics Farming
@@ -46,6 +56,18 @@ export default function FarmingPanel() {
                     <CardDescription>
                         Grow crops in a controlled environment.
                     </CardDescription>
+                    {inventory.cookedApple > 0 && (
+                        <Button
+                            size="icon"
+                            variant={inventory.cookedApple > 0 ? "default" : "outline"}
+                            onClick={handleEatCookedApple}
+                            disabled={isDead || inventory.cookedApple === 0}
+                            aria-label={`Eat cooked apple (${inventory.cookedApple})`}
+                            className={cn("absolute top-4 right-4 h-8 w-8 sm:h-10 sm:w-10")}
+                        >
+                            <Zap className="h-4 w-4" />
+                        </Button>
+                    )}
                 </CardHeader>
                 <CardContent>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

@@ -12,12 +12,13 @@ import { GameIcon } from '@/lib/icon-mapping';
 import { useState, useEffect, useCallback } from 'react';
 import { Progress } from '../ui/progress';
 import DronePanel from './DronePanel';
+import { cn } from '@/lib/utils';
 
 const REST_DURATION_SECONDS = 10;
 
 export default function FishingPanel() {
     const { gameState, dispatch } = useGame();
-    const { currentFishingZone, level, playerStats, isResting, smeltingQueue } = gameState;
+    const { currentFishingZone, level, playerStats, isResting, inventory } = gameState;
     const [restingProgress, setRestingProgress] = useState(0);
     const [isFishing, setIsFishing] = useState(false);
     const [fishingProgress, setFishingProgress] = useState(0);
@@ -27,7 +28,6 @@ export default function FishingPanel() {
     const availableZones = getAvailableFishingZones(level);
     const currentZone = fishingZones.find(z => z.id === currentFishingZone);
 
-    const MAX_ENERGY = 100 + (gameState.energyLevel || 0) * 5;
     const canFish = !isResting && playerStats.health > 0;
     const hasEnoughEnergy = currentZone ? playerStats.energy >= currentZone.energyCost : false;
 
@@ -92,6 +92,12 @@ export default function FishingPanel() {
         dispatch({ type: 'ADD_LOG', payload: { text: "You find a relatively safe spot to rest your eyes for a moment...", type: 'info' } });
     };
 
+    const handleEatCookedApple = () => {
+        if (inventory.cookedApple > 0) {
+            dispatch({ type: 'EAT_COOKED_APPLE' });
+        }
+    };
+
     const getRarityColor = (rarity: string) => {
         switch (rarity) {
             case 'very common': return 'text-gray-500';
@@ -104,16 +110,31 @@ export default function FishingPanel() {
         }
     };
 
+    const isBusy = isFishing || isResting;
+    const isDead = playerStats.health <= 0;
+
     return (
         <div className="space-y-4">
             {/* Zone Selection Card */}
             <Card>
-                <CardHeader>
+                <CardHeader className="relative">
                     <CardTitle className="flex items-center gap-2">
                         <Fish className="h-5 w-5" />
                         Fishing Zones
                     </CardTitle>
                     <CardDescription>Select a fishing zone and cast your line into the wasteland waters.</CardDescription>
+                    {inventory.cookedApple > 0 && (
+                        <Button
+                            size="icon"
+                            variant={inventory.cookedApple > 0 ? "default" : "outline"}
+                            onClick={handleEatCookedApple}
+                            disabled={isDead || inventory.cookedApple === 0 || isBusy}
+                            aria-label={`Eat cooked apple (${inventory.cookedApple})`}
+                            className={cn("absolute top-4 right-4 h-8 w-8 sm:h-10 sm:w-10")}
+                        >
+                            <Zap className="h-4 w-4" />
+                        </Button>
+                    )}
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="space-y-2">
@@ -134,11 +155,11 @@ export default function FishingPanel() {
 
                     {currentZone && (
                         <div className="space-y-3">
-                            <div className="p-3 bg-muted rounded-md">
+                            <div className="p-3 bg-muted rounded-md mb-4">
                                 <p className="text-sm text-muted-foreground">{currentZone.description}</p>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-sm mb-4">
                                 <div className="flex items-center gap-1">
                                     <TrendingUp className="h-4 w-4 text-primary" />
                                     <span>Level {currentZone.levelRequirement}</span>
@@ -161,7 +182,7 @@ export default function FishingPanel() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
                                 <Button
                                     onClick={handleFish}
-                                    disabled={!canFish || !hasEnoughEnergy || playerStats.health <= 0 || isFishing}
+                                    disabled={!canFish || !hasEnoughEnergy || isDead || isBusy}
                                     className="w-full"
                                 >
                                     {isFishing || isResting ? (
@@ -175,7 +196,7 @@ export default function FishingPanel() {
                                 <Button
                                     variant="outline"
                                     onClick={handleRest}
-                                    disabled={isResting || playerStats.health <= 0}
+                                    disabled={isBusy || isDead}
                                     className="w-full"
                                 >
                                     {isResting ? (
@@ -188,7 +209,7 @@ export default function FishingPanel() {
                             </div>
 
                             {isFishing && (
-                                <div className="space-y-2">
+                                <div className="flex flex-col gap-2">
                                     <Progress value={fishingProgress} className="w-full" />
                                     <p className="text-sm text-center text-muted-foreground font-mono italic">
                                         Watching the bobber... {Math.floor(fishingProgress)}%
@@ -197,11 +218,11 @@ export default function FishingPanel() {
                             )}
 
                             {isResting && (
-                                <div className="space-y-2">
-                                    <Progress value={restingProgress} className="w-full" />
+                                <div className="flex flex-col gap-2">
                                     <p className="text-sm text-center text-muted-foreground">
                                         Resting... {Math.floor(restingProgress)}%
                                     </p>
+                                    <Progress value={restingProgress} className="w-full" />
                                 </div>
                             )}
 
