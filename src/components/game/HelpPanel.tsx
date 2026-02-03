@@ -8,138 +8,103 @@ import {
     AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { itemData } from "@/lib/game-data/items";
-import { locations } from "@/lib/game-data/locations";
-import { statIcons, allIcons } from "./GameIcons";
-import { BookOpen } from "lucide-react";
-import type { Resource, Item } from "@/lib/game-types";
-
-const gameBasics = {
-    'Player Stats': 'Your core survival metrics. If Health reaches zero, you die.',
-    'Exploration': 'The primary way to find a wide variety of resources. Costs energy.',
-    'Scavenging': 'A less risky way to find basic survival items like food and water. Costs less energy.',
-    'Fishing': 'Catch fish in various zones for food or to sell for Silver. Requires energy and sometimes specific levels.',
-    'Mining': 'Extract valuable ores and stone from the earth. Requires a Pickaxe and energy.',
-    'Base Building': 'Constructing structures at your base unlocks new technologies and automation.',
-    'Crafting': 'Combining resources to create new tools, items, and structures.',
-    'Tech Upgrades': 'Use Silver to purchase permanent upgrades for your character and base.',
-    'Market': 'Sell your unwanted goods to the Wandering Trader for Silver.'
-}
+import { BookOpen, AlertTriangle, Hammer, Gauge, Info } from "lucide-react";
 
 export default function HelpPanel() {
-    const resources = Object.keys(itemData).filter(id => itemData[id as keyof typeof itemData].sellPrice !== undefined && id !== 'silver');
-    const items = Object.keys(itemData).filter(id => itemData[id as keyof typeof itemData].equipSlot !== undefined || (itemData[id as keyof typeof itemData].sellPrice === undefined && id !== 'silver'));
-
     return (
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <BookOpen /> Help & Game Guide
+                    <BookOpen className="text-primary" /> Survivor&apos;s Guide
                 </CardTitle>
-                <CardDescription>An overview of game mechanics and items.</CardDescription>
+                <CardDescription>Essential knowledge for surviving the wasteland.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Accordion type="single" collapsible className="w-full">
-                    <AccordionItem value="item-1">
-                        <AccordionTrigger>Game Basics</AccordionTrigger>
-                        <AccordionContent>
-                            <div className="space-y-4 pr-4">
-                                {Object.entries(gameBasics).map(([title, desc]) => (
-                                    <div key={title} className="flex flex-col p-2 rounded-md bg-muted/50">
-                                        <span className="font-medium">{title}</span>
-                                        <p className="text-sm text-muted-foreground">{desc}</p>
-                                    </div>
-                                ))}
+
+                    <AccordionItem value="basics">
+                        <AccordionTrigger className="text-lg font-semibold">
+                            <div className="flex items-center gap-2">
+                                <AlertTriangle className="h-5 w-5 text-yellow-500" /> Survival Basics
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="space-y-4 text-muted-foreground">
+                            <p>
+                                <strong className="text-primary">Health</strong> is your life. If it hits 0, you lose everything. Keep it high by eating, drinking, and resting.
+                            </p>
+                            <p>
+                                <strong className="text-primary">Energy</strong> is required for every action.
+                                It regenerates slowly over time, or quickly by <strong className="text-foreground">Resting</strong>.
+                            </p>
+                            <div className="bg-muted/50 p-3 rounded-md border-l-4 border-yellow-500">
+                                <p className="text-sm italic">"Don&apos;t starve. Don&apos;t dehydrate. Don&apos;t get eaten by mutants." - Wasteland Rule #1</p>
                             </div>
                         </AccordionContent>
                     </AccordionItem>
-                    <AccordionItem value="item-2">
-                        <AccordionTrigger>Player Stats</AccordionTrigger>
-                        <AccordionContent>
-                            <div className="space-y-4 pr-4">
-                                <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                                    {statIcons.health}
-                                    <div>
-                                        <span className="font-medium">Health:</span>
-                                        <p className="text-sm text-muted-foreground">Your life force. Regenerates slowly when well-fed and hydrated. Reaching 0 is permanent death for this run.</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                                    {statIcons.hunger}
-                                    <div>
-                                        <span className="font-medium">Hunger:</span>
-                                        <p className="text-sm text-muted-foreground">Decreases over time. Eat food to restore it. If it hits 0, you will start losing health.</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                                    {statIcons.thirst}
-                                    <div>
-                                        <span className="font-medium">Thirst:</span>
-                                        <p className="text-sm text-muted-foreground">Decreases over time. Drink water to restore it. If it hits 0, you will start losing health.</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
-                                    {statIcons.energy}
-                                    <div>
-                                        <span className="font-medium">Energy:</span>
-                                        <p className="text-sm text-muted-foreground">Consumed when performing actions like exploring. Regenerates slowly over time or by resting.</p>
-                                    </div>
-                                </div>
+
+                    <AccordionItem value="getting-started">
+                        <AccordionTrigger className="text-lg font-semibold">
+                            <div className="flex items-center gap-2">
+                                <Gauge className="h-5 w-5 text-blue-500" /> Getting Started
                             </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="space-y-4 text-muted-foreground">
+                            <ol className="list-decimal pl-5 space-y-2">
+                                <li>
+                                    <strong className="text-foreground">Scavenge</strong> for basic supplies like Water and Apples to stay alive.
+                                </li>
+                                <li>
+                                    <strong className="text-foreground">Explore</strong> the Outskirts to find Wood and Stone. You&apos;ll need these for tools.
+                                </li>
+                                <li>
+                                    Use the <strong className="text-foreground">Crafting</strong> panel to make a <strong className="text-primary">Stone Axe</strong>. This lets you Chop Wood efficiently.
+                                </li>
+                                <li>
+                                    Build a <strong className="text-primary">Workbench</strong> in the Base tab. This unlocks advanced crafting recipes.
+                                </li>
+                            </ol>
                         </AccordionContent>
                     </AccordionItem>
-                    <AccordionItem value="item-3">
-                        <AccordionTrigger>Locations</AccordionTrigger>
-                        <AccordionContent>
-                            <div className="space-y-2 pr-4">
-                                {Object.values(locations).map(loc => (
-                                    <div key={loc.id} className="p-2 rounded-md bg-muted/50">
-                                        <p><span className="font-medium">{loc.name}:</span> {loc.description}</p>
-                                    </div>
-                                ))}
+
+                    <AccordionItem value="crafting">
+                        <AccordionTrigger className="text-lg font-semibold">
+                            <div className="flex items-center gap-2">
+                                <Hammer className="h-5 w-5 text-orange-500" /> Crafting & Progression
                             </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="space-y-4 text-muted-foreground">
+                            <p>
+                                Most items require a <strong>Workbench</strong> to craft. Once you have one, you can make:
+                            </p>
+                            <ul className="list-disc pl-5 space-y-1">
+                                <li><strong>Tools:</strong> Pickaxes, Fishing Rods, and Weapons to access new resources.</li>
+                                <li><strong>Structures:</strong> Furnaces, Water Purifiers, and Farms to automate your survival.</li>
+                                <li><strong>Machines:</strong> Drill rigs and auto-smelters to do the work for you.</li>
+                            </ul>
+                            <p className="mt-2 text-sm">
+                                <strong>Tip:</strong> If you can&apos;t find a resource, check the <strong className="text-foreground">Explore</strong> panel. Different locations yield different items.
+                            </p>
                         </AccordionContent>
                     </AccordionItem>
-                    <AccordionItem value="item-4">
-                        <AccordionTrigger>Resources</AccordionTrigger>
-                        <AccordionContent>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pr-4">
-                                {resources.map(id => {
-                                    const data = itemData[id as keyof typeof itemData];
-                                    return (
-                                        <div key={id} className="flex items-start gap-2 p-2 rounded-md bg-muted/50">
-                                            {allIcons[id]}
-                                            <div>
-                                                <span className="font-medium">{data.name}</span>
-                                                <p className="text-sm text-muted-foreground">{data.description}</p>
-                                            </div>
-                                        </div>
-                                    )
-                                })}
+
+                    <AccordionItem value="tips">
+                        <AccordionTrigger className="text-lg font-semibold">
+                            <div className="flex items-center gap-2">
+                                <Info className="h-5 w-5 text-green-500" /> Pro Tips
                             </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="space-y-4 text-muted-foreground">
+                            <ul className="list-disc pl-5 space-y-2">
+                                <li>Sell excess items to the <strong>Wandering Trader</strong> (Market) for Silver.</li>
+                                <li>Use Silver to buy <strong>Upgrades</strong> like larger inventory or faster automation.</li>
+                                <li><strong>Fishing</strong> is a great source of food and valuable fish to sell.</li>
+                                <li>Check the <strong>Collection</strong> page in Settings to see what items you're missing!</li>
+                            </ul>
                         </AccordionContent>
                     </AccordionItem>
-                    <AccordionItem value="item-5">
-                        <AccordionTrigger>Craftable Items & Structures</AccordionTrigger>
-                        <AccordionContent>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pr-4">
-                                {items.map(id => {
-                                    const data = itemData[id as keyof typeof itemData];
-                                    return (
-                                        <div key={id} className="flex items-start gap-2 p-2 rounded-md bg-muted/50">
-                                            {allIcons[id]}
-                                            <div>
-                                                <span className="font-medium">{data.name}</span>
-                                                <p className="text-sm text-muted-foreground">{data.description}</p>
-                                            </div>
-                                        </div>
-                                    )
-                                })}
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
+
                 </Accordion>
             </CardContent>
         </Card>
-    )
+    );
 }

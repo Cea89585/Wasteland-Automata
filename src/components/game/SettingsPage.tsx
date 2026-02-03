@@ -117,32 +117,80 @@ export default function SettingsPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="col-span-1 lg:col-span-2">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Package /> Item Collection (All Time)
+                            <Package /> Item Collection
                         </CardTitle>
-                        <CardDescription>All items you have gathered throughout all your journeys.</CardDescription>
+                        <CardDescription>A complete log of every item you have discovered or crafted.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {totalItemsGained.length === 0 ? (
-                            <p className="text-muted-foreground text-center flex items-center justify-center">No items gathered yet.</p>
-                        ) : (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                {totalItemsGained.map(([itemId, quantity]) => {
-                                    const data = itemData[itemId as keyof typeof itemData];
-                                    return (
-                                        <div key={itemId} className="flex items-center justify-between p-2 rounded-md bg-muted/50">
-                                            <div className="flex items-center gap-2">
-                                                <GameIcon type="item" id={itemId} size={20} />
-                                                <span className="font-medium text-sm">{data?.name}</span>
-                                            </div>
-                                            <span className="font-mono font-semibold text-primary">{quantity}</span>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        )}
+                        <ScrollArea className="h-[600px] w-full pr-4">
+                            {(() => {
+                                // Dynamic Categorization
+                                const allItems = Object.entries(itemData).sort((a, b) => a[1].name.localeCompare(b[1].name));
+
+                                const categories = {
+                                    Resources: allItems.filter(([id, data]) => data.type === 'resource' || data.type === 'component'),
+                                    Equipment: allItems.filter(([id, data]) => data.type === 'equipment' || data.equipSlot),
+                                    Consumables: allItems.filter(([id, data]) => data.type === 'food' || data.type === 'potion' || data.type === 'seed'), // Added seed here if applicable, or separate farming
+                                    Fish: allItems.filter(([id, data]) => data.type === 'fish'),
+                                    Valuables: allItems.filter(([id, data]) => (data.type === 'valuable' || data.type === 'artifact') && data.type !== 'fish'),
+                                    Other: allItems.filter(([id, data]) =>
+                                        !['resource', 'component', 'equipment', 'food', 'potion', 'seed', 'fish', 'valuable', 'artifact'].includes(data.type) && !data.equipSlot
+                                    )
+                                };
+
+                                return (
+                                    <div className="flex flex-col gap-8">
+                                        {Object.entries(categories).map(([categoryName, items]) => {
+                                            if (items.length === 0) return null;
+                                            return (
+                                                <div key={categoryName} className="space-y-3">
+                                                    <h3 className="font-semibold text-lg border-b pb-2 flex items-center gap-2">
+                                                        {categoryName}
+                                                        <span className="text-xs font-normal text-muted-foreground ml-2">
+                                                            ({items.filter(([id]) => (statistics?.totalItemsGained?.[id as keyof typeof statistics.totalItemsGained] || 0) > 0).length} / {items.length} Discovered)
+                                                        </span>
+                                                    </h3>
+                                                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                                        {items.map(([itemId, data]) => {
+                                                            const count = statistics?.totalItemsGained?.[itemId as keyof typeof statistics.totalItemsGained] || 0;
+                                                            const isDiscovered = count > 0;
+
+                                                            return (
+                                                                <div
+                                                                    key={itemId}
+                                                                    className={`
+                                                                        flex flex-col items-center justify-center p-3 rounded-lg border text-center transition-all
+                                                                        ${isDiscovered ? 'bg-card' : 'bg-muted/20 opacity-60 grayscale'}
+                                                                    `}
+                                                                >
+                                                                    <div className="relative mb-2">
+                                                                        <GameIcon type="item" id={itemId} size={32} />
+                                                                        {!isDiscovered && (
+                                                                            <div className="absolute inset-0 flex items-center justify-center bg-background/50 rounded-full">
+                                                                                {/* Optional lock icon or question mark overlay */}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                    <span className="font-medium text-xs leading-tight min-h-[2.5em] flex items-center justify-center">
+                                                                        {data.name}
+                                                                    </span>
+                                                                    <div className="mt-2 text-xs font-mono bg-muted/50 px-2 py-0.5 rounded-full">
+                                                                        x{count}
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                );
+                            })()}
+                        </ScrollArea>
                     </CardContent>
                 </Card>
             </div>
