@@ -767,11 +767,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         const MAX_HEALTH = getMaxHealth();
         if (newStats.health < MAX_HEALTH) {
           const secondWindLevel = currentState.skills?.secondWind || 0;
-          const restEfficiencyLevel = currentState.skills?.efficientMetabolism || 0; // Assuming efficient metabolism might help here too? No, wait.
-          // Correct implementation of Second Wind is already here.
-          // Let's implement Efficient Metabolism for hunger/thirst decay.
+          const restEfficiencyLevel = currentState.restEfficiencyLevel || 0;
 
-          const healAmount = 0.25 * (1 + (secondWindLevel * 0.5));
+          // Base heal 0.25
+          // Second Wind: +50% per level
+          // Rest Efficiency Tech: +5% per level
+          const healAmount = 0.25 * (1 + (secondWindLevel * 0.5) + (restEfficiencyLevel * 0.05));
           newStats.health = Math.min(MAX_HEALTH, newStats.health + healAmount);
         }
       }

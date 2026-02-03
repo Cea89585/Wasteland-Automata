@@ -13,19 +13,21 @@ export default function CommunityPanel() {
     const { gameState } = useGame();
     const { completedQuests } = gameState;
     const [selectedQuest, setSelectedQuest] = useState<Quest | null>(null);
+    const [viewMode, setViewMode] = useState<'active' | 'completed'>('active');
 
-    const availableQuests = quests.filter(quest => {
-        if (completedQuests.includes(quest.id)) {
-            return false;
-        }
-        if (quest.dependsOn) {
-            return completedQuests.includes(quest.dependsOn);
-        }
+    const activeQuests = quests.filter(quest => {
+        if (completedQuests.includes(quest.id)) return false;
+        if (quest.dependsOn) return completedQuests.includes(quest.dependsOn);
         return true;
     });
 
+    const finishedQuests = quests.filter(quest => completedQuests.includes(quest.id));
+
+    const displayedQuests = viewMode === 'active' ? activeQuests : finishedQuests;
+
     const handleSelectQuest = (questId: string) => {
-        const quest = availableQuests.find(q => q.id === questId);
+        // Search in both lists to be safe, though displayedQuests contains the target
+        const quest = quests.find(q => q.id === questId);
         setSelectedQuest(quest || null);
     };
 
@@ -36,19 +38,51 @@ export default function CommunityPanel() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Users /> Quests</CardTitle>
-                <CardDescription>Locals in the wasteland may have tasks for you.</CardDescription>
+                <div className="flex justify-between items-center">
+                    <div>
+                        <CardTitle className="flex items-center gap-2"><Users /> Quests</CardTitle>
+                        <CardDescription>
+                            {viewMode === 'active'
+                                ? "Locals in the wasteland may have tasks for you."
+                                : "Tales of your past accomplishments."}
+                        </CardDescription>
+                    </div>
+                </div>
+                {!selectedQuest && (
+                    <div className="flex gap-2 mt-2">
+                        <div className="flex p-1 bg-muted rounded-lg">
+                            <button
+                                onClick={() => setViewMode('active')}
+                                className={`px-3 py-1 text-sm rounded-md transition-all ${viewMode === 'active' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                            >
+                                Active
+                            </button>
+                            <button
+                                onClick={() => setViewMode('completed')}
+                                className={`px-3 py-1 text-sm rounded-md transition-all ${viewMode === 'completed' ? 'bg-background shadow text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+                            >
+                                Completed
+                            </button>
+                        </div>
+                    </div>
+                )}
             </CardHeader>
             <CardContent>
-                {availableQuests.length === 0 ? (
+                {displayedQuests.length === 0 ? (
                     <div className="text-center text-muted-foreground p-8">
-                        <p>You've helped everyone you can for now.</p>
-                        <p className="text-xs">More opportunities may arise as you explore and build.</p>
+                        {viewMode === 'active' ? (
+                            <>
+                                <p>You've helped everyone you can for now.</p>
+                                <p className="text-xs">More opportunities may arise as you explore and build.</p>
+                            </>
+                        ) : (
+                            <p>No completed quests yet.</p>
+                        )}
                     </div>
                 ) : selectedQuest ? (
                     <QuestDetails quest={selectedQuest} onBack={handleBack} />
                 ) : (
-                    <QuestList quests={availableQuests} onSelectQuest={handleSelectQuest} />
+                    <QuestList quests={displayedQuests} onSelectQuest={handleSelectQuest} />
                 )}
             </CardContent>
         </Card>
