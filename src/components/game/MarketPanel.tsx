@@ -38,7 +38,7 @@ export default function MarketPanel() {
       ...itemData[fishId]
     }));
 
-  const sellableItems = [...inventoryItems, ...fishItems];
+  const sellableItems = [...inventoryItems, ...fishItems].sort((a, b) => a.name.localeCompare(b.name));
 
   const unlockedSellableItems = sellableItems.filter(item => !lockedItems.includes(item.id));
   const lockedSellableItems = sellableItems.filter(item => lockedItems.includes(item.id));
@@ -51,9 +51,9 @@ export default function MarketPanel() {
     if (isFish) {
       // Sell fish using SELL_ALL_FISH action (we'll need to modify this to sell individual fish)
       // For now, we'll use the same SELL_ITEM action
-      dispatch({ type: 'SELL_ITEM', payload: { item, amount, price } });
+      dispatch({ type: 'SELL_ITEM', payload: { itemId: item, amount, price } });
     } else {
-      dispatch({ type: 'SELL_ITEM', payload: { item, amount, price } });
+      dispatch({ type: 'SELL_ITEM', payload: { itemId: item, amount, price } });
     }
   }
 
