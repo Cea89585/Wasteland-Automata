@@ -63,7 +63,7 @@ export default function CharacterPanel() {
         </Card>
         <Separator />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {(Object.keys(equipment) as EquipmentSlot[]).map((slot) => {
+          {(Object.keys(equipment).sort() as EquipmentSlot[]).map((slot) => {
             const equippedItem = equipment[slot];
             const itemDetails = equippedItem ? itemData[equippedItem] : null;
 
@@ -102,7 +102,7 @@ export default function CharacterPanel() {
             <div className="space-y-2">
               <h3 className="text-lg font-medium text-muted-foreground">Discoveries</h3>
               <div className="grid grid-cols-1 gap-2">
-                {discoveredLocations.map((locationId) => (
+                {[...discoveredLocations].sort().map((locationId) => (
                   <div key={locationId} className="flex items-center gap-3 p-3 rounded-md bg-muted/50">
                     <Map className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                     <div className="flex flex-col">
