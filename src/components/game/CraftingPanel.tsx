@@ -172,8 +172,9 @@ export default function CraftingPanel() {
 
                         {(() => {
                           const bulkCrafterLevel = gameState.skills.bulkCrafter || 0;
+                          const massProductionLevel = gameState.skills.massProduction || 0;
 
-                          if (bulkCrafterLevel >= 3) {
+                          if (massProductionLevel > 0 || bulkCrafterLevel >= 3) {
                             return (
                               <TooltipProvider>
                                 <Tooltip>

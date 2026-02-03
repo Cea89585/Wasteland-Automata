@@ -27,10 +27,19 @@ export const skills: Skill[] = [
     {
         id: 'bulkCrafter',
         name: 'Bulk Crafter',
-        description: 'Unlock "Craft 5" button (Lv1), "Craft 10" button (Lv2), "Craft Max" button (Lv3)',
+        description: 'Unlock "Craft 5" button (Lv1) and "Craft 10" button (Lv2)',
         category: 'crafting',
-        maxLevel: 3,
+        maxLevel: 2,
         cost: 1,
+    },
+    {
+        id: 'massProduction',
+        name: 'Mass Production',
+        description: 'Unlock "Craft Max" button to craft as many items as possible at once',
+        category: 'crafting',
+        maxLevel: 1,
+        cost: 2,
+        prerequisites: ['bulkCrafter'],
     },
     {
         id: 'efficientHands',
