@@ -135,7 +135,7 @@ export default function SettingsPage() {
                                     Equipment: allItems.filter(([id, data]) => data.type === 'equipment' || data.equipSlot),
                                     Consumables: allItems.filter(([id, data]) => data.type === 'food' || data.type === 'potion' || data.type === 'seed'), // Added seed here if applicable, or separate farming
                                     Fish: allItems.filter(([id, data]) => data.type === 'fish'),
-                                    Valuables: allItems.filter(([id, data]) => (data.type === 'valuable' || data.type === 'artifact') && data.type !== 'fish'),
+                                    Valuables: allItems.filter(([id, data]) => data.type === 'valuable' || data.type === 'artifact'),
                                     Other: allItems.filter(([id, data]) =>
                                         !['resource', 'component', 'equipment', 'food', 'potion', 'seed', 'fish', 'valuable', 'artifact'].includes(data.type) && !data.equipSlot
                                     )

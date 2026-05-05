@@ -2,7 +2,7 @@
 'use client';
 
 import React, { createContext, useReducer, useEffect, type ReactNode, useState, useCallback, useRef } from 'react';
-import type { GameState, GameAction, LogMessage, Resource, Item, Statistics, LocationId, Theme, Machine } from '@/lib/game-types';
+import type { GameState, GameAction, LogMessage, Resource, Item, Statistics, LocationId, Theme, Machine, LoreEntry } from '@/lib/game-types';
 import { initialState, initialStatistics } from '@/lib/game-data/initial-state';
 import { recipes as allRecipes } from '@/lib/game-data/recipes';
 import { itemData } from '@/lib/game-data/items';
@@ -11,6 +11,9 @@ import { useInactivityTimer } from '@/hooks/use-inactivity-timer';
 import { locationOrder } from '@/lib/game-types';
 import { quests } from '@/lib/game-data/quests';
 import { xpCurve } from '@/lib/game-data/xp-curve';
+import { getFishingZoneById, rollFishingLoot, fishingZones } from '@/lib/game-data/fishing';
+import type { FishingZone, FishingLoot } from '@/lib/game-data/fishing';
+import { loreEntries } from '@/lib/game-data/lore';
 import { useUser } from '@/hooks/use-user';
 import { useFirebase } from '@/firebase/provider';
 import { doc, setDoc, getDoc, DocumentData, writeBatch, onSnapshot } from 'firebase/firestore';
@@ -56,7 +59,6 @@ const processDroneReturn = (state: GameState): { droneState: GameState, logMessa
   // Generate loot based on mission type
   if (missionType === 'fish') {
     // Fishing mission - use the current fishing zone's loot table
-    const { getFishingZoneById, rollFishingLoot } = require('@/lib/game-data/fishing');
     const zone = getFishingZoneById(state.currentFishingZone || 'toxic_puddle');
 
     if (zone) {
@@ -1235,9 +1237,8 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       const newCompletedQuests = [...state.completedQuests, questId];
 
       // Unlock lore entries associated with this quest
-      const loreEntries = require('@/lib/game-data/lore').loreEntries;
       const newUnlockedLore = [...state.unlockedLore];
-      loreEntries.forEach((entry: any) => {
+      loreEntries.forEach((entry: LoreEntry) => {
         if (entry.unlockedBy === questId && !newUnlockedLore.includes(entry.id)) {
           newUnlockedLore.push(entry.id);
         }
@@ -2059,13 +2060,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
       logText = `Drone returned from ${missionType} mission with: ${lootString}`;
 
       // Debug logging
-      console.log('FINISH_DRONE_MISSION:', {
-        missionType,
-        stateDroneMissionType: state.droneMissionType,
-        loot,
-        logText,
-        queue: state.droneMissionQueue
-      });
+      // console.log('FINISH_DRONE_MISSION:', {
+      //   missionType,
+      //   stateDroneMissionType: state.droneMissionType,
+      //   loot,
+      //   logText,
+      //   queue: state.droneMissionQueue
+      // });
 
       const newQueue = state.droneMissionQueue - 1;
       const isActive = newQueue > 0;
@@ -2353,7 +2354,6 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
     case 'FISH': {
       const { zoneId } = action.payload;
-      const { getFishingZoneById, rollFishingLoot } = require('@/lib/game-data/fishing');
       const zone = getFishingZoneById(zoneId);
 
       if (!zone) return state;
@@ -2453,13 +2453,12 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'SELL_ALL_FISH': {
-      const { fishingZones } = require('@/lib/game-data/fishing');
       let totalSilver = 0;
       let fishSold = 0;
 
       // Calculate total value of all caught fish
-      const allLoot: any[] = [];
-      fishingZones.forEach((zone: any) => {
+      const allLoot: FishingLoot[] = [];
+      fishingZones.forEach((zone: FishingZone) => {
         allLoot.push(...zone.lootTable);
       });
 
@@ -2467,7 +2466,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
 
       Object.entries(newCaughtFish).forEach(([fishType, count]) => {
         if (count && count > 0) {
-          const fishData = allLoot.find((loot: any) => loot.item === fishType && loot.isFish);
+          const fishData = allLoot.find((loot: FishingLoot) => loot.item === fishType && loot.isFish);
           if (fishData && fishData.silverValue) {
             totalSilver += fishData.silverValue * count;
             fishSold += count;

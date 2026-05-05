@@ -51,9 +51,9 @@ export default function MarketPanel() {
     if (isFish) {
       // Sell fish using SELL_ALL_FISH action (we'll need to modify this to sell individual fish)
       // For now, we'll use the same SELL_ITEM action
-      dispatch({ type: 'SELL_ITEM', payload: { itemId: item, amount, price } });
+      dispatch({ type: 'SELL_ITEM', payload: { itemId: item, amount } });
     } else {
-      dispatch({ type: 'SELL_ITEM', payload: { itemId: item, amount, price } });
+      dispatch({ type: 'SELL_ITEM', payload: { itemId: item, amount } });
     }
   }
 

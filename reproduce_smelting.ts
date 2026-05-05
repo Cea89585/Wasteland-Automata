@@ -1,4 +1,4 @@
-import { GameState, GameAction } from './lib/game-types';
+import { GameState, GameAction } from './src/lib/game-types';
 
 // Mock specific parts of the reducer logic to isolate the smelting bug
 // We don't need the whole state, just the relevant parts
