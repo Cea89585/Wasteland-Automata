@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { useFirebase } from '@/firebase/provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { LogIn } from 'lucide-react';
+import { LogIn, Globe } from 'lucide-react';
 import AuthLayout from '../auth-layout';
 
 export default function LoginPage() {
@@ -20,6 +20,26 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true);
+    auth.languageCode = 'en';
+    try {
+      await signInWithPopup(auth, provider);
+      toast({ title: 'Success', description: 'Logged in with Google.' });
+      router.push('/');
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Google Sign-In Error',
+        description: `${error.code ?? 'auth/error'}: ${error.message ?? 'Failed to sign in with Google.'}`,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +97,16 @@ export default function LoginPage() {
                 <CardFooter className="flex flex-col gap-4">
                     <Button type="submit" className="w-full" disabled={isLoading}>
                         {isLoading ? 'Signing In...' : 'Sign In'}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="w-full"
+                      onClick={handleGoogleSignIn}
+                      disabled={isLoading}
+                    >
+                      <Globe />
+                      Continue with Google
                     </Button>
                     <p className="text-center text-sm text-muted-foreground">
                         Don&apos;t have an account?{' '}
