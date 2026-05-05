@@ -1,6 +1,8 @@
 // src/app/settings/page.tsx
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import SettingsPage from '@/components/game/SettingsPage';
 
 export default function Settings() {

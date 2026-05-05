@@ -1,6 +1,9 @@
 // src/app/signup/page.tsx
 'use client';
-import { useState } from 'react';
+
+export const dynamic = 'force-dynamic';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { GoogleAuthProvider, createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
@@ -14,17 +17,31 @@ import { UserPlus, Globe } from 'lucide-react';
 import AuthLayout from '../auth-layout';
 
 export default function SignUpPage() {
-  const { auth } = useFirebase();
+  const firebase = useFirebase();
   const router = useRouter();
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const googleProvider = new GoogleAuthProvider();
-  googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+  // Firebase might not be available during SSR
+  const auth = firebase?.auth;
+  const googleProvider = auth ? new GoogleAuthProvider() : null;
+  if (googleProvider) {
+    googleProvider.setCustomParameters({ prompt: 'select_account' });
+  }
 
   const handleGoogleSignUp = async () => {
+    if (!auth || !googleProvider) {
+      toast({
+        variant: 'destructive',
+        title: 'Service Unavailable',
+        description: 'Authentication service is not available.',
+      });
+      return;
+    }
+
     setIsLoading(true);
     auth.languageCode = 'en';
     try {
@@ -44,6 +61,15 @@ export default function SignUpPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!auth) {
+      toast({
+        variant: 'destructive',
+        title: 'Service Unavailable',
+        description: 'Authentication service is not available.',
+      });
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast({
         variant: 'destructive',

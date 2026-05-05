@@ -1,6 +1,8 @@
 // src/app/page.tsx
 'use client';
 
+export const dynamic = 'force-dynamic';
+
 import { GameProvider } from '@/contexts/game-context';
 import GameUI from '@/components/game/GameUI';
 

@@ -2744,7 +2744,8 @@ export const GameContext = createContext<{
 export function GameProvider({ children }: { children: ReactNode }) {
   const [gameState, dispatch] = useReducer(reducer, { ...initialState, statistics: initialStatistics, isInitialized: false });
   const { user } = useUser();
-  const { firestore } = useFirebase();
+  const firebase = useFirebase();
+  const firestore = firebase?.firestore;
   const isSavingRef = useRef(false);
   const gameStateRef = useRef(gameState);
   const isProcessingSmeltRef = useRef(false);
@@ -2770,9 +2771,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // Effect for loading game state from Firestore using real-time snapshots
   useEffect(() => {
-    if (!user) {
-      dispatch({ type: 'RESET_GAME_NO_LOCALSTORAGE' });
-      hasInitializedRef.current = false;
+    if (!user || !firestore) {
+      if (!user) {
+        dispatch({ type: 'RESET_GAME_NO_LOCALSTORAGE' });
+        hasInitializedRef.current = false;
+      }
       return;
     }
 
@@ -2888,6 +2891,8 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // Effect for saving game state to Firestore
   useEffect(() => {
+    if (!firestore) return;
+
     const saveInterval = setInterval(() => {
       const currentGameState = gameStateRef.current;
       if (currentGameState.isInitialized && user && !isSavingRef.current) {
