@@ -59,7 +59,7 @@ import { useFirebase } from '@/firebase/provider';
 export default function GameUI() {
   const { gameState, dispatch } = useGame();
   const { user, isLoading: isUserLoading } = useUser();
-  const { auth } = useFirebase();
+  const firebase = useFirebase();
   const router = useRouter();
   const isMobile = useBreakpoint('sm');
   const [activeTab, setActiveTab] = useState('explore');
@@ -85,7 +85,9 @@ export default function GameUI() {
   }
 
   const handleLogout = async () => {
-    await auth.signOut();
+    if (firebase?.auth) {
+      await firebase.auth.signOut();
+    }
     dispatch({ type: 'RESET_GAME_NO_LOCALSTORAGE' });
     router.push('/login');
   };

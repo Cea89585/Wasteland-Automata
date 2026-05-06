@@ -5,6 +5,8 @@ import { useGame } from '@/hooks/use-game';
 import { useEffect } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { Analytics } from '@vercel/analytics/next';
+import { FirebaseProvider } from '@/firebase/provider';
+import { GameProvider } from '@/contexts/game-context';
 
 function ThemeWrapper({ children }: { children: React.ReactNode }) {
   const { gameState } = useGame();
@@ -46,9 +48,13 @@ export default function ClientLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <ThemeWrapper>
-            {children}
-        </ThemeWrapper>
+        <GameProvider>
+          <FirebaseProvider>
+            <ThemeWrapper>
+                {children}
+            </ThemeWrapper>
+          </FirebaseProvider>
+        </GameProvider>
         <Toaster />
         <Analytics />
       </body>

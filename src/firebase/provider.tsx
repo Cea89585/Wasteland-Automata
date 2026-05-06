@@ -23,7 +23,7 @@ export const FirebaseProvider = ({ children }: { children: React.ReactNode }) =>
       const app = getFirebaseApp();
       const auth = getFirebaseAuth();
       const db = getFirebaseDb();
-      setFirebaseValue({ firebaseApp: app, auth, db });
+      setFirebaseValue({ firebaseApp: app, auth, firestore: db });
     } catch (error) {
       // Firebase config not available - this is expected during build
       console.warn('Firebase not initialized:', error);
@@ -39,8 +39,5 @@ export const FirebaseProvider = ({ children }: { children: React.ReactNode }) =>
 
 export const useFirebase = () => {
   const context = useContext(FirebaseContext);
-  if (!context) {
-    throw new Error('Firebase is not available. Make sure FirebaseProvider is mounted and Firebase config is set.');
-  }
   return context;
 };

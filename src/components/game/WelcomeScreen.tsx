@@ -15,7 +15,7 @@ import { doc, getDoc, writeBatch, updateDoc } from 'firebase/firestore';
 
 export default function WelcomeScreen() {
     const { dispatch } = useGame();
-    const { firestore } = useFirebase();
+    const firebase = useFirebase();
     const { user } = useUser();
     const [name, setName] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -27,13 +27,18 @@ export default function WelcomeScreen() {
             return;
         }
 
+        if (!firebase?.firestore) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Firebase is not available.' });
+            return;
+        }
+
         const trimmedName = name.trim();
         if (trimmedName.length < 3 || trimmedName.length > 25) {
             toast({ variant: 'destructive', title: 'Invalid Name', description: 'Name must be between 3 and 25 characters.' });
             return;
         }
         setIsLoading(true);
-        const userRef = doc(firestore, 'users', user.uid);
+        const userRef = doc(firebase.firestore!, 'users', user.uid);
 
         try {
             // Normalize name for profanity check: remove spaces and non-alphanumeric characters

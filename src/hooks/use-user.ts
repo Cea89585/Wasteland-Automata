@@ -4,17 +4,21 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 import { useFirebase } from '@/firebase/provider';
 
 export const useUser = () => {
-  const { auth } = useFirebase();
+  const firebase = useFirebase();
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    if (!firebase?.auth) {
+      setIsLoading(false);
+      return;
+    }
+    const unsubscribe = onAuthStateChanged(firebase.auth, (user) => {
       setUser(user);
       setIsLoading(false);
     });
     return () => unsubscribe();
-  }, [auth]);
+  }, [firebase?.auth]);
 
   return { user, isLoading };
 };

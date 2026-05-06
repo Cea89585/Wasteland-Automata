@@ -1,9 +1,7 @@
 
 import type { Metadata } from 'next';
 import './globals.css';
-import { GameProvider } from '@/contexts/game-context';
 import ClientLayout from './client-layout';
-import { FirebaseProvider } from '@/firebase/provider';
 
 export const metadata: Metadata = {
   title: 'Wasteland Automata',
@@ -16,10 +14,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <FirebaseProvider>
-      <GameProvider>
-        <ClientLayout>{children}</ClientLayout>
-      </GameProvider>
-    </FirebaseProvider>
+    <ClientLayout>{children}</ClientLayout>
   );
 }
