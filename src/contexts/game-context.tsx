@@ -16,6 +16,7 @@ import type { FishingZone, FishingLoot } from '@/lib/game-data/fishing';
 import { loreEntries } from '@/lib/game-data/lore';
 import { useUser } from '@/hooks/use-user';
 import { useFirebase } from '@/firebase/provider';
+import { log } from '@/lib/logger';
 import { doc, setDoc, getDoc, DocumentData, writeBatch, onSnapshot } from 'firebase/firestore';
 import { machineCosts } from '@/lib/game-data/machines';
 import { canUnlockSkill, skills } from '@/lib/game-data/skills';
@@ -186,6 +187,48 @@ const xpForNextLevel = (level: number): number => {
   return cumulativeXpForNextLevel - cumulativeXpForCurrentLevel;
 }
 
+// Apply migrations and normalize incoming or loaded game state
+const applyMigrations = (state: Partial<GameState>): GameState => {
+  const newState: GameState = { ...initialState, ...state } as GameState;
+
+  // Ensure statistics object exists
+  newState.statistics = { ...initialStatistics, ...(state.statistics || {}) };
+  if (!newState.statistics.totalItemsGained) {
+    newState.statistics.totalItemsGained = { ...initialStatistics.totalItemsGained };
+  }
+
+  // Ensure farmPlots exists
+  if (!newState.farmPlots) newState.farmPlots = [];
+
+  // Migration: Unlock Forest for players who completed quest_anya_1
+  if (newState.completedQuests?.includes('quest_anya_1') && !newState.unlockedLocations?.includes('forest')) {
+    newState.unlockedLocations = [...(newState.unlockedLocations || []), 'forest'];
+  }
+
+  // MIGRATION: Ensure new recipes are unlocked for existing saves
+  const requiredRecipes = ['recipe_grindStone'];
+  if ((newState.inventory?.furnace || 0) > 0) requiredRecipes.push('recipe_glassTube');
+  if ((newState.inventory?.workbench || 0) > 0) {
+    requiredRecipes.push('recipe_glassJar');
+    requiredRecipes.push('recipe_pickledPeaches');
+  }
+  if (newState.builtStructures?.includes('kitchen')) {
+    allRecipes.forEach(r => {
+      if (r.unlockedBy.includes('kitchen')) {
+        requiredRecipes.push(r.id);
+      }
+    });
+  }
+
+  if (!newState.unlockedRecipes) newState.unlockedRecipes = [];
+  const missingRecipes = requiredRecipes.filter(r => !newState.unlockedRecipes.includes(r));
+  if (missingRecipes.length > 0) {
+    newState.unlockedRecipes = [...newState.unlockedRecipes, ...missingRecipes];
+  }
+
+  return newState;
+}
+
 const reducer = (state: GameState, action: GameAction): GameState => {
   const getInventoryCap = () => {
     const baseCap = 200 + (state.storageLevel || 0) * 50;
@@ -201,8 +244,13 @@ const reducer = (state: GameState, action: GameAction): GameState => {
   switch (action.type) {
     case 'INITIALIZE': {
       // Merge loaded state with initial state to ensure all fields exist (handling schema updates/missing fields)
-      const gameState = { ...initialState, ...action.payload.gameState };
-      const statistics = { ...initialStatistics, ...action.payload.statistics };
+      let gameState = { ...initialState, ...action.payload.gameState } as GameState;
+      let statistics = { ...initialStatistics, ...action.payload.statistics } as typeof initialStatistics;
+
+      // Apply migrations and normalization
+      const merged = applyMigrations({ ...gameState, statistics });
+      gameState = merged;
+      statistics = merged.statistics;
 
       if (gameState.log && gameState.log.length > 0) {
         const maxId = gameState.log.reduce((max, l) => Math.max(max, l.id), 0);
@@ -211,31 +259,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         logIdCounter = 1;
       }
 
-      // MIGRATION: Ensure new recipes are unlocked for existing saves
-      // MIGRATION: Ensure new recipes are unlocked for existing saves
-      const requiredRecipes = ['recipe_grindStone'];
-
-      // Unlock recipes based on existing structures
-      if ((gameState.inventory.furnace || 0) > 0) {
-        requiredRecipes.push('recipe_glassTube');
-      }
-      if ((gameState.inventory.workbench || 0) > 0) {
-        requiredRecipes.push('recipe_glassJar');
-        requiredRecipes.push('recipe_pickledPeaches');
-      }
-      if (gameState.builtStructures.includes('kitchen')) {
-        allRecipes.forEach(r => {
-          if (r.unlockedBy.includes('kitchen')) {
-            requiredRecipes.push(r.id);
-          }
-        });
-      }
-
-      requiredRecipes.forEach(recipeId => {
-        if (!gameState.unlockedRecipes.includes(recipeId)) {
-          gameState.unlockedRecipes.push(recipeId);
-        }
-      });
+      // migrations applied above
 
       // Offline Progress Calculation
       let offlineLogMessages: LogMessage[] = [];
@@ -340,7 +364,7 @@ const reducer = (state: GameState, action: GameAction): GameState => {
     }
 
     case 'SET_GAME_STATE': {
-      const newState = { ...state, ...action.payload };
+      const newState = { ...state, ...action.payload } as GameState;
 
       // Prevent reverting characterName to 'Survivor' if we already have a name locally
       // This handles the race condition where a stale snapshot arrives after we've set the name
@@ -348,49 +372,28 @@ const reducer = (state: GameState, action: GameAction): GameState => {
         newState.characterName = state.characterName;
       }
 
-      // Ensure statistics object is always present and has totalItemsGained
-      if (!newState.statistics) {
-        newState.statistics = { ...initialStatistics };
-      }
-      if (!newState.statistics.totalItemsGained) {
-        newState.statistics.totalItemsGained = { ...initialStatistics.totalItemsGained };
-      }
-      if (!newState.farmPlots) {
-        newState.farmPlots = [];
-      }
+      // Apply migrations and normalization
+      const migrated = applyMigrations(newState);
 
-      // Migration: Unlock Forest for players who completed quest_anya_1 before the fix
-      if (newState.completedQuests?.includes('quest_anya_1') && !newState.unlockedLocations?.includes('forest')) {
-        newState.unlockedLocations = [...(newState.unlockedLocations || []), 'forest'];
-      }
-
-      // MIGRATION: Ensure new recipes are unlocked for existing saves
-      const requiredRecipes = ['recipe_grindStone'];
-      if ((newState.inventory?.furnace || 0) > 0) requiredRecipes.push('recipe_glassTube');
-      if ((newState.inventory?.workbench || 0) > 0) {
-        requiredRecipes.push('recipe_glassJar');
-        requiredRecipes.push('recipe_pickledPeaches');
-      }
-      if (newState.builtStructures?.includes('kitchen')) {
-        allRecipes.forEach(r => {
-          if (r.unlockedBy.includes('kitchen')) {
-            requiredRecipes.push(r.id);
-          }
-        });
-      }
-
-      if (newState.unlockedRecipes) {
-        const missingRecipes = requiredRecipes.filter(r => !newState.unlockedRecipes.includes(r));
-        if (missingRecipes.length > 0) {
-          newState.unlockedRecipes = [...newState.unlockedRecipes, ...missingRecipes];
-        }
-      }
-
-      return { ...newState, isInitialized: true };
+      return { ...migrated, isInitialized: true };
     }
 
     case 'RESET_GAME': {
-      localStorage.clear();
+      // Remove only keys that likely belong to this app to avoid wiping unrelated site data.
+      try {
+        const patterns = ['wasteland', 'wasteland-automata', 'wasteland_automata', 'wa_', 'wa:', 'game_', 'wa-game'];
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (!key) continue;
+          const lower = key.toLowerCase();
+          if (patterns.some(p => lower.includes(p))) {
+            localStorage.removeItem(key);
+          }
+        }
+      } catch (e) {
+        // localStorage might not be available in some environments; swallow errors
+        console.error('Error clearing game localStorage keys', e);
+      }
       // Only reset the game world and player state, but keep the lifetime statistics and character name
       return {
         ...initialState,
@@ -2771,10 +2774,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // Effect for loading game state from Firestore using real-time snapshots
   useEffect(() => {
-    console.log('[GameProvider] user/firestore effect', { user, firestore });
+    log('[GameProvider] user/firestore effect', { user, firestore });
     if (!user || !firestore) {
       if (!user) {
-        console.log('[GameProvider] no user, resetting state');
+        log('[GameProvider] no user, resetting state');
         dispatch({ type: 'RESET_GAME_NO_LOCALSTORAGE' });
         hasInitializedRef.current = false;
       }
@@ -2783,17 +2786,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     const userDocRef = doc(firestore, 'users', user.uid);
 
-    console.log('[GameProvider] subscribing to user doc', user.uid);
+    log('[GameProvider] subscribing to user doc', user.uid);
 
     // Use onSnapshot for real-time multi-device sync
-    const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
-      console.log('[GameProvider] snapshot received', { exists: docSnap.exists() });
+    const unsubscribe = onSnapshot(userDocRef, async (docSnap) => {
+      log('[GameProvider] snapshot received', { exists: docSnap.exists() });
       try {
         if (docSnap.exists()) {
           const data = docSnap.data() as GameState;
 
           if (!hasInitializedRef.current) {
-            console.log('[GameProvider] first load, initializing game state');
+            log('[GameProvider] first load, initializing game state');
             // First load: handle offline progress via INITIALIZE
             const { statistics, ...restGameState } = data;
             dispatch({
@@ -2810,21 +2813,26 @@ export function GameProvider({ children }: { children: ReactNode }) {
             const remoteTs = data.lastSavedTimestamp || 0;
 
             if (remoteTs > currentTs) {
-              console.log('[GameProvider] remote state newer, syncing');
+              log('[GameProvider] remote state newer, syncing');
               dispatch({ type: 'SET_GAME_STATE', payload: data });
             }
           }
         } else {
-          console.log('[GameProvider] user doc missing, creating new game data');
+          log('[GameProvider] user doc missing, creating new game data');
           // New user, create initial state in Firestore
           if (!hasInitializedRef.current) {
             const newGameData = {
               ...initialState,
               isInitialized: true,
             };
-            setDoc(userDocRef, newGameData);
-            dispatch({ type: 'SET_GAME_STATE', payload: newGameData });
+            // Mark initialized before writing to avoid snapshot races triggering
             hasInitializedRef.current = true;
+            try {
+              await setDoc(userDocRef, newGameData);
+            } catch (writeError) {
+              console.error('[GameProvider] failed to create user doc', writeError);
+            }
+            dispatch({ type: 'SET_GAME_STATE', payload: newGameData });
           }
         }
       } catch (error) {

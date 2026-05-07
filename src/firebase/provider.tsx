@@ -5,6 +5,7 @@ import type { FirebaseApp } from 'firebase/app';
 import type { Auth } from 'firebase/auth';
 import type { Firestore } from 'firebase/firestore';
 import { getFirebaseApp, getFirebaseAuth, getFirebaseDb } from './config';
+import { log } from '@/lib/logger';
 
 type FirebaseContextValue = {
   firebaseApp: FirebaseApp;
@@ -21,7 +22,7 @@ export const FirebaseProvider = ({ children }: { children: React.ReactNode }) =>
       const app = getFirebaseApp();
       const auth = getFirebaseAuth();
       const db = getFirebaseDb();
-      console.log('[Firebase] Initialized successfully', { app, auth, db });
+      log('[Firebase] Initialized successfully', { app, auth, db });
       return { firebaseApp: app, auth, firestore: db };
     } catch (error) {
       // Firebase config not available - this is expected during build

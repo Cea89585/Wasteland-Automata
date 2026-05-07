@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { useFirebase } from '@/firebase/provider';
+import { log } from '@/lib/logger';
 
 export const useUser = () => {
   const firebase = useFirebase();
@@ -9,13 +10,13 @@ export const useUser = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    console.log('[useUser] effect', { auth: firebase?.auth });
+    log('[useUser] effect', { auth: firebase?.auth });
     if (!firebase?.auth) {
       setIsLoading(false);
       return;
     }
     const unsubscribe = onAuthStateChanged(firebase.auth, (user) => {
-      console.log('[useUser] auth state changed', { user });
+      log('[useUser] auth state changed', { user });
       setUser(user);
       setIsLoading(false);
     });

@@ -111,14 +111,7 @@
   </symbol>
 
 
-  <symbol id="icon-mutatedTwigs" viewBox="0 0 64 64">
-    <!-- Glowing twisted branches -->
-    <path d="M32 52 L32 32 M32 32 L20 20 M32 32 L44 20 M32 32 L24 44" stroke="#A855F7" stroke-width="3" stroke-linecap="round"/>
-    <circle cx="20" cy="20" r="3" fill="#C084FC"/>
-    <circle cx="44" cy="20" r="3" fill="#C084FC"/>
-    <circle cx="24" cy="44" r="3" fill="#C084FC"/>
-    <circle cx="32" cy="52" r="3" fill="#C084FC"/>
-  </symbol>
+  
 
   <!-- TOOLS -->
   <symbol id="icon-stoneAxe" viewBox="0 0 64 64">
@@ -225,11 +218,7 @@
     <path d="M16 48 L12 52" stroke="#94A3B8" stroke-width="3"/>
   </symbol>
   
-  <symbol id="icon-pickaxe" viewBox="0 0 64 64">
-    <!-- Heavy Pickaxe -->
-    <path d="M12 12 L52 12 Q56 12 56 16 L52 24 Q40 20 32 24 Q24 20 12 24 L8 16 Q8 12 12 12 Z" fill="#475569" stroke="#1E293B" stroke-width="2"/>
-    <rect x="28" y="24" width="8" height="36" fill="#78350F" stroke="#451A03" stroke-width="2"/>
-  </symbol>
+  
 
   <symbol id="icon-mining" viewBox="0 0 64 64">
     <!-- Mining Drill/Cave -->
