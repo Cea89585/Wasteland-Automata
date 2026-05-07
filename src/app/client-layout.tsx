@@ -48,13 +48,13 @@ export default function ClientLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <GameProvider>
-          <FirebaseProvider>
+        <FirebaseProvider>
+          <GameProvider>
             <ThemeWrapper>
-                {children}
+              {children}
             </ThemeWrapper>
-          </FirebaseProvider>
-        </GameProvider>
+          </GameProvider>
+        </FirebaseProvider>
         <Toaster />
         <Analytics />
       </body>

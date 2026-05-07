@@ -2771,8 +2771,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // Effect for loading game state from Firestore using real-time snapshots
   useEffect(() => {
+    console.log('[GameProvider] user/firestore effect', { user, firestore });
     if (!user || !firestore) {
       if (!user) {
+        console.log('[GameProvider] no user, resetting state');
         dispatch({ type: 'RESET_GAME_NO_LOCALSTORAGE' });
         hasInitializedRef.current = false;
       }
@@ -2781,13 +2783,17 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     const userDocRef = doc(firestore, 'users', user.uid);
 
+    console.log('[GameProvider] subscribing to user doc', user.uid);
+
     // Use onSnapshot for real-time multi-device sync
     const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+      console.log('[GameProvider] snapshot received', { exists: docSnap.exists() });
       try {
         if (docSnap.exists()) {
           const data = docSnap.data() as GameState;
 
           if (!hasInitializedRef.current) {
+            console.log('[GameProvider] first load, initializing game state');
             // First load: handle offline progress via INITIALIZE
             const { statistics, ...restGameState } = data;
             dispatch({
@@ -2804,10 +2810,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
             const remoteTs = data.lastSavedTimestamp || 0;
 
             if (remoteTs > currentTs) {
+              console.log('[GameProvider] remote state newer, syncing');
               dispatch({ type: 'SET_GAME_STATE', payload: data });
             }
           }
         } else {
+          console.log('[GameProvider] user doc missing, creating new game data');
           // New user, create initial state in Firestore
           if (!hasInitializedRef.current) {
             const newGameData = {

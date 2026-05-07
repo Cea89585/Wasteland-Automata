@@ -21,10 +21,11 @@ export const FirebaseProvider = ({ children }: { children: React.ReactNode }) =>
       const app = getFirebaseApp();
       const auth = getFirebaseAuth();
       const db = getFirebaseDb();
+      console.log('[Firebase] Initialized successfully', { app, auth, db });
       return { firebaseApp: app, auth, firestore: db };
     } catch (error) {
       // Firebase config not available - this is expected during build
-      console.warn('Firebase not initialized:', error);
+      console.error('[Firebase] Initialization failed:', error);
       return null;
     }
   }, []);

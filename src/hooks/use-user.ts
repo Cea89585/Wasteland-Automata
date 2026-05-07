@@ -9,11 +9,13 @@ export const useUser = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    console.log('[useUser] effect', { auth: firebase?.auth });
     if (!firebase?.auth) {
       setIsLoading(false);
       return;
     }
     const unsubscribe = onAuthStateChanged(firebase.auth, (user) => {
+      console.log('[useUser] auth state changed', { user });
       setUser(user);
       setIsLoading(false);
     });
