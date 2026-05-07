@@ -77,6 +77,30 @@ export default function GameUI() {
   }, [user, isUserLoading, router]);
 
   if (isUserLoading || !gameState.isInitialized || !user) {
+    // If Firebase is not available (e.g. missing env on production), show a clear message
+    if (!firebase && !isUserLoading) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-8">
+          <div className="max-w-xl w-full rounded-lg border bg-card p-6 text-card-foreground">
+            <h2 className="text-xl font-bold mb-2">Authentication Unavailable</h2>
+            <p className="mb-4 text-sm text-muted-foreground">The authentication service is not available. This usually means Firebase configuration is missing or misconfigured in the deployment environment.</p>
+            <ul className="text-sm list-disc list-inside mb-4">
+              <li>Ensure the following environment variables are set: <code>NEXT_PUBLIC_FIREBASE_API_KEY</code>, <code>NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN</code>, <code>NEXT_PUBLIC_FIREBASE_PROJECT_ID</code>, <code>NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET</code>, <code>NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID</code>, <code>NEXT_PUBLIC_FIREBASE_APP_ID</code>.</li>
+              <li>On Vercel, add these in Project Settings → Environment Variables and redeploy.</li>
+            </ul>
+            <div className="flex gap-2">
+              <Link href="/login">
+                <Button variant="outline">Go to Login</Button>
+              </Link>
+              <Link href="/settings">
+                <Button>Settings</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return <LoadingScreen />;
   }
 
