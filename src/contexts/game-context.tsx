@@ -2746,7 +2746,7 @@ export const GameContext = createContext<{
 
 export function GameProvider({ children }: { children: ReactNode }) {
   const [gameState, dispatch] = useReducer(reducer, { ...initialState, statistics: initialStatistics, isInitialized: false });
-  const { user } = useUser();
+  const { user, isLoading: isUserLoading } = useUser();
   const firebase = useFirebase();
   const firestore = firebase?.firestore;
   const isSavingRef = useRef(false);
@@ -2774,7 +2774,12 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   // Effect for loading game state from Firestore using real-time snapshots
   useEffect(() => {
-    log('[GameProvider] user/firestore effect', { user, firestore });
+    log('[GameProvider] user/firestore effect', { user, isUserLoading, firestore });
+    if (isUserLoading) {
+      log('[GameProvider] auth still loading, waiting');
+      return;
+    }
+
     if (!user || !firestore) {
       if (!user) {
         log('[GameProvider] no user, resetting state');

@@ -12,26 +12,33 @@ export const useUser = () => {
   useEffect(() => {
     log('[useUser] effect', { auth: !!firebase?.auth });
 
-    // Keep loading until we either:
-    //  - successfully attach the auth listener, or
-    //  - confirm auth is never available.
-    //
-    // This avoids an infinite spinner when Firebase context becomes
-    // available after the initial render (common on production).
     if (!firebase?.auth) {
-      // If Firebase isn't available (missing/invalid env on Vercel), avoid an infinite loader.
       setIsLoading(false);
       setUser(null);
       return;
     }
 
+    let didUnsubscribe = false;
+    const timeoutId = window.setTimeout(() => {
+      if (!didUnsubscribe) {
+        log('[useUser] auth state timeout, assuming no user');
+        setIsLoading(false);
+      }
+    }, 5000);
+
     const unsubscribe = onAuthStateChanged(firebase.auth, (nextUser) => {
+      if (didUnsubscribe) return;
+      clearTimeout(timeoutId);
       log('[useUser] auth state changed', { user: nextUser });
       setUser(nextUser);
       setIsLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      didUnsubscribe = true;
+      clearTimeout(timeoutId);
+      unsubscribe();
+    };
   }, [firebase?.auth]);
 
   return { user, isLoading };
