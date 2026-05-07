@@ -56,7 +56,7 @@ export default function ClientLayout({
           </GameProvider>
         </FirebaseProvider>
         <Toaster />
-        <Analytics />
+        {process.env.NODE_ENV === 'production' ? <Analytics /> : null}
       </body>
     </html>
   );
